@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>סד"כ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F0F2F5;--card:#FFFFFF;--card2:#F8F9FB;--border:#E2E6ED;
+  --text:#1A1D23;--text2:#5A6070;--text3:#9BA3B2;
+  --green:#1CB86A;--green-bg:#E8FAF1;--green-dark:#0F9454;
+  --red:#E8354A;--red-bg:#FDEAEC;
+  --amber:#F59E0B;--amber-bg:#FEF3C7;
+  --blue:#2563EB;--blue-bg:#EFF6FF;
+  --r:14px;--r-sm:10px;
+  --shadow:0 2px 12px rgba(0,0,0,.08);
+  --font:'Rubik',sans-serif;--hh:68px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl;font-size:16px;line-height:1.5;overscroll-behavior:none}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.screen.slide-left{transform:translateX(-38%);opacity:0;pointer-events:none}
+
+/* HEADER */
+.app-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 16px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10}
+.logo-icon{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#1E40AF,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.35)}
+.title-wrap{flex:1;min-width:0}
+.title-wrap h1{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.title-wrap .sub{font-size:12px;color:var(--text3)}
+
+/* DASHBOARD */
+.dashboard{background:var(--card);border-bottom:1.5px solid var(--border);padding:14px 16px;flex-shrink:0}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat-box{border-radius:var(--r-sm);padding:12px 8px;text-align:center;border:1.5px solid transparent;cursor:pointer;transition:transform .12s,box-shadow .12s;user-select:none}
+.stat-box:active{transform:scale(.94)}
+.stat-box.s-blue{background:var(--blue-bg);border-color:#BFDBFE}
+.stat-box.s-green{background:var(--green-bg);border-color:#A7F3D0}
+.stat-box.s-red{background:var(--red-bg);border-color:#FECDD3}
+.stat-box.active-filter{box-shadow:0 0 0 3px rgba(0,0,0,.15);transform:scale(.97)}
+.stat-num{font-size:30px;font-weight:900;line-height:1;margin-bottom:3px}
+.s-blue .stat-num{color:var(--blue)}.s-green .stat-num{color:var(--green-dark)}.s-red .stat-num{color:var(--red)}
+.stat-lbl{font-size:11px;font-weight:600;color:var(--text2)}
+.role-stats{display:flex;gap:8px;flex-wrap:wrap}
+.rcs{background:var(--card2);border:1.5px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px}
+.rcs-cnt{background:var(--green);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+
+/* FILTER BANNER */
+.filter-banner{display:none;align-items:center;justify-content:space-between;padding:8px 16px;font-size:13px;font-weight:700;flex-shrink:0}
+.filter-banner.show{display:flex}
+.filter-banner.fb-green{background:#D1FAE5;color:var(--green-dark)}
+.filter-banner.fb-red{background:#FEE2E2;color:var(--red)}
+.fb-close{background:none;border:none;cursor:pointer;font-size:18px;color:inherit;line-height:1}
+
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.list-pad{padding:14px 14px 100px}
+
+/* SOLDIER CARD */
+.soldier-item{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s,border-color .15s,transform .1s;min-height:76px;box-shadow:var(--shadow);user-select:none}
+.soldier-item:active{transform:scale(.983);box-shadow:none}
+.s-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.s-avatar.av-p{background:linear-gradient(135deg,#34D399,var(--green-dark))}
+.s-avatar.av-a{background:linear-gradient(135deg,#F87171,var(--red))}
+.s-info{flex:1;min-width:0}
+.s-name{font-size:16px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-roles{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-badge{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;flex-shrink:0}
+.s-badge.bp{background:var(--green-bg);color:var(--green-dark)}
+.s-badge.ba{background:var(--red-bg);color:var(--red)}
+.s-arrow{color:var(--text3);font-size:16px;flex-shrink:0}
+.empty{text-align:center;padding:64px 24px;color:var(--text3)}
+.empty .ei{font-size:60px;margin-bottom:18px;opacity:.55}
+.empty h3{font-size:19px;font-weight:700;color:var(--text2);margin-bottom:8px}
+.empty p{font-size:14px;line-height:1.7}
+
+/* FAB */
+.fab{position:fixed;bottom:86px;left:18px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-size:28px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 24px rgba(37,99,235,.45);transition:transform .15s;z-index:30}
+.fab:active{transform:scale(.88)}
+
+/* BOTTOM BAR */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--border);padding:12px 14px;z-index:20;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.btn-report{width:100%;min-height:52px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-family:var(--font);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 16px rgba(37,99,235,.35);transition:transform .12s}
+.btn-report:active{transform:scale(.97)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 20px;border-radius:var(--r-sm);border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none}
+.btn:active{transform:scale(.96)}
+.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1.5px solid #FECDD3}
+.btn-waze{background:#1CCAD8;color:#fff}
+.btn-maps{background:#EA4335;color:#fff}
+.btn-call{background:linear-gradient(135deg,#22C55E,var(--green-dark));color:#fff;font-size:18px;min-height:60px;border-radius:var(--r);box-shadow:0 4px 16px rgba(28,184,106,.4)}
+.btn-full{width:100%}
+.btn-wa{background:#25D366;color:#fff;flex:1}
+.btn-xl{background:#1D6F42;color:#fff;flex:1}
+
+/* REPORT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal-sheet{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:500px;padding:24px 20px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.modal-overlay.show .modal-sheet{transform:translateY(0)}
+.modal-drag{width:40px;height:5px;background:var(--border);border-radius:3px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:18px;text-align:center}
+
+/* REPORT CAL */
+.rcal-wrap{background:var(--bg);border-radius:var(--r-sm);padding:10px;margin-bottom:18px}
+.rcal-nav{display:flex;align-items:center;justify-content:space-between;padding:4px 8px 10px}
+.rcal-nav-btn{font-size:22px;background:none;border:none;cursor:pointer;color:var(--text2);padding:0 8px}
+.rcal-month-lbl{font-size:15px;font-weight:700}
+.rcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.rcal-hdr{text-align:center;font-size:11px;font-weight:700;color:var(--text3);padding:4px 0}
+.rcal-day{background:transparent;border:none;border-radius:8px;cursor:pointer;padding:8px 2px;font-size:14px;font-family:var(--font);text-align:center;transition:background .12s;color:var(--text);font-weight:500;width:100%}
+.rcal-day:hover{background:var(--blue-bg)}
+.rcal-day.selected{background:var(--blue);color:#fff;font-weight:800;border-radius:50%}
+.rcal-day.today-mark{font-weight:800;color:var(--blue)}
+.report-result{background:var(--green-bg);border:1.5px solid #A7F3D0;border-radius:var(--r-sm);padding:14px 16px;margin-bottom:14px;display:none}
+.report-result.show{display:block}
+.rr-date{font-size:13px;color:var(--text3);margin-bottom:6px}
+.rr-names{font-size:14px;font-weight:600;line-height:1.8;color:var(--text)}
+.rr-count{font-size:13px;color:var(--green-dark);font-weight:700;margin-top:6px}
+.share-row{display:flex;gap:10px;margin-top:4px}
+
+/* DETAIL */
+.detail-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 14px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.back-btn{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--text2);flex-shrink:0;transition:background .15s}
+.back-btn:active{background:var(--bg)}
+.detail-title{flex:1;font-size:18px;font-weight:800;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-inner{padding:16px 14px 60px}
+.section{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.sec-hdr{padding:14px 18px 0;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px}
+.sec-body{padding:14px 18px 18px}
+.flbl{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:7px;display:block}
+.finp{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:13px 14px;color:var(--text);font-family:var(--font);font-size:15px;direction:rtl;outline:none;transition:border-color .15s;min-height:50px}
+.finp:focus{border-color:var(--blue);background:#fff}
+.finp::placeholder{color:var(--text3)}
+textarea.finp{resize:vertical;min-height:100px;line-height:1.6}
+.stb-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stb-btn{min-height:58px;border-radius:var(--r-sm);border:2px solid var(--border);background:var(--bg);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .18s;color:var(--text2)}
+.stb-btn.ap{background:var(--green-bg);border-color:var(--green);color:var(--green-dark)}
+.stb-btn.aa{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;min-height:42px;display:flex;align-items:center}
+.chip:active{transform:scale(.94)}
+.chip.sel{background:#EFF6FF;border-color:var(--blue);color:var(--blue)}
+.lv-rec{background:var(--bg);border-radius:var(--r-sm);border:1.5px solid var(--border);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.lv-info{flex:1}.lv-dates{font-size:14px;font-weight:600}.lv-days{font-size:12px;color:var(--text3);margin-top:2px}
+.lv-del{width:38px;height:38px;border-radius:9px;border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.lv-del:hover{background:var(--red);color:#fff}
+.lv-form{background:var(--bg);border-radius:var(--r-sm);border:1.5px dashed var(--border);padding:14px;margin-top:8px;display:none}
+.lv-form.open{display:block}
+/* cal */
+.cal-wrap{background:var(--card);border-radius:var(--r-sm);overflow:hidden}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 6px}
+.cal-nav-btn{font-size:22px;background:none;border:none;cursor:pointer;color:var(--text2);padding:0 6px}
+.cal-month-lbl{font-size:15px;font-weight:700}
+.cal-hint{text-align:center;font-size:12px;color:var(--text3);padding:0 0 6px;min-height:18px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:4px 10px 12px}
+.cal-day-hdr{text-align:center;font-size:11px;font-weight:700;color:var(--text3);padding:4px 0}
+.cal-day{background:transparent;border:none;border-radius:8px;cursor:pointer;padding:7px 2px;font-size:14px;font-family:var(--font);text-align:center;transition:background .12s;color:var(--text);font-weight:500}
+.cal-day.from,.cal-day.to{background:var(--green);color:#fff;font-weight:800;border-radius:50%}
+.cal-day.in-range{background:var(--green-bg);color:var(--green-dark);font-weight:600}
+.cal-day.disabled{color:var(--text3);cursor:default}
+.cal-day.pending-from,.cal-day.pending-to{background:var(--amber-bg);color:#92400E;font-weight:800;border-radius:50%}
+.cal-day.pending-range{background:#FEF3C7;color:#92400E;font-weight:600}
+.nl-box{border-radius:var(--r-sm);padding:16px;border:2px solid var(--border);background:var(--bg);transition:all .25s}
+.nl-box.approved{background:#DCFCE7;border-color:#86EFAC}
+.ap-row{display:flex;align-items:center;gap:12px;margin-top:14px}
+.ap-chk{width:26px;height:26px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+.ap-lbl{font-size:15px;font-weight:600;cursor:pointer}
+/* toast */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(16px);background:#1A1D23;color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- MAIN -->
+<div class="screen" id="scr-main">
+  <div class="app-header">
+    <div class="logo-icon">🪖</div>
+    <div class="title-wrap">
+      <h1 id="h-title">מערכת ניהול סד"כ</h1>
+      <div class="sub">מחלקה 1</div>
+    </div>
+  </div>
+  <div class="dashboard">
+    <div class="stats-row">
+      <div class="stat-box s-blue" id="sb-all"><div class="stat-num" id="st-tot">0</div><div class="stat-lbl">סה"כ</div></div>
+      <div class="stat-box s-green" id="sb-pr"><div class="stat-num" id="st-pr">0</div><div class="stat-lbl">נוכחים</div></div>
+      <div class="stat-box s-red" id="sb-ab"><div class="stat-num" id="st-ab">0</div><div class="stat-lbl">חסרים</div></div>
+    </div>
+    <div class="role-stats" id="role-stats"></div>
+  </div>
+  <div class="filter-banner" id="filter-banner">
+    <span id="fb-label"></span>
+    <button class="fb-close" id="fb-close">✕</button>
+  </div>
+  <div class="scroll-area"><div class="list-pad" id="list-wrap"></div></div>
+  <button class="fab" id="fab">+</button>
+  <div class="bottom-bar">
+    <button class="btn-report" id="btn-report">📋 דו"ח 1</button>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="screen hidden" id="scr-det">
+  <div class="detail-header">
+    <div class="back-btn" id="btn-back">←</div>
+    <div class="detail-title" id="det-title"></div>
+    <button class="btn btn-danger" id="btn-del" style="min-height:42px;padding:0 16px;font-size:13px">🗑 הסר</button>
+  </div>
+  <div class="scroll-area"><div class="detail-inner" id="det-body"></div></div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal-overlay" id="modal-report">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">📋 דו"ח נוכחות</div>
+    <div class="rcal-wrap">
+      <div class="rcal-nav">
+        <button class="rcal-nav-btn" id="rcal-prev">‹</button>
+        <span class="rcal-month-lbl" id="rcal-lbl"></span>
+        <button class="rcal-nav-btn" id="rcal-next">›</button>
+      </div>
+      <div class="rcal-grid" id="rcal-grid"></div>
+    </div>
+    <div class="report-result" id="report-result">
+      <div class="rr-date" id="rr-date"></div>
+      <div class="rr-names" id="rr-names"></div>
+      <div class="rr-count" id="rr-count"></div>
+      <div class="share-row">
+        <button class="btn btn-wa" id="rr-wa">📲 WhatsApp</button>
+        <button class="btn btn-xl" id="rr-xl">📊 Excel</button>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-full" id="modal-close">סגור</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+var ROLES=['חובש','מאג','מטול','קלע','מ"כ','סמ"ל','מפקד מחלקה','רוגר','צלף','מטאדור','נהג נגמ"ש'];
+var KEY=[0,4,6];
+var LS='pltn_v7';
+var MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+var DAYS_HE=['א','ב','ג','ד','ה','ו','ש'];
+
+var state={soldiers:[],nid:1,active:null,filter:'all'};
+
+function save(){try{localStorage.setItem(LS,JSON.stringify({soldiers:state.soldiers,nid:state.nid}));}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem(LS)||'null');if(d){state.soldiers=d.soldiers||[];state.nid=d.nid||1;}}catch(e){}}
+function mkSoldier(){return{id:state.nid++,name:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:''};}
+function find(id){return state.soldiers.find(function(s){return s.id===id;});}
+function initials(n){var p=(n||'').trim().split(/\s+/).filter(Boolean);if(!p.length)return'?';if(p.length===1)return p[0].slice(0,2);return p[0][0]+(p[p.length-1][0]||'');}
+function calcDays(a,b){if(!a||!b)return 0;var d=(new Date(b)-new Date(a))/864e5;return d>0?Math.round(d):0;}
+function toDateStr(y,m,d){return y+'-'+(m<9?'0':'')+(m+1)+'-'+(d<10?'0':'')+d;}
+function today(){var n=new Date();return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
+function fmtDate(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function fmtDateHe(s){if(!s)return'';var p=s.split('-');return p[2]+' ב'+MONTHS_HE[+p[1]-1]+' '+p[0];}
+
+function checkNextExpiry(s){
+  if(s.nextApproved&&s.nextFrom&&s.nextTo&&s.nextTo<today()){
+    s.leaves.push({from:s.nextFrom,to:s.nextTo});
+    s.nextFrom='';s.nextTo='';s.nextApproved=false;save();
+  }
+}
+
+var _tt=null;
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2200);}
+
+/* ── FILTER ─────────────────────────────────────────────────────────────── */
+function setFilter(f){
+  state.filter=f;
+  var banner=document.getElementById('filter-banner');
+  var lbl=document.getElementById('fb-label');
+  document.getElementById('sb-all').classList.toggle('active-filter',f==='all');
+  document.getElementById('sb-pr').classList.toggle('active-filter',f==='present');
+  document.getElementById('sb-ab').classList.toggle('active-filter',f==='absent');
+  if(f==='present'){banner.className='filter-banner show fb-green';lbl.textContent='מציג נוכחים בלבד';}
+  else if(f==='absent'){banner.className='filter-banner show fb-red';lbl.textContent='מציג חסרים בלבד';}
+  else{banner.className='filter-banner';}
+  renderList();
+}
+
+/* ── PRESENT ON DATE ────────────────────────────────────────────────────── */
+// A soldier is "present" on date ds if:
+// status === 'present' AND not on an approved leave that covers ds
+function presentOnDate(s, ds){
+  if(s.status!=='present') return false;
+  // check leaves
+  for(var i=0;i<s.leaves.length;i++){
+    var lv=s.leaves[i];
+    if(ds>=lv.from && ds<lv.to) return false;
+  }
+  // check next leave if approved
+  if(s.nextApproved && s.nextFrom && s.nextTo){
+    if(ds>=s.nextFrom && ds<s.nextTo) return false;
+  }
+  return true;
+}
+
+/* ── MAIN ────────────────────────────────────────────────────────────────── */
+function showMain(){
+  document.getElementById('scr-det').classList.add('hidden');
+  document.getElementById('scr-det').classList.remove('slide-left');
+  document.getElementById('scr-main').classList.remove('hidden','slide-left');
+  renderMain();
+}
+function showDetail(id){
+  state.active=id;
+  document.getElementById('scr-main').classList.add('slide-left');
+  document.getElementById('scr-det').classList.remove('hidden');
+  renderDetail(id);
+}
+
+function renderMain(){
+  updateStats();
+  renderList();
+}
+
+function updateStats(){
+  var pr=state.soldiers.filter(function(s){return s.status==='present';});
+  var ab=state.soldiers.filter(function(s){return s.status==='absent';});
+  document.getElementById('st-tot').textContent=state.soldiers.length;
+  document.getElementById('st-pr').textContent=pr.length;
+  document.getElementById('st-ab').textContent=ab.length;
+  var rs=document.getElementById('role-stats');rs.innerHTML='';
+  KEY.forEach(function(ri){
+    var role=ROLES[ri];
+    var cnt=pr.filter(function(s){return s.roles.indexOf(role)!==-1;}).length;
+    var c=document.createElement('div');c.className='rcs';
+    c.innerHTML=role+'&nbsp;<span class="rcs-cnt">'+cnt+'</span>';
+    rs.appendChild(c);
+  });
+}
+
+function renderList(){
+  var wrap=document.getElementById('list-wrap');
+  wrap.innerHTML='';
+  state.soldiers.forEach(function(s){checkNextExpiry(s);});
+  var list=state.soldiers.filter(function(s){
+    if(state.filter==='present') return s.status==='present';
+    if(state.filter==='absent') return s.status==='absent';
+    return true;
+  });
+  if(!list.length){
+    var es=document.createElement('div');es.className='empty';
+    es.innerHTML='<div class="ei">🪖</div><h3>'+(state.filter==='all'?'אין חיילים עדיין':'אין חיילים ברשימה זו')+'</h3><p>'+(state.filter==='all'?'לחץ + להוספת חייל ראשון':'')+'</p>';
+    wrap.appendChild(es);return;
+  }
+  list.forEach(function(s){
+    var item=document.createElement('div');item.className='soldier-item';
+    var av=document.createElement('div');av.className='s-avatar '+(s.status==='present'?'av-p':'av-a');av.textContent=initials(s.name||'חייל');
+    var info=document.createElement('div');info.className='s-info';
+    info.innerHTML='<div class="s-name">'+(s.name||'חייל חדש')+'</div><div class="s-roles">'+(s.roles.length?s.roles.join(' · '):'ללא תפקיד')+'</div>';
+    var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=s.status==='present'?'✅ נוכח':'❌ חסר';
+    var arr=document.createElement('span');arr.className='s-arrow';arr.textContent='‹';
+    item.appendChild(av);item.appendChild(info);item.appendChild(badge);item.appendChild(arr);
+    item.addEventListener('click',function(){showDetail(s.id);});
+    wrap.appendChild(item);
+  });
+}
+
+/* ── REPORT MODAL ───────────────────────────────────────────────────────── */
+var rcalYear=new Date().getFullYear(), rcalMonth=new Date().getMonth(), rcalSel=null;
+
+function openReportModal(){
+  rcalSel=null;
+  document.getElementById('report-result').classList.remove('show');
+  renderRcal();
+  document.getElementById('modal-report').classList.add('show');
+}
+function closeReportModal(){
+  document.getElementById('modal-report').classList.remove('show');
+}
+
+function renderRcal(){
+  document.getElementById('rcal-lbl').textContent=MONTHS_HE[rcalMonth]+' '+rcalYear;
+  var grid=document.getElementById('rcal-grid');
+  grid.innerHTML='';
+  DAYS_HE.forEach(function(d){var h=document.createElement('div');h.className='rcal-hdr';h.textContent=d;grid.appendChild(h);});
+  var firstDay=new Date(rcalYear,rcalMonth,1).getDay();
+  for(var i=0;i<firstDay;i++){grid.appendChild(document.createElement('div'));}
+  var dim=new Date(rcalYear,rcalMonth+1,0).getDate();
+  var td=today();
+  for(var d=1;d<=dim;d++){
+    var ds=toDateStr(rcalYear,rcalMonth,d);
+    var btn=document.createElement('button');
+    btn.className='rcal-day'+(ds===rcalSel?' selected':'')+(ds===td?' today-mark':'');
+    btn.textContent=d;
+    (function(ds2){
+      btn.addEventListener('click',function(){rcalSel=ds2;renderRcal();showReportResult(ds2);});
+    })(ds);
+    grid.appendChild(btn);
+  }
+}
+
+function showReportResult(ds){
+  var presentList=state.soldiers.filter(function(s){return presentOnDate(s,ds);});
+  var res=document.getElementById('report-result');
+  document.getElementById('rr-date').textContent='תאריך: '+fmtDateHe(ds);
+  document.getElementById('rr-names').textContent=presentList.length?presentList.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n'):'אין חיילים נוכחים';
+  document.getElementById('rr-count').textContent='סה"כ נוכחים: '+presentList.length+' חיילים';
+  res.classList.add('show');
+
+  document.getElementById('rr-wa').onclick=function(){
+    var msg='🪖 *דו"ח נוכחות — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+presentList.length+'):*\n'+(presentList.length?presentList.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n'):'אין');
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  };
+  document.getElementById('rr-xl').onclick=function(){
+    var hdr=[['#','שם','תפקידים','טלפון','מגורים']];
+    var rows=hdr.concat(presentList.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
+    var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+    a.download='נוכחות_'+ds+'.csv';a.click();toast('הקובץ הורד ✓');
+  };
+}
+
+/* ── DETAIL ─────────────────────────────────────────────────────────────── */
+function renderDetail(id){
+  var s=find(id);if(!s){showMain();return;}
+  checkNextExpiry(s);
+  document.getElementById('det-title').textContent=s.name||'חייל חדש';
+  var body=document.getElementById('det-body');
+  body.innerHTML='';body.appendChild(buildDetail(s));
+  body.parentElement.scrollTop=0;
+}
+
+function buildCal(s,mode,onSave){
+  var wrap=document.createElement('div');
+  var calWrap=document.createElement('div');calWrap.className='cal-wrap';
+  var nav=document.createElement('div');nav.className='cal-nav';
+  var prev=document.createElement('button');prev.className='cal-nav-btn';prev.textContent='‹';
+  var next=document.createElement('button');next.className='cal-nav-btn';next.textContent='›';
+  var lbl=document.createElement('span');lbl.className='cal-month-lbl';
+  var hint=document.createElement('div');hint.className='cal-hint';
+  var grid=document.createElement('div');grid.className='cal-grid';
+  nav.appendChild(prev);nav.appendChild(lbl);nav.appendChild(next);
+  calWrap.appendChild(nav);calWrap.appendChild(hint);calWrap.appendChild(grid);
+  var cy=new Date().getFullYear(),cm=new Date().getMonth();
+  var pf=mode==='next'&&s.nextFrom?s.nextFrom:null;
+  var pt=mode==='next'&&s.nextTo?s.nextTo:null;
+  function rc(){
+    lbl.textContent=MONTHS_HE[cm]+' '+cy;
+    if(!pf) hint.textContent='בחר תאריך תחילה';
+    else if(!pt) hint.textContent='עכשיו בחר תאריך סיום';
+    else hint.textContent=fmtDate(pf)+' → '+fmtDate(pt)+' ('+calcDays(pf,pt)+' ימים)';
+    grid.innerHTML='';
+    DAYS_HE.forEach(function(d){var h=document.createElement('div');h.className='cal-day-hdr';h.textContent=d;grid.appendChild(h);});
+    var fd=new Date(cy,cm,1).getDay();
+    for(var i=0;i<fd;i++)grid.appendChild(document.createElement('div'));
+    var dim=new Date(cy,cm+1,0).getDate();
+    for(var d=1;d<=dim;d++){
+      var ds=toDateStr(cy,cm,d);
+      var isPast=pf&&!pt&&ds<pf;
+      var cls='cal-day';
+      if(mode==='next'){
+        if(ds===pf||ds===pt) cls+=' pending-from';
+        else if(pf&&pt&&ds>pf&&ds<pt) cls+=' pending-range';
+        else if(isPast) cls+=' disabled';
+      } else {
+        if(ds===pf||ds===pt) cls+=' from';
+        else if(pf&&pt&&ds>pf&&ds<pt) cls+=' in-range';
+        else if(isPast) cls+=' disabled';
+      }
+      var btn=document.createElement('button');btn.className=cls;btn.textContent=d;
+      if(!isPast)(function(ds2){btn.addEventListener('click',function(){
+        if(!pf||pt){pf=ds2;pt=null;}
+        else{if(ds2<=pf){pf=ds2;pt=null;}else{pt=ds2;onSave(pf,pt);pf=null;pt=null;}}
+        rc();
+      });})(ds);
+      grid.appendChild(btn);
+    }
+  }
+  prev.addEventListener('click',function(){cm--;if(cm<0){cm=11;cy--;}rc();});
+  next.addEventListener('click',function(){cm++;if(cm>11){cm=0;cy++;}rc();});
+  rc();
+  var cn=document.createElement('button');cn.className='btn btn-ghost btn-full';cn.textContent='ביטול';cn.style.marginTop='8px';
+  wrap.appendChild(calWrap);wrap.appendChild(cn);
+  return{el:wrap,cancel:cn,reset:function(){pf=null;pt=null;rc();}};
+}
+
+function buildDetail(s){
+  var f=document.createDocumentFragment();
+
+  // BASIC
+  var s1=document.createElement('div');s1.className='section';
+  s1.innerHTML='<div class="sec-hdr">פרטים בסיסיים</div>';
+  var b1=document.createElement('div');b1.className='sec-body';
+  var ni=document.createElement('input');ni.className='finp';ni.type='text';ni.placeholder='שם החייל...';ni.value=s.name;ni.style.cssText='font-size:19px;font-weight:700';
+  ni.addEventListener('input',function(){s.name=ni.value;document.getElementById('det-title').textContent=s.name||'חייל חדש';save();});
+  b1.appendChild(ni);
+  var sl=document.createElement('span');sl.className='flbl';sl.textContent='סטטוס';sl.style.cssText='margin-top:16px;display:block';
+  var stDisp=document.createElement('div');
+  stDisp.style.cssText='min-height:52px;border-radius:var(--r-sm);border:2px solid;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;';
+  function refreshStatus(){
+    var td=today();
+    var onLeave=false;
+    for(var i=0;i<s.leaves.length;i++){if(td>=s.leaves[i].from&&td<s.leaves[i].to){onLeave=true;break;}}
+    if(!onLeave&&s.nextApproved&&s.nextFrom&&s.nextTo&&td>=s.nextFrom&&td<s.nextTo) onLeave=true;
+    if(onLeave){
+      stDisp.textContent='🏖️ בחופשה';
+      stDisp.style.background='var(--amber-bg)';stDisp.style.borderColor='#FCD34D';stDisp.style.color='#92400E';
+    } else if(s.status==='present'){
+      stDisp.textContent='✅ נוכח';
+      stDisp.style.background='var(--green-bg)';stDisp.style.borderColor='var(--green)';stDisp.style.color='var(--green-dark)';
+    } else {
+      stDisp.textContent='❌ חסר';
+      stDisp.style.background='var(--red-bg)';stDisp.style.borderColor='var(--red)';stDisp.style.color='var(--red)';
+    }
+  }
+  refreshStatus();
+  b1.appendChild(sl);b1.appendChild(stDisp);s1.appendChild(b1);f.appendChild(s1);
+
+  // ROLES
+  var s2=document.createElement('div');s2.className='section';s2.innerHTML='<div class="sec-hdr">תפקידים ופק"ל</div>';
+  var b2=document.createElement('div');b2.className='sec-body';var ch=document.createElement('div');ch.className='chips';
+  ROLES.forEach(function(r){
+    var c=document.createElement('div');c.className='chip'+(s.roles.indexOf(r)!==-1?' sel':'');c.textContent=r;
+    c.addEventListener('click',function(){var i=s.roles.indexOf(r);if(i===-1){s.roles.push(r);c.className='chip sel';}else{s.roles.splice(i,1);c.className='chip';}save();updateStats();});
+    ch.appendChild(c);
+  });
+  b2.appendChild(ch);s2.appendChild(b2);f.appendChild(s2);
+
+  // CONTACT
+  var s3=document.createElement('div');s3.className='section';s3.innerHTML='<div class="sec-hdr">יצירת קשר</div>';
+  var b3=document.createElement('div');b3.className='sec-body';
+  var pl=document.createElement('span');pl.className='flbl';pl.textContent='טלפון';b3.appendChild(pl);
+  var pi=document.createElement('input');pi.className='finp';pi.type='tel';pi.placeholder='050-0000000';pi.value=s.phone;
+  var ca=document.createElement('a');ca.className='btn btn-call btn-full';ca.style.cssText='margin-top:10px;display:flex';ca.textContent='📞 התקשר';ca.href='tel:'+(s.phone||'');
+  pi.addEventListener('change',function(){s.phone=pi.value;ca.href='tel:'+s.phone;save();});
+  b3.appendChild(pi);b3.appendChild(ca);
+  var rl=document.createElement('span');rl.className='flbl';rl.textContent='מגורים';rl.style.cssText='margin-top:18px;display:block';
+  var ri=document.createElement('input');ri.className='finp';ri.type='text';ri.placeholder='עיר / כתובת...';ri.value=s.residence;
+  ri.addEventListener('change',function(){s.residence=ri.value;save();});
+  b3.appendChild(rl);b3.appendChild(ri);
+  var ng=document.createElement('div');ng.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px';
+  var wb=document.createElement('button');wb.className='btn btn-waze btn-full';wb.textContent='Waze 🗺️';
+  var gb=document.createElement('button');gb.className='btn btn-maps btn-full';gb.textContent='Google Maps 📍';
+  wb.addEventListener('click',function(){var a=ri.value.trim();if(!a){toast('אנא הכנס כתובת תחילה');return;}window.open('https://waze.com/ul?q='+encodeURIComponent(a),'_blank');});
+  gb.addEventListener('click',function(){var a=ri.value.trim();if(!a){toast('אנא הכנס כתובת תחילה');return;}window.open('https://maps.google.com/?q='+encodeURIComponent(a),'_blank');});
+  ng.appendChild(wb);ng.appendChild(gb);b3.appendChild(ng);s3.appendChild(b3);f.appendChild(s3);
+
+  // LEAVES
+  var s4=document.createElement('div');s4.className='section';s4.innerHTML='<div class="sec-hdr">יציאות</div>';
+  var b4=document.createElement('div');b4.className='sec-body';
+  var lvList=document.createElement('div');
+  var lvTot=document.createElement('div');
+  lvTot.style.cssText='background:var(--amber-bg);border:1.5px solid #FCD34D;border-radius:var(--r-sm);padding:11px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;';
+  var lvTotLbl=document.createElement('span');lvTotLbl.style.cssText='font-size:13px;font-weight:600;color:#92400E;';lvTotLbl.textContent='סה"כ ימי יציאה:';
+  var lvTotNum=document.createElement('span');lvTotNum.style.cssText='font-size:22px;font-weight:900;color:#B45309;';
+  lvTot.appendChild(lvTotLbl);lvTot.appendChild(lvTotNum);
+  var nextTotEl=null;
+
+  function renderLv(){
+    lvList.innerHTML='';
+    var tot=0;
+    s.leaves.forEach(function(lv){tot+=calcDays(lv.from,lv.to);});
+    if(!s.leaves.length){
+      lvTot.style.display='none';
+      var nl=document.createElement('div');nl.style.cssText='color:var(--text3);font-size:13px;padding:4px 0';nl.textContent='אין יציאות רשומות';
+      lvList.appendChild(nl);
+    } else {
+      lvTot.style.display='flex';
+      lvTotNum.textContent=tot+' ימים';
+      s.leaves.forEach(function(lv,li){
+        var rec=document.createElement('div');rec.className='lv-rec';
+        var inf=document.createElement('div');inf.className='lv-info';
+        inf.innerHTML='<div class="lv-dates">'+fmtDate(lv.from)+' → '+fmtDate(lv.to)+'</div><div class="lv-days">'+calcDays(lv.from,lv.to)+' ימים</div>';
+        var del=document.createElement('button');del.className='lv-del';del.textContent='×';
+        del.addEventListener('click',(function(i){return function(){s.leaves.splice(i,1);save();renderLv();};})(li));
+        rec.appendChild(inf);rec.appendChild(del);lvList.appendChild(rec);
+      });
+    }
+    if(nextTotEl){
+      var nd=s.nextApproved&&s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo):0;
+      nextTotEl.textContent=nd>0?'✅ אושר — '+nd+' ימים (יתווספו ליציאות)':'';
+    }
+  }
+
+  b4.appendChild(lvTot);b4.appendChild(lvList);
+  var addBtn=document.createElement('button');addBtn.className='btn btn-ghost btn-full';addBtn.textContent='+ הוסף יציאה';addBtn.style.marginTop='8px';
+  var form=document.createElement('div');form.className='lv-form';
+  var calObj=buildCal(s,'leave',function(from,to){s.leaves.push({from:from,to:to});save();renderLv();form.classList.remove('open');});
+  calObj.cancel.addEventListener('click',function(){form.classList.remove('open');});
+  form.appendChild(calObj.el);
+  addBtn.addEventListener('click',function(){var o=form.classList.contains('open');form.classList.toggle('open');if(!o)calObj.reset();});
+  b4.appendChild(addBtn);b4.appendChild(form);s4.appendChild(b4);f.appendChild(s4);
+  renderLv();
+
+  // NEXT LEAVE
+  var s5=document.createElement('div');s5.className='section';s5.innerHTML='<div class="sec-hdr">בקשת יציאה הבאה</div>';
+  var b5=document.createElement('div');b5.className='sec-body';
+  var nlBox=document.createElement('div');nlBox.className='nl-box'+(s.nextApproved?' approved':'');
+  var nlDates=document.createElement('div');nlDates.style.cssText='margin-bottom:10px;min-height:24px';
+  var nlDLbl=document.createElement('div');nlDLbl.style.cssText='font-size:15px;font-weight:700;color:var(--text)';
+  nextTotEl=document.createElement('div');nextTotEl.style.cssText='font-size:12px;color:#0F9454;font-weight:600;margin-top:3px';
+  nlDates.appendChild(nlDLbl);nlDates.appendChild(nextTotEl);
+  function updNl(){
+    if(s.nextFrom&&s.nextTo){nlDLbl.textContent=fmtDate(s.nextFrom)+' → '+fmtDate(s.nextTo);}
+    else{nlDLbl.textContent='לא נבחר תאריך';}
+    var nd=s.nextApproved&&s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo):0;
+    nextTotEl.textContent=nd>0?'✅ אושר — '+nd+' ימים (יתווספו ליציאות)':(s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo)+' ימים':'');
+  }
+  updNl();
+  var calTog=document.createElement('button');calTog.className='btn btn-ghost btn-full';calTog.textContent='📅 בחר תאריכים';calTog.style.marginBottom='10px';
+  var clrBtn=document.createElement('button');clrBtn.className='btn btn-ghost';clrBtn.textContent='✕ נקה';clrBtn.style.cssText='min-height:42px;padding:0 14px;font-size:13px;margin-right:8px';
+  var calRow=document.createElement('div');calRow.style.cssText='display:flex;align-items:center';calRow.appendChild(calTog);calRow.appendChild(clrBtn);
+  var nxForm=document.createElement('div');nxForm.className='lv-form';
+  var nxCal=buildCal(s,'next',function(from,to){s.nextFrom=from;s.nextTo=to;save();updNl();renderLv();nxForm.classList.remove('open');});
+  nxCal.cancel.addEventListener('click',function(){nxForm.classList.remove('open');});
+  nxForm.appendChild(nxCal.el);
+  calTog.addEventListener('click',function(){var o=nxForm.classList.contains('open');nxForm.classList.toggle('open');if(!o)nxCal.reset();});
+  clrBtn.addEventListener('click',function(){s.nextFrom='';s.nextTo='';s.nextApproved=false;apChk.checked=false;nlBox.className='nl-box';save();updNl();renderLv();});
+  var apRow=document.createElement('div');apRow.className='ap-row';
+  var apChk=document.createElement('input');apChk.type='checkbox';apChk.className='ap-chk';apChk.checked=!!s.nextApproved;
+  var apId='apchk'+s.id;apChk.id=apId;
+  var apLbl=document.createElement('label');apLbl.className='ap-lbl';apLbl.textContent='אושר יציאה';apLbl.htmlFor=apId;
+  apChk.addEventListener('change',function(){s.nextApproved=apChk.checked;nlBox.className='nl-box'+(s.nextApproved?' approved':'');updNl();renderLv();save();});
+  apRow.appendChild(apChk);apRow.appendChild(apLbl);
+  nlBox.appendChild(nlDates);nlBox.appendChild(calRow);nlBox.appendChild(nxForm);nlBox.appendChild(apRow);
+  b5.appendChild(nlBox);s5.appendChild(b5);f.appendChild(s5);
+
+  // NOTES
+  var s6=document.createElement('div');s6.className='section';s6.innerHTML='<div class="sec-hdr">הערות</div>';
+  var b6=document.createElement('div');b6.className='sec-body';
+  var ta=document.createElement('textarea');ta.className='finp';ta.placeholder='הערות כלליות...';ta.value=s.notes||'';ta.rows=4;
+  ta.addEventListener('change',function(){s.notes=ta.value;save();});
+  b6.appendChild(ta);s6.appendChild(b6);f.appendChild(s6);
+  return f;
+}
+
+/* ── INIT ───────────────────────────────────────────────────────────────── */
+function init(){
+  document.getElementById('fab').addEventListener('click',function(){
+    var name=prompt('שם החייל:','');
+    if(!name||!name.trim()){toast('לא נשמר — חייל ללא שם');return;}
+    var s=mkSoldier();s.name=name.trim();state.soldiers.push(s);save();showDetail(s.id);
+  });
+  document.getElementById('btn-back').addEventListener('click',showMain);
+  document.getElementById('btn-del').addEventListener('click',function(){
+    if(!state.active)return;
+    state.soldiers=state.soldiers.filter(function(s){return s.id!==state.active;});
+    save();toast('החייל הוסר ✓');showMain();
+  });
+  // stat box filters
+  document.getElementById('sb-all').addEventListener('click',function(){setFilter('all');});
+  document.getElementById('sb-pr').addEventListener('click',function(){setFilter(state.filter==='present'?'all':'present');});
+  document.getElementById('sb-ab').addEventListener('click',function(){setFilter(state.filter==='absent'?'all':'absent');});
+  document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
+  // report
+  document.getElementById('btn-report').addEventListener('click',openReportModal);
+  document.getElementById('modal-close').addEventListener('click',closeReportModal);
+  document.getElementById('modal-report').addEventListener('click',function(e){if(e.target===this)closeReportModal();});
+  document.getElementById('rcal-prev').addEventListener('click',function(){rcalMonth--;if(rcalMonth<0){rcalMonth=11;rcalYear--;}renderRcal();});
+  document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
+}
+
+load();init();showMain();
+})();
+</script>
+</body>
+</html>
