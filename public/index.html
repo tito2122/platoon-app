@@ -567,7 +567,6 @@ function buildInfoTab(s){
     var nameRow=document.createElement('div');nameRow.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px';
     var niFirst=mkInp('text','שם פרטי...',s.firstName||'');
     var niLast=mkInp('text','שם משפחה...',s.lastName||'');
-    var ni=document.createElement('input');// dummy ref for banner logic
     var nameBanner=document.createElement('div');
     nameBanner.style.cssText='display:none;background:#FEE2E2;border:1.5px solid #FECDD3;border-radius:var(--r-sm);padding:9px 14px;margin-top:8px;font-size:13px;font-weight:700;color:var(--red);text-align:center';
     ni.addEventListener('input',function(){
@@ -578,9 +577,9 @@ function buildInfoTab(s){
       else{nameBanner.style.display='none';s.name=ni.value;document.getElementById('det-title').textContent=s.name;saveSoldier(s);}
     });
     sec0.body.appendChild(ni);sec0.body.appendChild(nameBanner);inner.appendChild(sec0.el);
-    if(!s.name.trim())setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';},80);
+    if(!s.name.trim())setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';niFirst.focus();},80);
 
-None
+
 
     // ROLES
     var sec2=mkSec('תפקידים ופק"ל');
@@ -891,8 +890,7 @@ function init(){
       deleteSoldierRemote(state.active);
     }
     showMain();
-  });
-  document.getElementById('btn-del').addEventListener('click',function(){
+  });  document.getElementById('btn-del').addEventListener('click',function(){
     if(!state.active)return;
     deleteSoldierRemote(state.active);
     state.soldiers=state.soldiers.filter(function(s){return s.id!==state.active;});
