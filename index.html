@@ -1136,19 +1136,12 @@ function init(){
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
 }
 init();
-// מנגנון חזרה — 10 entries כמחסום
-history.replaceState({page:'app'},'');
-for(var _i=0;_i<10;_i++)history.pushState({page:'app'},'');
 var _lastBack=0;
 
 function _handleBack(){
-  // debounce
   var now=Date.now();
-  if(now-_lastBack<400){history.pushState({page:'app'},'');return;}
+  if(now-_lastBack<400)return;
   _lastBack=now;
-
-  // תמיד הוסף entry חדש כדי לא לאזל
-  history.pushState({page:'app'},'');
 
   // lightbox פתוח
   if(document.getElementById('photo-lightbox').style.display==='flex'){
@@ -1192,14 +1185,14 @@ function _handleBack(){
   // דשבורד — נשאר
 }
 
-window.addEventListener('popstate',function(e){
+// מנגנון hash — אמין יותר מ-history
+window.location.hash='app';
+window.addEventListener('hashchange',function(){
+  // תמיד החזר את ה-hash
+  window.location.hash='app';
   _handleBack();
 });
-// שומר — מחדש entries אם אוזלים
-setInterval(function(){
-  if(history.length<5)for(var i=0;i<10;i++)history.pushState({page:'app'},'');
-},1000);
-// חסימת יציאה מהאתר — תמיד
+// חסימת יציאה
 window.addEventListener('beforeunload',function(e){
   e.preventDefault();
   e.returnValue='';
