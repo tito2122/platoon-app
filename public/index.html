@@ -426,7 +426,10 @@ function renderList(){
     if(state.filter==='present')return s.status==='present';
     if(state.filter==='absent')return s.status==='absent';
     return true;
-  }).sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
+  }).sort(function(a,b){
+    var la=a.lastName||a.name||'', lb=b.lastName||b.name||'';
+    return la.localeCompare(lb,'he');
+  });
   if(!list.length){
     var es=document.createElement('div');es.className='empty';
     es.innerHTML='<div class="ei">🪖</div><h3>'+(state.filter==='all'?'אין חיילים עדיין':'אין חיילים ברשימה זו')+'</h3><p>'+(state.filter==='all'?'לחץ + להוספת חייל ראשון':'')+'</p>';
@@ -479,7 +482,13 @@ function buildInfoTab(s){
     inner.appendChild(stBox);
 
     // NAME
-    addViewField(inner,'שם',s.name);
+    // NAME view
+    var nameViewBox=document.createElement('div');nameViewBox.className='field-view';
+    var nameLblEl=document.createElement('div');nameLblEl.className='field-lbl';nameLblEl.textContent='שם';
+    var nameValEl=document.createElement('div');nameValEl.className='field-val';
+    nameValEl.textContent=(s.lastName&&s.firstName)?(s.lastName+' '+s.firstName):s.name||'';
+    nameViewBox.appendChild(nameLblEl);nameViewBox.appendChild(nameValEl);
+    inner.appendChild(nameViewBox);
     // ROLES
     var rf=document.createElement('div');rf.className='field-view';
     var rl=document.createElement('div');rl.className='field-lbl';rl.textContent='תפקידים';
@@ -555,7 +564,10 @@ function buildInfoTab(s){
 
     // NAME
     var sec0=mkSec('שם החייל');
-    var ni=mkInp('text','שם מלא...',s.name);ni.style.cssText='font-size:18px;font-weight:700';
+    var nameRow=document.createElement('div');nameRow.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px';
+    var niFirst=mkInp('text','שם פרטי...',s.firstName||'');
+    var niLast=mkInp('text','שם משפחה...',s.lastName||'');
+    var ni=document.createElement('input');// dummy ref for banner logic
     var nameBanner=document.createElement('div');
     nameBanner.style.cssText='display:none;background:#FEE2E2;border:1.5px solid #FECDD3;border-radius:var(--r-sm);padding:9px 14px;margin-top:8px;font-size:13px;font-weight:700;color:var(--red);text-align:center';
     ni.addEventListener('input',function(){
@@ -568,7 +580,7 @@ function buildInfoTab(s){
     sec0.body.appendChild(ni);sec0.body.appendChild(nameBanner);inner.appendChild(sec0.el);
     if(!s.name.trim())setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';},80);
 
-None
+
 
     // ROLES
     var sec2=mkSec('תפקידים ופק"ל');
