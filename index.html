@@ -276,6 +276,11 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
   </div>
 </div>
 
+<!-- PHOTO LIGHTBOX -->
+<div id="photo-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center" onclick="this.style.display='none'">
+  <img id="lightbox-img" style="max-width:92%;max-height:88%;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,.6)">
+</div>
+
 <div class="toast" id="toast"></div>
 <div id="loading-overlay" style="position:fixed;inset:0;background:#F0F2F5;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px">
   <div style="font-size:48px">🪖</div>
@@ -367,8 +372,8 @@ function setFilter(f){
   document.getElementById('sb-pr').classList.toggle('active-filter',f==='present');
   document.getElementById('sb-ab').classList.toggle('active-filter',f==='absent');
   document.getElementById('sb-ms').classList.toggle('active-filter',f==='missing');
-  if(f==='present'){banner.className='filter-banner show fb-green';document.getElementById('fb-label').textContent='מציג נוכחים בלבד';}
-  else if(f==='absent'){banner.className='filter-banner show fb-red';document.getElementById('fb-label').textContent='מציג חסרים בלבד';}
+  if(f==='present'){banner.className='filter-banner show fb-green';document.getElementById('fb-label').textContent='מציג נוכחים בלבד';history.pushState({page:'filter',filter:f},'');}
+  else if(f==='absent'){banner.className='filter-banner show fb-red';document.getElementById('fb-label').textContent='מציג חסרים בלבד';history.pushState({page:'filter',filter:f},'');}
   else{banner.className='filter-banner';}
   renderList();
 }
@@ -377,6 +382,7 @@ function showMain(){
   document.getElementById('scr-det').classList.add('hidden');
   document.getElementById('scr-det').classList.remove('slide-left');
   document.getElementById('scr-main').classList.remove('hidden','slide-left');
+  history.replaceState({page:'main'},'');
   renderMain();
 }
 function showDetail(id){
@@ -387,6 +393,7 @@ function showDetail(id){
   document.getElementById('tab-leaves').classList.add('active');
   document.getElementById('tab-info').classList.remove('active');
   document.querySelector('.tabs-bar').style.display='flex';
+  history.pushState({page:'detail',id:id},'');
   renderDetail(id);
 }
 function showDetailNewSoldier(id){
@@ -397,6 +404,7 @@ function showDetailNewSoldier(id){
     document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
     document.getElementById('tab-info').classList.add('active');
     document.getElementById('tab-leaves').classList.remove('active');
+    history.pushState({page:'detail',id:id},'');
     renderDetail(id);
   }catch(e){
     document.getElementById('scr-main').classList.remove('slide-left');
@@ -450,6 +458,13 @@ function renderList(){
     if(s.photoData){
       var avImg=document.createElement('img');avImg.src=s.photoData;avImg.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
       av.appendChild(avImg);
+      av.style.cursor='pointer';
+      av.addEventListener('click',function(e){
+        e.stopPropagation();
+        var lb=document.getElementById('photo-lightbox');
+        document.getElementById('lightbox-img').src=s.photoData;
+        lb.style.display='flex';
+      });
     } else {
       av.textContent=initials(s.name||'?');
     }
@@ -1056,7 +1071,7 @@ function init(){
       showMain();
       return;
     }
-    // if on info tab, go back to leaves tab
+    // if on info tab, go back to leaves tab; if on leaves tab, go to main
     var infoPanel=document.getElementById('tab-info');
     if(infoPanel.classList.contains('active')){
       document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
@@ -1110,7 +1125,53 @@ function init(){
   document.getElementById('rcal-prev').addEventListener('click',function(){rcalMonth--;if(rcalMonth<0){rcalMonth=11;rcalYear--;}renderRcal();});
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
 }
-init();startSync();
+init();
+history.replaceState({page:'main'},'');
+var _backPressedOnce=false;
+window.addEventListener('popstate',function(e){
+  // סגור lightbox אם פתוח
+  if(document.getElementById('photo-lightbox').style.display==='flex'){
+    document.getElementById('photo-lightbox').style.display='none';
+    history.pushState({page:'main'},'');return;
+  }
+  // סגור מודל נעדרים אם פתוח
+  if(document.getElementById('modal-missing').classList.contains('show')){
+    closeMissingModal();history.pushState({page:'main'},'');return;
+  }
+  // סגור מודל דו"ח אם פתוח
+  if(document.getElementById('modal-report').classList.contains('show')){
+    closeReportModal();history.pushState({page:'main'},'');return;
+  }
+  // אם במסך פרטי חייל
+  if(!document.getElementById('scr-det').classList.contains('hidden')){
+    var infoPanel=document.getElementById('tab-info');
+    if(infoPanel.classList.contains('active')){
+      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
+      document.getElementById('tab-leaves').classList.add('active');
+      document.getElementById('tab-info').classList.remove('active');
+      history.pushState({page:'detail-leaves'},'');
+    } else {
+      var s=find(state.active);
+      if(s&&!s.name.trim()){state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});deleteSoldierRemote(state.active);}
+      showMain();
+    }
+    return;
+  }
+  // אם בדשבורד עם פילטר פעיל → חזור לסה"כ
+  if(state.filter!=='all'){
+    setFilter('all');
+    history.pushState({page:'main'},'');return;
+  }
+  // בדשבורד — לחיצה ראשונה מציגה טוסט, שנייה יוצאת
+  if(_backPressedOnce){
+    window.history.go(-1);return;
+  }
+  _backPressedOnce=true;
+  toast('לחץ שוב לצאת מהאפליקציה');
+  history.pushState({page:'main'},'');
+  setTimeout(function(){_backPressedOnce=false;},2500);
+});
+startSync();
 })();
 </script>
 </body>
