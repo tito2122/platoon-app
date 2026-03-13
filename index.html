@@ -1136,19 +1136,19 @@ function init(){
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
 }
 init();
-// מנגנון חזרה אמין — sentinel אחד קבוע
-history.replaceState({page:'sentinel'},'');
-history.pushState({page:'app'},'');
-var _backPressedOnce=false;
+// מנגנון חזרה — 10 entries כמחסום
+history.replaceState({page:'app'},'');
+for(var _i=0;_i<10;_i++)history.pushState({page:'app'},'');
 var _lastBack=0;
 
 function _handleBack(){
-  // תמיד שחזר sentinel מיד — לפני כל דבר אחר
-  history.pushState({page:'app'},'');
-  // debounce — מנע לחיצות כפולות מהירות
+  // debounce
   var now=Date.now();
-  if(now-_lastBack<500)return;
+  if(now-_lastBack<400){history.pushState({page:'app'},'');return;}
   _lastBack=now;
+
+  // תמיד הוסף entry חדש כדי לא לאזל
+  history.pushState({page:'app'},'');
 
   // lightbox פתוח
   if(document.getElementById('photo-lightbox').style.display==='flex'){
@@ -1162,9 +1162,8 @@ function _handleBack(){
   if(document.getElementById('modal-report').classList.contains('show')){
     closeReportModal();return;
   }
-  // במסך פרטי חייל — בדיקה לפי state ולפי מיקום מסך
+  // במסך פרטי חייל
   var scrDet=document.getElementById('scr-det');
-  var scrMain=document.getElementById('scr-main');
   var isInDetail=state.active!==null&&!scrDet.classList.contains('hidden');
   if(isInDetail){
     var sol=find(state.active);
@@ -1172,7 +1171,6 @@ function _handleBack(){
     var infoPanel=document.getElementById('tab-info');
     if(infoPanel.classList.contains('active')){
       if(isNew){
-        // חייל חדש ריק — מחק וחזור לדשבורד
         state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});
         deleteSoldierRemote(state.active);
         showMain();
@@ -1181,8 +1179,6 @@ function _handleBack(){
         document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
         document.getElementById('tab-leaves').classList.add('active');
         document.getElementById('tab-info').classList.remove('active');
-        history.pushState({page:'app'},'');
-        history.pushState({page:'app'},'');
       }
     } else {
       // מיציאות → דשבורד
@@ -1191,21 +1187,18 @@ function _handleBack(){
     }
     return;
   }
-  // פילטר פעיל → נקה אותו
+  // פילטר פעיל → נקה
   if(state.filter!=='all'){setFilter('all');return;}
-  // דשבורד — נשאר באפליקציה תמיד
-  history.pushState({page:'app'},'');
+  // דשבורד — נשאר
 }
 
 window.addEventListener('popstate',function(e){
   _handleBack();
 });
-// שומר sentinel — מבטיח שתמיד יש history entry מעל הדף
+// שומר — מחדש entries אם אוזלים
 setInterval(function(){
-  if(history.state&&history.state.page==='sentinel'){
-    history.pushState({page:'app'},'');
-  }
-},300);
+  if(history.length<5)for(var i=0;i<10;i++)history.pushState({page:'app'},'');
+},1000);
 // חסימת יציאה מהאתר — תמיד
 window.addEventListener('beforeunload',function(e){
   e.preventDefault();
