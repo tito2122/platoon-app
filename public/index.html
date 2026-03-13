@@ -218,11 +218,11 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
     <button class="btn btn-danger" id="btn-del" style="min-height:38px;padding:0 14px;font-size:13px">🗑 הסר</button>
   </div>
   <div class="tabs-bar">
-    <button class="tab-btn active" data-tab="info">📋 פרטים</button>
-    <button class="tab-btn" data-tab="leaves">🏖️ יציאות</button>
+    <button class="tab-btn active" data-tab="leaves">🏖️ יציאות</button>
+    <button class="tab-btn" data-tab="info">📋 פרטים</button>
   </div>
-  <div class="tab-panel active" id="tab-info"></div>
-  <div class="tab-panel" id="tab-leaves"></div>
+  <div class="tab-panel active" id="tab-leaves"></div>
+  <div class="tab-panel" id="tab-info"></div>
 </div>
 
 <div class="modal-overlay" id="modal-report">
@@ -293,7 +293,7 @@ function startSync(){
     if(lo)lo.style.display='none';
   });
 }
-function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:''};}
+function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:''};}
 function find(id){return state.soldiers.find(function(s){return s.id===id;});}
 function initials(n){var p=(n||'').trim().split(/\s+/).filter(Boolean);if(!p.length)return'?';if(p.length===1)return p[0].slice(0,2);return p[0][0]+(p[p.length-1][0]||'');}
 function calcDays(a,b){if(!a||!b)return 0;var d=(new Date(b)-new Date(a))/864e5;return d>0?Math.round(d):0;}
@@ -348,9 +348,9 @@ function showDetail(id){
   state.active=id;
   document.getElementById('scr-main').classList.add('slide-left');
   document.getElementById('scr-det').classList.remove('hidden');
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
-  document.getElementById('tab-info').classList.add('active');
-  document.getElementById('tab-leaves').classList.remove('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
+  document.getElementById('tab-leaves').classList.add('active');
+  document.getElementById('tab-info').classList.remove('active');
   document.querySelector('.tabs-bar').style.display='flex';
   renderDetail(id);
 }
@@ -362,7 +362,6 @@ function showDetailNewSoldier(id){
     document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
     document.getElementById('tab-info').classList.add('active');
     document.getElementById('tab-leaves').classList.remove('active');
-    document.querySelector('.tabs-bar').style.display='none';
     renderDetail(id);
   }catch(e){
     document.getElementById('scr-main').classList.remove('slide-left');
@@ -453,6 +452,14 @@ function buildInfoTab(s){
     nameViewBox.appendChild(nameLblEl);nameViewBox.appendChild(nameValEl);
     inner.appendChild(nameViewBox);
 
+    // מספר אישי
+    var idBox=document.createElement('div');idBox.className='field-view';
+    var idLbl=document.createElement('div');idLbl.className='field-lbl';idLbl.textContent='מספר אישי';
+    var idVal=document.createElement('div');idVal.className='field-val'+(s.personalId&&s.personalId.trim()?'':' empty-val');
+    idVal.textContent=s.personalId&&s.personalId.trim()?s.personalId:'לא הוזן';
+    idBox.appendChild(idLbl);idBox.appendChild(idVal);
+    inner.appendChild(idBox);
+
     var rf=document.createElement('div');rf.className='field-view';
     var rl=document.createElement('div');rl.className='field-lbl';rl.textContent='תפקידים';
     rf.appendChild(rl);
@@ -495,7 +502,14 @@ function buildInfoTab(s){
     }
     inner.appendChild(resBox);
 
-    addViewField(inner,'הערות',s.notes);
+    // הערות - עריכה ישירה ללא לחיצה על עריכה
+    var notesBox=document.createElement('div');notesBox.className='field-view';
+    var notesLbl=document.createElement('div');notesLbl.className='field-lbl';notesLbl.textContent='הערות';
+    var notesTa=document.createElement('textarea');notesTa.className='finp';notesTa.style.cssText='margin-top:4px;min-height:70px;font-size:14px';
+    notesTa.placeholder='הערות כלליות...';notesTa.value=s.notes||'';notesTa.rows=3;
+    notesTa.addEventListener('input',function(){s.notes=notesTa.value;saveSoldier(s);});
+    notesBox.appendChild(notesLbl);notesBox.appendChild(notesTa);
+    inner.appendChild(notesBox);
 
     if(s.hasWife){
       var famBox=document.createElement('div');famBox.className='field-view';
@@ -559,6 +573,12 @@ function buildInfoTab(s){
     if(!s.name.trim()){
       setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';niLast.focus();},80);
     }
+
+    // ── PERSONAL ID ──
+    var secId=mkSec('מספר אישי');
+    var piId=mkInp('text','מספר אישי...',s.personalId||'');
+    piId.addEventListener('input',function(){s.personalId=piId.value;saveSoldier(s);});
+    secId.body.appendChild(piId);inner.appendChild(secId.el);
 
     // ── ROLES ──
     var sec2=mkSec('תפקידים');
@@ -702,7 +722,11 @@ function buildLeavesTab(s){
 
   var addBtn=document.createElement('button');addBtn.className='btn btn-ghost btn-full';addBtn.textContent='+ הוסף יציאה';addBtn.style.marginTop='8px';
   var addForm=document.createElement('div');addForm.className='lv-form';
-  var calObj=buildCal(s,'leave',function(from,to){s.leaves.push({from:from,to:to});saveSoldier(s);renderLv();addForm.classList.remove('open');});
+  var calObj=buildCal(s,'leave',function(from,to){
+    s.leaves.push({from:from,to:to});
+    s.leaves.sort(function(a,b){return a.from<b.from?-1:a.from>b.from?1:0;});
+    saveSoldier(s);renderLv();addForm.classList.remove('open');
+  });
   calObj.cancel.addEventListener('click',function(){addForm.classList.remove('open');});
   addForm.appendChild(calObj.el);
   addBtn.addEventListener('click',function(){var o=addForm.classList.contains('open');addForm.classList.toggle('open');if(!o)calObj.reset();});
@@ -855,8 +879,18 @@ function init(){
     if(s&&!s.name.trim()){
       state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});
       deleteSoldierRemote(state.active);
+      showMain();
+      return;
     }
-    showMain();
+    // if on info tab, go back to leaves tab
+    var infoPanel=document.getElementById('tab-info');
+    if(infoPanel.classList.contains('active')){
+      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
+      document.getElementById('tab-leaves').classList.add('active');
+      document.getElementById('tab-info').classList.remove('active');
+    } else {
+      showMain();
+    }
   });
   document.getElementById('btn-del').addEventListener('click',function(){
     if(!state.active)return;
