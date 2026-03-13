@@ -327,7 +327,7 @@ function startSync(){
     document.getElementById('st-ms').textContent=state.missing.length;
   });
 }
-function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:''};}
+function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',photoData:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:''};}
 function find(id){return state.soldiers.find(function(s){return s.id===id;});}
 function initials(n){var p=(n||'').trim().split(/\s+/).filter(Boolean);if(!p.length)return'?';if(p.length===1)return p[0].slice(0,2);return p[0][0]+(p[p.length-1][0]||'');}
 function calcDays(a,b){if(!a||!b)return 0;var d=(new Date(b)-new Date(a))/864e5;return d>0?Math.round(d):0;}
@@ -421,6 +421,17 @@ function updateStats(){
     c.innerHTML=role+'&nbsp;<span class="rcs-cnt">'+cnt+'</span>';
     rs.appendChild(c);
   });
+  // תפקידים נוכחים — כל התפקידים שיש להם לפחות נוכח אחד
+  var roleWrap=document.createElement('div');roleWrap.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px';
+  ROLES.forEach(function(role){
+    var cnt=pr.filter(function(s){return s.roles.indexOf(role)!==-1;}).length;
+    if(cnt===0)return;
+    var tag=document.createElement('div');
+    tag.style.cssText='background:#1E40AF;color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px';
+    tag.innerHTML='<span>'+role+'</span><span style="background:rgba(255,255,255,0.25);border-radius:10px;padding:1px 6px;font-size:10px">'+cnt+'</span>';
+    roleWrap.appendChild(tag);
+  });
+  rs.appendChild(roleWrap);
 }
 function renderList(){
   var wrap=document.getElementById('list-wrap');wrap.innerHTML='';
@@ -476,12 +487,27 @@ function buildInfoTab(s){
   function renderView(){
     inner.innerHTML='';
     var st=getStatusInfo(s);
-    var stBox=document.createElement('div');stBox.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
+
+    // תמונה + סטטוס בראש
+    var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;gap:14px;margin-bottom:16px';
+    var avatarWrap=document.createElement('div');avatarWrap.style.cssText='flex-shrink:0';
+    if(s.photoData){
+      var photoImg=document.createElement('img');photoImg.src=s.photoData;photoImg.style.cssText='width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border)';
+      avatarWrap.appendChild(photoImg);
+    } else {
+      var bigAv=document.createElement('div');bigAv.style.cssText='width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#34D399,var(--green-dark))';
+      bigAv.textContent=initials(s.name||'?');
+      avatarWrap.appendChild(bigAv);
+    }
+    var topInfo=document.createElement('div');topInfo.style.cssText='flex:1;min-width:0';
+    var stBox=document.createElement('div');stBox.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px';
     var pill=document.createElement('div');pill.className='status-pill '+st.cls;pill.textContent=st.label;
     var editBtn=document.createElement('button');editBtn.className='btn btn-edit';editBtn.textContent='✏️ עריכה';
     editBtn.addEventListener('click',function(){editMode=true;renderEdit();});
     stBox.appendChild(pill);stBox.appendChild(editBtn);
-    inner.appendChild(stBox);
+    topInfo.appendChild(stBox);
+    topRow.appendChild(avatarWrap);topRow.appendChild(topInfo);
+    inner.appendChild(topRow);
 
     var nameViewBox=document.createElement('div');nameViewBox.className='field-view';
     var nameLblEl=document.createElement('div');nameLblEl.className='field-lbl';nameLblEl.textContent='שם';
@@ -611,6 +637,52 @@ function buildInfoTab(s){
     if(!s.name.trim()){
       setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';niLast.focus();},80);
     }
+
+    // ── PHOTO ──
+    var secPhoto=mkSec('תמונת חייל');
+    var photoWrap=document.createElement('div');photoWrap.style.cssText='display:flex;align-items:center;gap:14px';
+    var photoPreview=document.createElement('div');
+    photoPreview.style.cssText='width:72px;height:72px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:24px;font-weight:800;color:#fff';
+    if(s.photoData){
+      var prevImg=document.createElement('img');prevImg.src=s.photoData;prevImg.style.cssText='width:100%;height:100%;object-fit:cover';
+      photoPreview.appendChild(prevImg);
+    } else {
+      var prevAv=document.createElement('div');prevAv.style.cssText='width:100%;height:100%;background:linear-gradient(135deg,#34D399,var(--green-dark));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff';
+      prevAv.textContent=initials(s.name||'?');
+      photoPreview.appendChild(prevAv);
+    }
+    var photoBtns=document.createElement('div');photoBtns.style.cssText='display:flex;flex-direction:column;gap:8px;flex:1';
+    var photoInput=document.createElement('input');photoInput.type='file';photoInput.accept='image/*';photoInput.style.display='none';
+    var photoUploadBtn=document.createElement('button');photoUploadBtn.className='btn btn-ghost btn-full';photoUploadBtn.style.minHeight='42px';photoUploadBtn.textContent='📷 העלה תמונה';
+    photoUploadBtn.addEventListener('click',function(){photoInput.click();});
+    photoInput.addEventListener('change',function(){
+      var file=photoInput.files[0];if(!file)return;
+      var reader=new FileReader();
+      reader.onload=function(e){
+        s.photoData=e.target.result;
+        saveSoldier(s);
+        photoPreview.innerHTML='';
+        var img=document.createElement('img');img.src=s.photoData;img.style.cssText='width:100%;height:100%;object-fit:cover';
+        photoPreview.appendChild(img);
+        toast('התמונה נשמרה ✓');
+      };
+      reader.readAsDataURL(file);
+    });
+    var photoDelBtn=document.createElement('button');
+    photoDelBtn.style.cssText='min-height:36px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;display:'+(s.photoData?'block':'none');
+    photoDelBtn.textContent='🗑 הסר תמונה';
+    photoDelBtn.addEventListener('click',function(){
+      s.photoData='';saveSoldier(s);
+      photoPreview.innerHTML='';
+      var av2=document.createElement('div');av2.style.cssText='width:100%;height:100%;background:linear-gradient(135deg,#34D399,var(--green-dark));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff';
+      av2.textContent=initials(s.name||'?');
+      photoPreview.appendChild(av2);
+      photoDelBtn.style.display='none';
+      toast('התמונה הוסרה');
+    });
+    photoBtns.appendChild(photoUploadBtn);photoBtns.appendChild(photoDelBtn);photoBtns.appendChild(photoInput);
+    photoWrap.appendChild(photoPreview);photoWrap.appendChild(photoBtns);
+    secPhoto.body.appendChild(photoWrap);inner.appendChild(secPhoto.el);
 
     // ── PERSONAL ID ──
     var secId=mkSec('מספר אישי');
@@ -843,18 +915,19 @@ function buildCal(s,mode,onSave){
     for(var d=1;d<=dim;d++){
       var ds=toDateStr(cy,cm,d);
       var isPast=pf&&!pt&&ds<pf;
+      var isBeforeToday=mode==='next'&&ds<today();
       var cls='cal-day';
       if(mode==='next'){
         if(ds===pf||ds===pt)cls+=' pending-from';
         else if(pf&&pt&&ds>pf&&ds<pt)cls+=' pending-range';
-        else if(isPast)cls+=' disabled';
+        else if(isPast||isBeforeToday)cls+=' disabled';
       } else {
         if(ds===pf||ds===pt)cls+=' from';
         else if(pf&&pt&&ds>pf&&ds<pt)cls+=' in-range';
         else if(isPast)cls+=' disabled';
       }
       var btn=document.createElement('button');btn.className=cls;btn.textContent=d;
-      if(!isPast)(function(ds2){btn.addEventListener('click',function(){
+      if(!isPast&&!isBeforeToday)(function(ds2){btn.addEventListener('click',function(){
         if(!pf||pt){pf=ds2;pt=null;}
         else{if(ds2<=pf){pf=ds2;pt=null;}else{pt=ds2;onSave(pf,pt);pf=null;pt=null;}}
         rc();
