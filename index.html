@@ -1159,16 +1159,24 @@ function _handleBack(){
   var scrMain=document.getElementById('scr-main');
   var isInDetail=!scrDet.classList.contains('hidden')&&scrMain.classList.contains('slide-left');
   if(isInDetail){
+    var sol=find(state.active);
+    var isNew=sol&&!sol.name.trim();
     var infoPanel=document.getElementById('tab-info');
     if(infoPanel.classList.contains('active')){
-      // מפרטים → יציאות
-      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
-      document.getElementById('tab-leaves').classList.add('active');
-      document.getElementById('tab-info').classList.remove('active');
+      if(isNew){
+        // חייל חדש ריק — מחק וחזור לדשבורד
+        state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});
+        deleteSoldierRemote(state.active);
+        showMain();
+      } else {
+        // מפרטים → יציאות
+        document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
+        document.getElementById('tab-leaves').classList.add('active');
+        document.getElementById('tab-info').classList.remove('active');
+      }
     } else {
       // מיציאות → דשבורד
-      var sol=find(state.active);
-      if(sol&&!sol.name.trim()){state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});deleteSoldierRemote(state.active);}
+      if(isNew){state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});deleteSoldierRemote(state.active);}
       showMain();
     }
     return;
