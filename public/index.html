@@ -388,15 +388,20 @@ function showDetail(id){
   renderDetail(id);
 }
 function showDetailNewSoldier(id){
-  state.active=id;
-  document.getElementById('scr-main').classList.add('slide-left');
-  document.getElementById('scr-det').classList.remove('hidden');
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
-  document.getElementById('tab-info').classList.add('active');
-  document.getElementById('tab-leaves').classList.remove('active');
-  // hide leaves tab for new soldier
-  document.querySelector('.tabs-bar').style.display='none';
-  renderDetail(id);
+  try{
+    state.active=id;
+    document.getElementById('scr-main').classList.add('slide-left');
+    document.getElementById('scr-det').classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
+    document.getElementById('tab-info').classList.add('active');
+    document.getElementById('tab-leaves').classList.remove('active');
+    document.querySelector('.tabs-bar').style.display='none';
+    renderDetail(id);
+  }catch(e){
+    document.getElementById('scr-main').classList.remove('slide-left');
+    document.getElementById('scr-det').classList.add('hidden');
+    toast('שגיאה בפתיחת כרטיס: '+e.message);
+  }
 }
 function renderMain(){updateStats();renderList();}
 function updateStats(){
@@ -443,10 +448,15 @@ function renderList(){
 /* ── DETAIL ── */
 function renderDetail(id){
   var s=find(id);if(!s){showMain();return;}
-  checkNextExpiry(s);
-  document.getElementById('det-title').textContent=s.name||'חייל חדש';
-  buildInfoTab(s);
-  buildLeavesTab(s);
+  try{
+    checkNextExpiry(s);
+    document.getElementById('det-title').textContent=s.name||'חייל חדש';
+    buildInfoTab(s);
+    buildLeavesTab(s);
+  }catch(e){
+    toast('שגיאה בטעינת כרטיס');
+    console.error(e);
+  }
 }
 
 /* ═══ INFO TAB ═══ */
@@ -558,7 +568,7 @@ function buildInfoTab(s){
     sec0.body.appendChild(ni);sec0.body.appendChild(nameBanner);inner.appendChild(sec0.el);
     if(!s.name.trim())setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';},80);
 
-None
+
 
     // ROLES
     var sec2=mkSec('תפקידים ופק"ל');
@@ -852,7 +862,10 @@ function showReportResult(ds){
 
 /* ── INIT ── */
 function init(){
-  document.getElementById('fab').addEventListener('click',function(){var s=mkSoldier();state.soldiers.push(s);saveSoldier(s);showDetailNewSoldier(s.id);});
+  document.getElementById('fab').addEventListener('click',function(){
+    try{var s=mkSoldier();state.soldiers.push(s);saveSoldier(s);showDetailNewSoldier(s.id);}
+    catch(e){toast('שגיאה: '+e.message);}
+  });
   document.getElementById('btn-back').addEventListener('click',function(){
     var s=find(state.active);
     if(s&&!s.name.trim()){
