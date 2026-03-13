@@ -1183,14 +1183,8 @@ function _handleBack(){
   }
   // פילטר פעיל → נקה אותו
   if(state.filter!=='all'){setFilter('all');return;}
-  // דשבורד — יציאה בלחיצה כפולה
-  if(_backPressedOnce){
-    // יציאה אמיתית — הסר את ה-sentinel ותן לדפדפן לצאת
-    history.go(-2);return;
-  }
-  _backPressedOnce=true;
-  toast('לחץ שוב לצאת מהאפליקציה');
-  setTimeout(function(){_backPressedOnce=false;},2500);
+  // דשבורד — נשאר באפליקציה תמיד
+  history.pushState({page:'app'},'');
 }
 
 window.addEventListener('popstate',function(e){
