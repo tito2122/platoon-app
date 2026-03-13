@@ -845,8 +845,14 @@ function renderRcal(){
 }
 function showReportResult(ds){
   var pl=state.soldiers.filter(function(s){return presentOnDate(s,ds);});
+  if(!pl.length){
+    toast('אין נתונים להצגה ביום זה');
+    rcalSel=null;
+    renderRcal();
+    return;
+  }
   document.getElementById('rr-date').textContent='תאריך: '+fmtDateHe(ds);
-  document.getElementById('rr-names').textContent=pl.length?pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n'):'אין חיילים נוכחים';
+  document.getElementById('rr-names').textContent=pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
   document.getElementById('rr-count').textContent='סה"כ נוכחים: '+pl.length+' חיילים';
   document.getElementById('report-result').classList.add('show');
   document.getElementById('rr-wa').onclick=function(){
