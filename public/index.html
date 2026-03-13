@@ -208,7 +208,7 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
   </div>
   <div class="scroll-area"><div class="list-pad" id="list-wrap"></div></div>
   <button class="fab" id="fab">+</button>
-  <div class="bottom-bar"><button class="btn-report" id="btn-report">📋 דו"ח נוכחות</button></div>
+  <div class="bottom-bar"><button class="btn-report" id="btn-report">📋 דו"ח 1</button></div>
 </div>
 
 <div class="screen hidden" id="scr-det">
@@ -228,7 +228,7 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 <div class="modal-overlay" id="modal-report">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
-    <div class="modal-title">📋 דו"ח נוכחות</div>
+    <div class="modal-title">📋 דו"ח 1</div>
     <div class="rcal-wrap">
       <div class="rcal-nav">
         <button class="rcal-nav-btn" id="rcal-prev">‹</button>
@@ -851,8 +851,18 @@ function renderRcal(){
   }
 }
 function showReportResult(ds){
-  var pl=state.soldiers.filter(function(s){return presentOnDate(s,ds);});
-  if(!pl.length){toast('אין נתונים להצגה ביום זה');rcalSel=null;renderRcal();return;}
+  var pl=state.soldiers.filter(function(s){
+    if(s.status!=='present')return false;
+    for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+    if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
+    return true;
+  });
+  if(!pl.length){
+    toast('אין נוכחים להצגה ביום זה');
+    rcalSel=null;renderRcal();
+    document.getElementById('report-result').classList.remove('show');
+    return;
+  }
   document.getElementById('rr-date').textContent='תאריך: '+fmtDateHe(ds);
   document.getElementById('rr-names').textContent=pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
   document.getElementById('rr-count').textContent='סה"כ נוכחים: '+pl.length+' חיילים';
