@@ -372,8 +372,8 @@ function setFilter(f){
   document.getElementById('sb-pr').classList.toggle('active-filter',f==='present');
   document.getElementById('sb-ab').classList.toggle('active-filter',f==='absent');
   document.getElementById('sb-ms').classList.toggle('active-filter',f==='missing');
-  if(f==='present'){banner.className='filter-banner show fb-green';document.getElementById('fb-label').textContent='מציג נוכחים בלבד';history.pushState({page:'filter',filter:f},'');}
-  else if(f==='absent'){banner.className='filter-banner show fb-red';document.getElementById('fb-label').textContent='מציג חסרים בלבד';history.pushState({page:'filter',filter:f},'');}
+  if(f==='present'){banner.className='filter-banner show fb-green';document.getElementById('fb-label').textContent='מציג נוכחים בלבד';}
+  else if(f==='absent'){banner.className='filter-banner show fb-red';document.getElementById('fb-label').textContent='מציג חסרים בלבד';}
   else{banner.className='filter-banner';}
   renderList();
 }
@@ -382,7 +382,6 @@ function showMain(){
   document.getElementById('scr-det').classList.add('hidden');
   document.getElementById('scr-det').classList.remove('slide-left');
   document.getElementById('scr-main').classList.remove('hidden','slide-left');
-  history.replaceState({page:'main'},'');
   renderMain();
 }
 function showDetail(id){
@@ -393,7 +392,6 @@ function showDetail(id){
   document.getElementById('tab-leaves').classList.add('active');
   document.getElementById('tab-info').classList.remove('active');
   document.querySelector('.tabs-bar').style.display='flex';
-  history.pushState({page:'detail',id:id},'');
   renderDetail(id);
 }
 function showDetailNewSoldier(id){
@@ -404,7 +402,6 @@ function showDetailNewSoldier(id){
     document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
     document.getElementById('tab-info').classList.add('active');
     document.getElementById('tab-leaves').classList.remove('active');
-    history.pushState({page:'detail',id:id},'');
     renderDetail(id);
   }catch(e){
     document.getElementById('scr-main').classList.remove('slide-left');
@@ -959,7 +956,7 @@ function buildCal(s,mode,onSave){
 
 /* ── REPORT MODAL ── */
 var rcalYear=new Date().getFullYear(),rcalMonth=new Date().getMonth(),rcalSel=null;
-function openReportModal(){rcalSel=null;document.getElementById('report-result').classList.remove('show');renderRcal();document.getElementById('modal-report').classList.add('show');history.pushState({page:'report'},'');}
+function openReportModal(){rcalSel=null;document.getElementById('report-result').classList.remove('show');renderRcal();document.getElementById('modal-report').classList.add('show');}
 function closeReportModal(){document.getElementById('modal-report').classList.remove('show');}
 function renderRcal(){
   document.getElementById('rcal-lbl').textContent=MONTHS_HE[rcalMonth]+' '+rcalYear;
@@ -1019,7 +1016,6 @@ function openMissingModal(){
   document.getElementById('mf-name').value='';
   document.getElementById('mf-reason').value='';
   document.getElementById('modal-missing').classList.add('show');
-  history.pushState({page:'missing'},'');
 }
 function closeMissingModal(){document.getElementById('modal-missing').classList.remove('show');}
 function renderMissingList(){
@@ -1127,52 +1123,55 @@ function init(){
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
 }
 init();
-history.replaceState({page:'main'},'');
+// מנגנון חזרה אמין — sentinel אחד קבוע
+history.replaceState({page:'sentinel'},'');
+history.pushState({page:'app'},'');
 var _backPressedOnce=false;
-window.addEventListener('popstate',function(e){
-  // סגור lightbox אם פתוח
+
+function _handleBack(){
+  // תמיד שחזר את ה-sentinel מייד
+  history.pushState({page:'app'},'');
+
+  // lightbox פתוח
   if(document.getElementById('photo-lightbox').style.display==='flex'){
-    document.getElementById('photo-lightbox').style.display='none';
-    history.pushState({page:'main'},'');return;
+    document.getElementById('photo-lightbox').style.display='none';return;
   }
-  // סגור מודל נעדרים אם פתוח
+  // מודל נעדרים פתוח
   if(document.getElementById('modal-missing').classList.contains('show')){
-    closeMissingModal();history.pushState({page:'main'},'');return;
+    closeMissingModal();return;
   }
-  // סגור מודל דו"ח אם פתוח
+  // מודל דו"ח פתוח
   if(document.getElementById('modal-report').classList.contains('show')){
-    closeReportModal();history.pushState({page:'main'},'');return;
+    closeReportModal();return;
   }
-  // אם במסך פרטי חייל
+  // במסך פרטי חייל
   if(!document.getElementById('scr-det').classList.contains('hidden')){
     var infoPanel=document.getElementById('tab-info');
     if(infoPanel.classList.contains('active')){
-      // מפרטים → יציאות
       document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
       document.getElementById('tab-leaves').classList.add('active');
       document.getElementById('tab-info').classList.remove('active');
-      history.pushState({page:'detail-leaves'},'');
     } else {
-      // מיציאות → דשבורד
-      var s=find(state.active);
-      if(s&&!s.name.trim()){state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});deleteSoldierRemote(state.active);}
+      var sol=find(state.active);
+      if(sol&&!sol.name.trim()){state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});deleteSoldierRemote(state.active);}
       showMain();
     }
     return;
   }
-  // אם בדשבורד עם פילטר פעיל → חזור לסה"כ
-  if(state.filter!=='all'){
-    setFilter('all');
-    history.pushState({page:'main'},'');return;
-  }
-  // בדשבורד — לחיצה ראשונה מציגה טוסט, שנייה יוצאת
+  // פילטר פעיל → נקה אותו
+  if(state.filter!=='all'){setFilter('all');return;}
+  // דשבורד — יציאה בלחיצה כפולה
   if(_backPressedOnce){
-    window.history.go(-1);return;
+    // יציאה אמיתית — הסר את ה-sentinel ותן לדפדפן לצאת
+    history.go(-2);return;
   }
   _backPressedOnce=true;
   toast('לחץ שוב לצאת מהאפליקציה');
-  history.pushState({page:'main'},'');
   setTimeout(function(){_backPressedOnce=false;},2500);
+}
+
+window.addEventListener('popstate',function(e){
+  _handleBack();
 });
 startSync();
 })();
