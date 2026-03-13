@@ -414,15 +414,8 @@ function updateStats(){
   document.getElementById('st-ab').textContent=ab.length;
   document.getElementById('st-ms').textContent=state.missing.length;
   var rs=document.getElementById('role-stats');rs.innerHTML='';
-  KEY.forEach(function(ri){
-    var role=ROLES[ri];
-    var cnt=pr.filter(function(s){return s.roles.indexOf(role)!==-1;}).length;
-    var c=document.createElement('div');c.className='rcs';
-    c.innerHTML=role+'&nbsp;<span class="rcs-cnt">'+cnt+'</span>';
-    rs.appendChild(c);
-  });
-  // תפקידים נוכחים — כל התפקידים שיש להם לפחות נוכח אחד
-  var roleWrap=document.createElement('div');roleWrap.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px';
+  // באנרים כחולים של תפקידים נוכחים
+  var roleWrap=document.createElement('div');roleWrap.style.cssText='display:flex;flex-wrap:wrap;gap:6px';
   ROLES.forEach(function(role){
     var cnt=pr.filter(function(s){return s.roles.indexOf(role)!==-1;}).length;
     if(cnt===0)return;
