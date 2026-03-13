@@ -959,7 +959,7 @@ function buildCal(s,mode,onSave){
 
 /* ── REPORT MODAL ── */
 var rcalYear=new Date().getFullYear(),rcalMonth=new Date().getMonth(),rcalSel=null;
-function openReportModal(){rcalSel=null;document.getElementById('report-result').classList.remove('show');renderRcal();document.getElementById('modal-report').classList.add('show');}
+function openReportModal(){rcalSel=null;document.getElementById('report-result').classList.remove('show');renderRcal();document.getElementById('modal-report').classList.add('show');history.pushState({page:'report'},'');}
 function closeReportModal(){document.getElementById('modal-report').classList.remove('show');}
 function renderRcal(){
   document.getElementById('rcal-lbl').textContent=MONTHS_HE[rcalMonth]+' '+rcalYear;
@@ -1019,6 +1019,7 @@ function openMissingModal(){
   document.getElementById('mf-name').value='';
   document.getElementById('mf-reason').value='';
   document.getElementById('modal-missing').classList.add('show');
+  history.pushState({page:'missing'},'');
 }
 function closeMissingModal(){document.getElementById('modal-missing').classList.remove('show');}
 function renderMissingList(){
@@ -1146,11 +1147,13 @@ window.addEventListener('popstate',function(e){
   if(!document.getElementById('scr-det').classList.contains('hidden')){
     var infoPanel=document.getElementById('tab-info');
     if(infoPanel.classList.contains('active')){
+      // מפרטים → יציאות
       document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
       document.getElementById('tab-leaves').classList.add('active');
       document.getElementById('tab-info').classList.remove('active');
       history.pushState({page:'detail-leaves'},'');
     } else {
+      // מיציאות → דשבורד
       var s=find(state.active);
       if(s&&!s.name.trim()){state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});deleteSoldierRemote(state.active);}
       showMain();
