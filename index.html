@@ -446,7 +446,13 @@ function renderList(){
   list.forEach(function(s){
     var st=getStatusInfo(s);
     var item=document.createElement('div');item.className='soldier-item';
-    var av=document.createElement('div');av.className='s-avatar '+(getStatusInfo(s).cls==='sp-present'?'av-p':'av-a');av.textContent=initials(s.name||'?');
+    var av=document.createElement('div');av.className='s-avatar '+(getStatusInfo(s).cls==='sp-present'?'av-p':'av-a');
+    if(s.photoData){
+      var avImg=document.createElement('img');avImg.src=s.photoData;avImg.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
+      av.appendChild(avImg);
+    } else {
+      av.textContent=initials(s.name||'?');
+    }
     var info=document.createElement('div');info.className='s-info';
     info.innerHTML='<div class="s-name">'+(s.name||'חייל חדש')+'</div><div class="s-roles">'+(s.roles.length?s.roles.join(' · '):'ללא תפקיד')+'</div>';
     var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=st.label;
