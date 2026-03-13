@@ -525,21 +525,6 @@ function buildInfoTab(s){
   function renderEdit(){
     inner.innerHTML='';
 
-    // ── STATUS ──
-    var sec1=mkSec('סטטוס');
-    var statusChips=document.createElement('div');statusChips.className='chips';
-    [{v:'present',l:'✅ נוכח'},{v:'absent',l:'❌ חסר'}].forEach(function(opt){
-      var c=document.createElement('div');c.className='chip'+(s.status===opt.v?' sel':'');c.textContent=opt.l;
-      c.addEventListener('click',function(){
-        s.status=opt.v;
-        statusChips.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});
-        c.classList.add('sel');
-        saveSoldier(s);updateStats();
-      });
-      statusChips.appendChild(c);
-    });
-    sec1.body.appendChild(statusChips);inner.appendChild(sec1.el);
-
     // ── NAME ──
     var sec0=mkSec('שם החייל');
     var nameRow=document.createElement('div');nameRow.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px';
