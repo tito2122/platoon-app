@@ -426,7 +426,7 @@ function renderList(){
     if(state.filter==='present')return s.status==='present';
     if(state.filter==='absent')return s.status==='absent';
     return true;
-  });
+  }).sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
   if(!list.length){
     var es=document.createElement('div');es.className='empty';
     es.innerHTML='<div class="ei">🪖</div><h3>'+(state.filter==='all'?'אין חיילים עדיין':'אין חיילים ברשימה זו')+'</h3><p>'+(state.filter==='all'?'לחץ + להוספת חייל ראשון':'')+'</p>';
@@ -568,7 +568,7 @@ function buildInfoTab(s){
     sec0.body.appendChild(ni);sec0.body.appendChild(nameBanner);inner.appendChild(sec0.el);
     if(!s.name.trim())setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';},80);
 
-
+None
 
     // ROLES
     var sec2=mkSec('תפקידים ופק"ל');
