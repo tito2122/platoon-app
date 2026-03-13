@@ -1194,7 +1194,17 @@ function _handleBack(){
 window.addEventListener('popstate',function(e){
   _handleBack();
 });
-// Pull-to-refresh
+// שומר sentinel — מבטיח שתמיד יש history entry מעל הדף
+setInterval(function(){
+  if(history.state&&history.state.page==='sentinel'){
+    history.pushState({page:'app'},'');
+  }
+},300);
+// חסימת יציאה מהאתר — תמיד
+window.addEventListener('beforeunload',function(e){
+  e.preventDefault();
+  e.returnValue='';
+});
 (function(){
   var scrollArea=document.querySelector('.scroll-area');
   var indicator=document.getElementById('ptr-indicator');
