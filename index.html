@@ -663,18 +663,21 @@ function buildInfoTab(s){
       photoPreview.appendChild(prevAv);
     }
     var photoBtns=document.createElement('div');photoBtns.style.cssText='display:flex;flex-direction:column;gap:8px;flex:1';
-    var photoInput=document.createElement('input');photoInput.type='file';photoInput.accept='image/*';photoInput.style.display='none';
+    var photoInput=document.createElement('input');photoInput.type='file';photoInput.accept='image/*';
+    photoInput.style.cssText='position:fixed;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px';
+    document.body.appendChild(photoInput);
     var photoUploadBtn=document.createElement('button');photoUploadBtn.className='btn btn-ghost btn-full';photoUploadBtn.style.minHeight='42px';photoUploadBtn.textContent='📷 העלה תמונה';
-    photoUploadBtn.addEventListener('click',function(){photoInput.click();});
+    photoUploadBtn.addEventListener('click',function(e){e.preventDefault();photoInput.click();});
     photoInput.addEventListener('change',function(){
       var file=photoInput.files[0];if(!file)return;
       var reader=new FileReader();
-      reader.onload=function(e){
-        s.photoData=e.target.result;
+      reader.onload=function(ev){
+        s.photoData=ev.target.result;
         saveSoldier(s);
         photoPreview.innerHTML='';
         var img=document.createElement('img');img.src=s.photoData;img.style.cssText='width:100%;height:100%;object-fit:cover';
         photoPreview.appendChild(img);
+        photoDelBtn.style.display='block';
         toast('התמונה נשמרה ✓');
       };
       reader.readAsDataURL(file);
