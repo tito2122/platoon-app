@@ -1000,13 +1000,13 @@ function showReportResult(ds){
   document.getElementById('rr-count').textContent='סה"כ נוכחים: '+pl.length+' חיילים';
   document.getElementById('report-result').classList.add('show');
   document.getElementById('rr-wa').onclick=function(){
-    var msg='🪖 *דו"ח נוכחות — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
+    var msg='🪖 *דו"ח נוכחות מח 1 — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   };
   document.getElementById('rr-xl').onclick=function(){
-    var rows=[['#','שם','תפקידים','טלפון','מגורים']].concat(pl.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
+    var rows=[['דו"ח נוכחות מח 1 — '+fmtDateHe(ds)],[],['#','שם','תפקידים','טלפון','מגורים']].concat(pl.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
     var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
-    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='נוכחות_'+ds+'.csv';a.click();toast('הקובץ הורד ✓');
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='נוכחות_מח1_'+ds+'.csv';a.click();toast('הקובץ הורד ✓');
   };
 }
 
