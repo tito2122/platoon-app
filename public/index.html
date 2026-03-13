@@ -390,8 +390,8 @@ function renderList(){
   var wrap=document.getElementById('list-wrap');wrap.innerHTML='';
   state.soldiers.forEach(function(s){checkNextExpiry(s);});
   var list=state.soldiers.filter(function(s){
-    if(state.filter==='present')return s.status==='present';
-    if(state.filter==='absent')return s.status==='absent';
+    if(state.filter==='present')return s.status==='present'&&getStatusInfo(s).cls!=='sp-leave';
+    if(state.filter==='absent')return s.status==='absent'||getStatusInfo(s).cls==='sp-leave';
     return true;
   }).sort(function(a,b){
     var la=a.lastName||a.name||'', lb=b.lastName||b.name||'';
