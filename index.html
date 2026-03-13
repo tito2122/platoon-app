@@ -9,6 +9,11 @@
 <meta name="theme-color" content="#1CB86A">
 <link rel="manifest" href="manifest.json">
 <title>סד"כ</title>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/platoon-app/sw.js');
+}
+</script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
