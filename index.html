@@ -1195,18 +1195,18 @@ function _handleBack(){
   // דשבורד — נשאר
 }
 
-// מנגנון hash — אמין יותר מ-history
-window.location.hash='app';
-window.addEventListener('hashchange',function(){
-  // תמיד החזר את ה-hash
-  window.location.hash='app';
-  _handleBack();
-});
-// חסימת יציאה
-window.addEventListener('beforeunload',function(e){
-  e.preventDefault();
-  e.returnValue='';
-});
+// מנגנון חזרה
+(function(){
+  // מלא את ה-history ב-50 entries כך שלעולם לא יאזלו
+  history.replaceState({n:0},'');
+  for(var i=1;i<=50;i++) history.pushState({n:i},'');
+
+  window.addEventListener('popstate',function(){
+    // תמיד הוסף entry חדש מיד
+    history.pushState({n:99},'');
+    _handleBack();
+  });
+})();
 (function(){
   var scrollArea=document.querySelector('.scroll-area');
   var indicator=document.getElementById('ptr-indicator');
