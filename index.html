@@ -1000,11 +1000,11 @@ function showReportResult(ds){
   document.getElementById('rr-count').textContent='סה"כ נוכחים: '+pl.length+' חיילים';
   document.getElementById('report-result').classList.add('show');
   document.getElementById('rr-wa').onclick=function(){
-    var msg='🪖 *דו"ח נוכחות מח 1 — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
+    var msg='🪖 *דו"ח נוכחות מח\' 1 — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   };
   document.getElementById('rr-xl').onclick=function(){
-    var rows=[['דו"ח נוכחות מח 1 — '+fmtDateHe(ds)],[],['#','שם','תפקידים','טלפון','מגורים']].concat(pl.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
+    var rows=[['דו"ח נוכחות מח\' 1 — '+fmtDateHe(ds)],[],['#','שם','תפקידים','טלפון','מגורים']].concat(pl.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
     var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
     var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='נוכחות_מח1_'+ds+'.csv';a.click();toast('הקובץ הורד ✓');
   };
@@ -1090,6 +1090,9 @@ function init(){
   });
   document.getElementById('btn-del').addEventListener('click',function(){
     if(!state.active)return;
+    var sol=find(state.active);
+    var name=sol&&sol.name?sol.name:'החייל';
+    if(!confirm('למחוק את '+name+'?\nהפעולה אינה ניתנת לביטול.'))return;
     deleteSoldierRemote(state.active);
     state.soldiers=state.soldiers.filter(function(s){return s.id!==state.active;});
     toast('החייל הוסר ✓');showMain();
@@ -1173,6 +1176,7 @@ function _handleBack(){
         document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
         document.getElementById('tab-leaves').classList.add('active');
         document.getElementById('tab-info').classList.remove('active');
+        history.pushState({page:'app'},'');
       }
     } else {
       // מיציאות → דשבורד
