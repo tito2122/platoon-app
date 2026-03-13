@@ -372,8 +372,8 @@ function showDetailNewSoldier(id){
 }
 function renderMain(){updateStats();renderList();}
 function updateStats(){
-  var pr=state.soldiers.filter(function(s){return s.status==='present';});
-  var ab=state.soldiers.filter(function(s){return s.status==='absent';});
+  var pr=state.soldiers.filter(function(s){return getStatusInfo(s).cls==='sp-present';});
+  var ab=state.soldiers.filter(function(s){return getStatusInfo(s).cls!=='sp-present';});
   document.getElementById('st-tot').textContent=state.soldiers.length;
   document.getElementById('st-pr').textContent=pr.length;
   document.getElementById('st-ab').textContent=ab.length;
@@ -405,7 +405,7 @@ function renderList(){
   list.forEach(function(s){
     var st=getStatusInfo(s);
     var item=document.createElement('div');item.className='soldier-item';
-    var av=document.createElement('div');av.className='s-avatar '+(s.status==='present'?'av-p':'av-a');av.textContent=initials(s.name||'?');
+    var av=document.createElement('div');av.className='s-avatar '+(getStatusInfo(s).cls==='sp-present'?'av-p':'av-a');av.textContent=initials(s.name||'?');
     var info=document.createElement('div');info.className='s-info';
     info.innerHTML='<div class="s-name">'+(s.name||'חייל חדש')+'</div><div class="s-roles">'+(s.roles.length?s.roles.join(' · '):'ללא תפקיד')+'</div>';
     var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=st.label;
