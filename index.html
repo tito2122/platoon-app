@@ -1154,10 +1154,10 @@ function _handleBack(){
   if(document.getElementById('modal-report').classList.contains('show')){
     closeReportModal();return;
   }
-  // במסך פרטי חייל
+  // במסך פרטי חייל — בדיקה לפי state ולפי מיקום מסך
   var scrDet=document.getElementById('scr-det');
   var scrMain=document.getElementById('scr-main');
-  var isInDetail=!scrDet.classList.contains('hidden')&&scrMain.classList.contains('slide-left');
+  var isInDetail=state.active!==null&&!scrDet.classList.contains('hidden');
   if(isInDetail){
     var sol=find(state.active);
     var isNew=sol&&!sol.name.trim();
