@@ -1140,10 +1140,15 @@ init();
 history.replaceState({page:'sentinel'},'');
 history.pushState({page:'app'},'');
 var _backPressedOnce=false;
+var _lastBack=0;
 
 function _handleBack(){
-  // תמיד שחזר את ה-sentinel מייד
+  // תמיד שחזר sentinel מיד — לפני כל דבר אחר
   history.pushState({page:'app'},'');
+  // debounce — מנע לחיצות כפולות מהירות
+  var now=Date.now();
+  if(now-_lastBack<500)return;
+  _lastBack=now;
 
   // lightbox פתוח
   if(document.getElementById('photo-lightbox').style.display==='flex'){
