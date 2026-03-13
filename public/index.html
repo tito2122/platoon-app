@@ -19,7 +19,6 @@
   const db = getFirestore(app);
   const soldiersCol = collection(db, "soldiers");
 
-  // expose to main script
   window._db = db;
   window._soldiersCol = soldiersCol;
   window._setDoc = setDoc;
@@ -49,8 +48,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
 .screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
 .screen.slide-left{transform:translateX(-38%);opacity:0;pointer-events:none}
-
-/* HEADER */
 .app-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 16px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10}
 .logo-icon{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#1E40AF,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.35)}
 .title-wrap{flex:1;min-width:0}
@@ -108,24 +105,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .btn-wa{background:#25D366;color:#fff;flex:1}
 .btn-xl{background:#1D6F42;color:#fff;flex:1}
 .btn-edit{background:var(--blue-bg);color:var(--blue);border:1.5px solid #BFDBFE;min-height:38px;padding:0 14px;font-size:13px;border-radius:20px}
-
-/* DETAIL SCREEN */
 .detail-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 14px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0}
 .back-btn{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--text2);flex-shrink:0;transition:background .15s}
 .back-btn:active{background:var(--bg)}
 .detail-title{flex:1;font-size:18px;font-weight:800;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* TABS */
 .tabs-bar{display:flex;background:var(--card);border-bottom:1.5px solid var(--border);flex-shrink:0}
 .tab-btn{flex:1;min-height:48px;border:none;background:transparent;font-family:var(--font);font-size:15px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
 .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
-
-/* TAB PANELS */
 .tab-panel{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .tab-panel.active{display:block}
 .tab-inner{padding:16px 14px 80px}
-
-/* VIEW / EDIT MODE */
 .field-view{background:var(--bg);border-radius:var(--r-sm);padding:13px 14px;margin-bottom:10px;border:1.5px solid var(--border)}
 .field-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .field-val{font-size:15px;font-weight:600;color:var(--text);min-height:22px}
@@ -147,8 +136,6 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{padding:9px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;min-height:42px;display:flex;align-items:center}
 .chip.sel{background:#EFF6FF;border-color:var(--blue);color:var(--blue)}
-
-/* LEAVES TAB */
 .lv-rec{background:var(--card);border-radius:var(--r-sm);border:1.5px solid var(--border);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
 .lv-info{flex:1}.lv-dates{font-size:14px;font-weight:700}.lv-days{font-size:12px;color:var(--text3);margin-top:2px}
 .lv-del{width:36px;height:36px;border-radius:9px;border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -156,7 +143,6 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 .lv-form{background:var(--bg);border-radius:var(--r-sm);border:1.5px dashed var(--border);padding:14px;margin-top:8px;display:none}
 .lv-form.open{display:block}
 .lv-total-box{background:var(--amber-bg);border:1.5px solid #FCD34D;border-radius:var(--r-sm);padding:11px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-/* cal */
 .cal-wrap{background:var(--card);border-radius:var(--r-sm);overflow:hidden}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 6px}
 .cal-nav-btn{font-size:22px;background:none;border:none;cursor:pointer;color:var(--text2);padding:0 6px}
@@ -175,7 +161,6 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 .ap-row{display:flex;align-items:center;gap:12px;margin-top:14px}
 .ap-chk{width:26px;height:26px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
 .ap-lbl{font-size:15px;font-weight:600;cursor:pointer}
-/* modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-overlay.show{opacity:1;pointer-events:all}
 .modal-sheet{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:500px;padding:24px 20px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
@@ -204,7 +189,6 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 </head>
 <body>
 
-<!-- MAIN -->
 <div class="screen" id="scr-main">
   <div class="app-header">
     <div class="logo-icon">🪖</div>
@@ -224,10 +208,9 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
   </div>
   <div class="scroll-area"><div class="list-pad" id="list-wrap"></div></div>
   <button class="fab" id="fab">+</button>
-  <div class="bottom-bar"><button class="btn-report" id="btn-report">📋 דו"ח 1</button></div>
+  <div class="bottom-bar"><button class="btn-report" id="btn-report">📋 דו"ח נוכחות</button></div>
 </div>
 
-<!-- DETAIL -->
 <div class="screen hidden" id="scr-det">
   <div class="detail-header">
     <div class="back-btn" id="btn-back">←</div>
@@ -242,7 +225,6 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
   <div class="tab-panel" id="tab-leaves"></div>
 </div>
 
-<!-- REPORT MODAL -->
 <div class="modal-overlay" id="modal-report">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
@@ -280,13 +262,11 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 (function(){
 var ROLES=['חובש','מאג','מטול','קלע','מ"כ','סמ"ל','מפקד מחלקה','רוגר','צלף','מטאדור','נהג נגמ"ש'];
 var KEY=[0,4,6];
-var LS='pltn_v8';
 var MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 var DAYS_HE=['א','ב','ג','ד','ה','ו','ש'];
 
 var state={soldiers:[],nid:1,active:null,filter:'all'};
 
-// ── FIRESTORE SAVE/LOAD ──
 function saveSoldier(s){
   if(!window._firebaseReady)return;
   var docRef=window._doc(window._soldiersCol,String(s.id));
@@ -297,20 +277,11 @@ function deleteSoldierRemote(id){
   var docRef=window._doc(window._soldiersCol,String(id));
   window._deleteDoc(docRef);
 }
-function save(s){
-  // save single soldier if provided, else save all (for bulk ops)
-  if(s){saveSoldier(s);}
-}
-function saveAll(){state.soldiers.forEach(function(s){saveSoldier(s);});}
-function load(){
-  // noop — data loaded via onSnapshot
-}
 function startSync(){
   if(!window._firebaseReady){window.addEventListener('firebaseReady',startSync,{once:true});return;}
   window._onSnapshot(window._soldiersCol, function(snapshot){
     var incoming=[];
     snapshot.forEach(function(d){incoming.push(d.data());});
-    // update nid
     var maxId=0;
     incoming.forEach(function(s){if(s.id>maxId)maxId=s.id;});
     if(maxId>=state.nid)state.nid=maxId+1;
@@ -318,12 +289,11 @@ function startSync(){
     if(document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')){
       renderMain();
     }
-    // hide loading
     var lo=document.getElementById('loading-overlay');
     if(lo)lo.style.display='none';
   });
 }
-function mkSoldier(){return{id:state.nid++,name:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:''};}
+function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:''};}
 function find(id){return state.soldiers.find(function(s){return s.id===id;});}
 function initials(n){var p=(n||'').trim().split(/\s+/).filter(Boolean);if(!p.length)return'?';if(p.length===1)return p[0].slice(0,2);return p[0][0]+(p[p.length-1][0]||'');}
 function calcDays(a,b){if(!a||!b)return 0;var d=(new Date(b)-new Date(a))/864e5;return d>0?Math.round(d):0;}
@@ -356,7 +326,6 @@ function presentOnDate(s,ds){
 var _tt=null;
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2500);}
 
-/* ── FILTER ── */
 function setFilter(f){
   state.filter=f;
   var banner=document.getElementById('filter-banner');
@@ -369,7 +338,6 @@ function setFilter(f){
   renderList();
 }
 
-/* ── MAIN ── */
 function showMain(){
   document.getElementById('scr-det').classList.add('hidden');
   document.getElementById('scr-det').classList.remove('slide-left');
@@ -383,7 +351,6 @@ function showDetail(id){
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
   document.getElementById('tab-info').classList.add('active');
   document.getElementById('tab-leaves').classList.remove('active');
-  // show leaves tab
   document.querySelector('.tabs-bar').style.display='flex';
   renderDetail(id);
 }
@@ -448,7 +415,6 @@ function renderList(){
   });
 }
 
-/* ── DETAIL ── */
 function renderDetail(id){
   var s=find(id);if(!s){showMain();return;}
   try{
@@ -468,11 +434,10 @@ function buildInfoTab(s){
   panel.innerHTML='';
   var inner=document.createElement('div');inner.className='tab-inner';
 
-  var editMode=!s.name.trim(); // open in edit mode if new soldier
+  var editMode=!s.name.trim();
 
   function renderView(){
     inner.innerHTML='';
-    // STATUS
     var st=getStatusInfo(s);
     var stBox=document.createElement('div');stBox.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
     var pill=document.createElement('div');pill.className='status-pill '+st.cls;pill.textContent=st.label;
@@ -481,15 +446,13 @@ function buildInfoTab(s){
     stBox.appendChild(pill);stBox.appendChild(editBtn);
     inner.appendChild(stBox);
 
-    // NAME
-    // NAME view
     var nameViewBox=document.createElement('div');nameViewBox.className='field-view';
     var nameLblEl=document.createElement('div');nameLblEl.className='field-lbl';nameLblEl.textContent='שם';
     var nameValEl=document.createElement('div');nameValEl.className='field-val';
     nameValEl.textContent=(s.lastName&&s.firstName)?(s.lastName+' '+s.firstName):s.name||'';
     nameViewBox.appendChild(nameLblEl);nameViewBox.appendChild(nameValEl);
     inner.appendChild(nameViewBox);
-    // ROLES
+
     var rf=document.createElement('div');rf.className='field-view';
     var rl=document.createElement('div');rl.className='field-lbl';rl.textContent='תפקידים';
     rf.appendChild(rl);
@@ -501,7 +464,7 @@ function buildInfoTab(s){
       var rv=document.createElement('div');rv.className='field-val empty-val';rv.textContent='ללא תפקיד';rf.appendChild(rv);
     }
     inner.appendChild(rf);
-    // PHONE
+
     var phoneRow=document.createElement('div');phoneRow.className='field-view';
     var phl=document.createElement('div');phl.className='field-lbl';phl.textContent='טלפון';
     phoneRow.appendChild(phl);
@@ -515,7 +478,7 @@ function buildInfoTab(s){
       var phEmpty=document.createElement('div');phEmpty.className='field-val empty-val';phEmpty.textContent='לא הוזן';phoneRow.appendChild(phEmpty);
     }
     inner.appendChild(phoneRow);
-    // RESIDENCE + NAV
+
     var resBox=document.createElement('div');resBox.className='field-view';
     var resl=document.createElement('div');resl.className='field-lbl';resl.textContent='מגורים';
     resBox.appendChild(resl);
@@ -531,9 +494,9 @@ function buildInfoTab(s){
       var resEmpty=document.createElement('div');resEmpty.className='field-val empty-val';resEmpty.textContent='לא הוזן';resBox.appendChild(resEmpty);
     }
     inner.appendChild(resBox);
-    // NOTES
+
     addViewField(inner,'הערות',s.notes);
-    // FAMILY
+
     if(s.hasWife){
       var famBox=document.createElement('div');famBox.className='field-view';
       var famLbl=document.createElement('div');famLbl.className='field-lbl';famLbl.textContent='משפחה';
@@ -562,27 +525,58 @@ function buildInfoTab(s){
   function renderEdit(){
     inner.innerHTML='';
 
-    // NAME
+    // ── STATUS ──
+    var sec1=mkSec('סטטוס');
+    var statusChips=document.createElement('div');statusChips.className='chips';
+    [{v:'present',l:'✅ נוכח'},{v:'absent',l:'❌ חסר'}].forEach(function(opt){
+      var c=document.createElement('div');c.className='chip'+(s.status===opt.v?' sel':'');c.textContent=opt.l;
+      c.addEventListener('click',function(){
+        s.status=opt.v;
+        statusChips.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});
+        c.classList.add('sel');
+        saveSoldier(s);updateStats();
+      });
+      statusChips.appendChild(c);
+    });
+    sec1.body.appendChild(statusChips);inner.appendChild(sec1.el);
+
+    // ── NAME ──
     var sec0=mkSec('שם החייל');
     var nameRow=document.createElement('div');nameRow.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px';
-    var niFirst=mkInp('text','שם פרטי...',s.firstName||'');
     var niLast=mkInp('text','שם משפחה...',s.lastName||'');
+    var niFirst=mkInp('text','שם פרטי...',s.firstName||'');
     var nameBanner=document.createElement('div');
     nameBanner.style.cssText='display:none;background:#FEE2E2;border:1.5px solid #FECDD3;border-radius:var(--r-sm);padding:9px 14px;margin-top:8px;font-size:13px;font-weight:700;color:var(--red);text-align:center';
-    ni.addEventListener('input',function(){
-      var val=ni.value.trim();
-      var dup=state.soldiers.some(function(x){return x.id!==s.id&&x.name.trim()===val;});
-      if(!val){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';}
-      else if(dup){nameBanner.textContent='⚠️ כבר קיים חייל עם השם הזה';nameBanner.style.display='block';}
-      else{nameBanner.style.display='none';s.name=ni.value;document.getElementById('det-title').textContent=s.name;saveSoldier(s);}
-    });
-    sec0.body.appendChild(ni);sec0.body.appendChild(nameBanner);inner.appendChild(sec0.el);
-    if(!s.name.trim())setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';niFirst.focus();},80);
 
-None
+    function updateName(){
+      var first=niFirst.value.trim();
+      var last=niLast.value.trim();
+      var full=(last&&first)?(last+' '+first):(last||first);
+      if(!full){
+        nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';
+      } else {
+        var dup=state.soldiers.some(function(x){return x.id!==s.id&&(x.name||'').trim()===full;});
+        if(dup){nameBanner.textContent='⚠️ כבר קיים חייל עם השם הזה';nameBanner.style.display='block';}
+        else{
+          nameBanner.style.display='none';
+          s.firstName=niFirst.value;
+          s.lastName=niLast.value;
+          s.name=full;
+          document.getElementById('det-title').textContent=s.name;
+          saveSoldier(s);
+        }
+      }
+    }
+    niFirst.addEventListener('input',updateName);
+    niLast.addEventListener('input',updateName);
+    nameRow.appendChild(niLast);nameRow.appendChild(niFirst);
+    sec0.body.appendChild(nameRow);sec0.body.appendChild(nameBanner);inner.appendChild(sec0.el);
+    if(!s.name.trim()){
+      setTimeout(function(){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';niLast.focus();},80);
+    }
 
-    // ROLES
-    var sec2=mkSec('תפקידים ופק"ל');
+    // ── ROLES ──
+    var sec2=mkSec('תפקידים');
     var chips=document.createElement('div');chips.className='chips';
     ROLES.forEach(function(r){
       var c=document.createElement('div');c.className='chip'+(s.roles.indexOf(r)!==-1?' sel':'');c.textContent=r;
@@ -591,54 +585,51 @@ None
     });
     sec2.body.appendChild(chips);inner.appendChild(sec2.el);
 
-    // PHONE
+    // ── PHONE ──
     var sec3=mkSec('טלפון');
     var pi=mkInp('tel','050-0000000',s.phone);
-    pi.addEventListener('change',function(){s.phone=pi.value;save();});
+    pi.addEventListener('input',function(){s.phone=pi.value;saveSoldier(s);});
     sec3.body.appendChild(pi);inner.appendChild(sec3.el);
 
-    // RESIDENCE
+    // ── RESIDENCE ──
     var sec4=mkSec('מגורים');
     var ri=mkInp('text','עיר / כתובת...',s.residence);
-    ri.addEventListener('change',function(){s.residence=ri.value;save();});
+    ri.addEventListener('input',function(){s.residence=ri.value;saveSoldier(s);});
     sec4.body.appendChild(ri);inner.appendChild(sec4.el);
 
-    // FAMILY
+    // ── FAMILY ──
     var sec5=mkSec('משפחה');
-    var hasWife=document.createElement('div');hasWife.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px';
+    var hasWifeRow=document.createElement('div');hasWifeRow.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px';
     var wifeChk=document.createElement('input');wifeChk.type='checkbox';wifeChk.className='ap-chk';wifeChk.checked=!!s.hasWife;
     var wifeChkId='wifechk'+s.id;wifeChk.id=wifeChkId;
     var wifeChkLbl=document.createElement('label');wifeChkLbl.htmlFor=wifeChkId;wifeChkLbl.style.cssText='font-size:15px;font-weight:600;cursor:pointer';wifeChkLbl.textContent='נשוי';
-    hasWife.appendChild(wifeChk);hasWife.appendChild(wifeChkLbl);
-    sec5.body.appendChild(hasWife);
+    hasWifeRow.appendChild(wifeChk);hasWifeRow.appendChild(wifeChkLbl);
+    sec5.body.appendChild(hasWifeRow);
 
     var wifeFields=document.createElement('div');wifeFields.style.display=s.hasWife?'block':'none';
-
     var wnLbl=document.createElement('span');wnLbl.className='flbl';wnLbl.textContent='שם האישה';
-    var wnInp=mkInp('text','שם האישה...',s.wifeName);
-    wnInp.addEventListener('change',function(){s.wifeName=wnInp.value;saveSoldier(s);});
-    var wpLbl=document.createElement('span');wpLbl.className='flbl';wpLbl.style.marginTop='10px';wpLbl.style.display='block';wpLbl.textContent='טלפון אישה';
-    var wpInp=mkInp('tel','050-0000000',s.wifePhone);
-    wpInp.addEventListener('change',function(){s.wifePhone=wpInp.value;saveSoldier(s);});
+    var wnInp=mkInp('text','שם האישה...',s.wifeName||'');
+    wnInp.addEventListener('input',function(){s.wifeName=wnInp.value;saveSoldier(s);});
+    var wpLbl=document.createElement('span');wpLbl.className='flbl';wpLbl.style.cssText='margin-top:10px;display:block';wpLbl.textContent='טלפון אישה';
+    var wpInp=mkInp('tel','050-0000000',s.wifePhone||'');
+    wpInp.addEventListener('input',function(){s.wifePhone=wpInp.value;saveSoldier(s);});
     wifeFields.appendChild(wnLbl);wifeFields.appendChild(wnInp);wifeFields.appendChild(wpLbl);wifeFields.appendChild(wpInp);
 
-    // children
-    var hasKids=document.createElement('div');hasKids.style.cssText='display:flex;align-items:center;gap:10px;margin:12px 0';
+    var hasKidsRow=document.createElement('div');hasKidsRow.style.cssText='display:flex;align-items:center;gap:10px;margin:12px 0';
     var kidsChk=document.createElement('input');kidsChk.type='checkbox';kidsChk.className='ap-chk';kidsChk.checked=!!s.hasKids;
     var kidsChkId='kidschk'+s.id;kidsChk.id=kidsChkId;
     var kidsChkLbl=document.createElement('label');kidsChkLbl.htmlFor=kidsChkId;kidsChkLbl.style.cssText='font-size:15px;font-weight:600;cursor:pointer';kidsChkLbl.textContent='יש ילדים';
-    hasKids.appendChild(kidsChk);hasKids.appendChild(kidsChkLbl);
-    wifeFields.appendChild(hasKids);
+    hasKidsRow.appendChild(kidsChk);hasKidsRow.appendChild(kidsChkLbl);
+    wifeFields.appendChild(hasKidsRow);
 
     var kidsArea=document.createElement('div');kidsArea.style.display=s.hasKids?'block':'none';
     if(!s.kids)s.kids=[];
-
     function renderKids(){
       kidsArea.innerHTML='';
       s.kids.forEach(function(kid,ki){
         var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:8px';
         var kinp=document.createElement('input');kinp.className='finp';kinp.type='text';kinp.placeholder='שם ילד/ה...';kinp.value=kid;kinp.style.cssText='flex:1;min-height:44px';
-        kinp.addEventListener('change',function(){s.kids[ki]=kinp.value;saveSoldier(s);});
+        kinp.addEventListener('input',function(){s.kids[ki]=kinp.value;saveSoldier(s);});
         var kdel=document.createElement('button');kdel.style.cssText='width:38px;height:44px;border-radius:9px;border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:18px;cursor:pointer;flex-shrink:0';kdel.textContent='×';
         kdel.addEventListener('click',function(){s.kids.splice(ki,1);saveSoldier(s);renderKids();});
         row.appendChild(kinp);row.appendChild(kdel);kidsArea.appendChild(row);
@@ -649,25 +640,25 @@ None
     }
     renderKids();
     wifeFields.appendChild(kidsArea);
-
-    kidsChk.addEventListener('change',function(){s.hasKids=kidsChk.checked;if(!s.hasKids){s.kids=[];}kidsArea.style.display=s.hasKids?'block':'none';saveSoldier(s);renderKids();});
+    kidsChk.addEventListener('change',function(){s.hasKids=kidsChk.checked;if(!s.hasKids)s.kids=[];kidsArea.style.display=s.hasKids?'block':'none';saveSoldier(s);renderKids();});
     wifeChk.addEventListener('change',function(){s.hasWife=wifeChk.checked;if(!s.hasWife){s.wifeName='';s.wifePhone='';s.hasKids=false;s.kids=[];}wifeFields.style.display=s.hasWife?'block':'none';saveSoldier(s);});
-
     sec5.body.appendChild(wifeFields);inner.appendChild(sec5.el);
 
-    // NOTES
+    // ── NOTES ──
     var sec6=mkSec('הערות');
     var ta=document.createElement('textarea');ta.className='finp';ta.placeholder='הערות כלליות...';ta.value=s.notes||'';ta.rows=3;
-    ta.addEventListener('change',function(){s.notes=ta.value;saveSoldier(s);});
+    ta.addEventListener('input',function(){s.notes=ta.value;saveSoldier(s);});
     sec6.body.appendChild(ta);inner.appendChild(sec6.el);
 
-    // DONE button
+    // ── DONE ──
     var doneBtn=document.createElement('button');
     doneBtn.style.cssText='width:100%;min-height:52px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-family:var(--font);font-size:16px;font-weight:800;cursor:pointer;margin-top:4px;box-shadow:0 4px 16px rgba(37,99,235,.3)';
     doneBtn.textContent='✓ סיום עריכה';
     doneBtn.addEventListener('click',function(){
-      if(!s.name.trim()){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';ni.focus();return;}
-      editMode=false;renderView();
+      if(!s.name.trim()){nameBanner.textContent='⚠️ מילוי שם חובה';nameBanner.style.display='block';niLast.focus();return;}
+      editMode=false;
+      document.querySelector('.tabs-bar').style.display='flex';
+      renderView();
     });
     inner.appendChild(doneBtn);
   }
@@ -681,7 +672,7 @@ None
   }
   function mkInp(type,ph,val){var i=document.createElement('input');i.className='finp';i.type=type;i.placeholder=ph;i.value=val||'';return i;}
 
-      if(editMode){ renderEdit(); } else { renderView(); }
+  if(editMode){renderEdit();}else{renderView();}
   panel.appendChild(inner);
 }
 
@@ -691,22 +682,20 @@ function buildLeavesTab(s){
   panel.innerHTML='';
   var inner=document.createElement('div');inner.className='tab-inner';
 
-  // TOTAL
   var totBox=document.createElement('div');totBox.className='lv-total-box';
   var totLbl=document.createElement('span');totLbl.style.cssText='font-size:13px;font-weight:600;color:#92400E';totLbl.textContent='סה"כ ימי יציאה:';
   var totNum=document.createElement('span');totNum.style.cssText='font-size:24px;font-weight:900;color:#B45309';
   totBox.appendChild(totLbl);totBox.appendChild(totNum);
 
   var lvList=document.createElement('div');
+  var nextTotEl=null;
 
   function calcTotal(){
-    var t=0;s.leaves.forEach(function(lv){t+=calcDays(lv.from,lv.to);});
-    return t;
+    var t=0;s.leaves.forEach(function(lv){t+=calcDays(lv.from,lv.to);});return t;
   }
   function renderLv(){
     lvList.innerHTML='';
-    var tot=calcTotal();
-    totNum.textContent=tot+' ימים';
+    totNum.textContent=calcTotal()+' ימים';
     if(!s.leaves.length){
       var empty=document.createElement('div');empty.style.cssText='color:var(--text3);font-size:14px;padding:8px 0;text-align:center';empty.textContent='אין יציאות רשומות';
       lvList.appendChild(empty);
@@ -726,7 +715,6 @@ function buildLeavesTab(s){
     }
   }
 
-  // ADD LEAVE
   var addBtn=document.createElement('button');addBtn.className='btn btn-ghost btn-full';addBtn.textContent='+ הוסף יציאה';addBtn.style.marginTop='8px';
   var addForm=document.createElement('div');addForm.className='lv-form';
   var calObj=buildCal(s,'leave',function(from,to){s.leaves.push({from:from,to:to});saveSoldier(s);renderLv();addForm.classList.remove('open');});
@@ -736,14 +724,13 @@ function buildLeavesTab(s){
 
   inner.appendChild(totBox);inner.appendChild(lvList);inner.appendChild(addBtn);inner.appendChild(addForm);
 
-  // NEXT LEAVE
   var nlSec=document.createElement('div');nlSec.className='edit-section';nlSec.style.marginTop='18px';
   var nlHdr=document.createElement('div');nlHdr.className='edit-sec-hdr';nlHdr.textContent='בקשת יציאה הבאה';
   var nlBody=document.createElement('div');nlBody.className='edit-sec-body';
   var nlBox=document.createElement('div');nlBox.className='nl-box'+(s.nextApproved?' approved':'');
 
   var nlDatesLbl=document.createElement('div');nlDatesLbl.style.cssText='font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px';
-  var nextTotEl=document.createElement('div');nextTotEl.style.cssText='font-size:12px;color:#0F9454;font-weight:600;margin-bottom:10px';
+  nextTotEl=document.createElement('div');nextTotEl.style.cssText='font-size:12px;color:#0F9454;font-weight:600;margin-bottom:10px';
 
   function updNlLbl(){
     nlDatesLbl.textContent=s.nextFrom&&s.nextTo?fmtDate(s.nextFrom)+' → '+fmtDate(s.nextTo):'לא נבחר תאריך';
@@ -773,7 +760,7 @@ function buildLeavesTab(s){
 
   var nlNotesLbl=document.createElement('span');nlNotesLbl.className='flbl';nlNotesLbl.textContent='הערות לבקשה';nlNotesLbl.style.cssText='display:block;margin-top:12px';
   var nlNotesTa=document.createElement('textarea');nlNotesTa.className='finp';nlNotesTa.placeholder='הערות לבקשת היציאה...';nlNotesTa.value=s.nextNotes||'';nlNotesTa.rows=2;
-  nlNotesTa.addEventListener('change',function(){s.nextNotes=nlNotesTa.value;saveSoldier(s);});
+  nlNotesTa.addEventListener('input',function(){s.nextNotes=nlNotesTa.value;saveSoldier(s);});
   nlBox.appendChild(nlDatesLbl);nlBox.appendChild(nextTotEl);nlBox.appendChild(calRow);nlBox.appendChild(nxForm);nlBox.appendChild(nlNotesLbl);nlBox.appendChild(nlNotesTa);nlBox.appendChild(apRow);
   nlBody.appendChild(nlBox);nlSec.appendChild(nlHdr);nlSec.appendChild(nlBody);inner.appendChild(nlSec);
 
@@ -856,18 +843,13 @@ function renderRcal(){
 }
 function showReportResult(ds){
   var pl=state.soldiers.filter(function(s){return presentOnDate(s,ds);});
-  if(!pl.length){
-    toast('אין נתונים להצגה ביום זה');
-    rcalSel=null;
-    renderRcal();
-    return;
-  }
+  if(!pl.length){toast('אין נתונים להצגה ביום זה');rcalSel=null;renderRcal();return;}
   document.getElementById('rr-date').textContent='תאריך: '+fmtDateHe(ds);
   document.getElementById('rr-names').textContent=pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
   document.getElementById('rr-count').textContent='סה"כ נוכחים: '+pl.length+' חיילים';
   document.getElementById('report-result').classList.add('show');
   document.getElementById('rr-wa').onclick=function(){
-    var msg='🪖 *דו"ח נוכחות — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+(pl.length?pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n'):'אין');
+    var msg='🪖 *דו"ח נוכחות — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   };
   document.getElementById('rr-xl').onclick=function(){
@@ -890,13 +872,13 @@ function init(){
       deleteSoldierRemote(state.active);
     }
     showMain();
-  });  document.getElementById('btn-del').addEventListener('click',function(){
+  });
+  document.getElementById('btn-del').addEventListener('click',function(){
     if(!state.active)return;
     deleteSoldierRemote(state.active);
     state.soldiers=state.soldiers.filter(function(s){return s.id!==state.active;});
     toast('החייל הוסר ✓');showMain();
   });
-  // tabs
   document.querySelectorAll('.tab-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
       var t=btn.dataset.tab;
@@ -904,19 +886,17 @@ function init(){
       document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.toggle('active',p.id==='tab-'+t);});
     });
   });
-  // filters
   document.getElementById('sb-all').addEventListener('click',function(){setFilter('all');});
   document.getElementById('sb-pr').addEventListener('click',function(){setFilter(state.filter==='present'?'all':'present');});
   document.getElementById('sb-ab').addEventListener('click',function(){setFilter(state.filter==='absent'?'all':'absent');});
   document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
-  // report
   document.getElementById('btn-report').addEventListener('click',openReportModal);
   document.getElementById('modal-close').addEventListener('click',closeReportModal);
   document.getElementById('modal-report').addEventListener('click',function(e){if(e.target===this)closeReportModal();});
   document.getElementById('rcal-prev').addEventListener('click',function(){rcalMonth--;if(rcalMonth<0){rcalMonth=11;rcalYear--;}renderRcal();});
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
 }
-load();init();startSync();
+init();startSync();
 })();
 </script>
 </body>
