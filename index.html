@@ -851,7 +851,10 @@ function buildLeavesTab(s){
         var inf=document.createElement('div');inf.className='lv-info';
         inf.innerHTML='<div class="lv-dates">'+fmtDate(lv.from)+' → '+fmtDate(lv.to)+'</div><div class="lv-days">'+calcDays(lv.from,lv.to)+' ימים</div>';
         var del=document.createElement('button');del.className='lv-del';del.textContent='×';
-        del.addEventListener('click',(function(i){return function(){s.leaves.splice(i,1);saveSoldier(s);renderLv();};})(li));
+        del.addEventListener('click',(function(i,lv){return function(){
+          if(!confirm('למחוק את היציאה '+fmtDate(lv.from)+' → '+fmtDate(lv.to)+'?'))return;
+          s.leaves.splice(i,1);saveSoldier(s);renderLv();
+        };})(li,lv));
         rec.appendChild(inf);rec.appendChild(del);lvList.appendChild(rec);
       });
     }
