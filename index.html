@@ -11,7 +11,9 @@
 <title>סד"כ</title>
 <script>
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/platoon-app/sw.js');
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){r.unregister();});
+  });
 }
 </script>
 <script type="module">
@@ -255,4 +257,4 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
       <span class="flbl">שם החייל</span>
       <input class="finp" id="mf-name" type="text" placeholder="שם מלא..." style="margin-bottom:10px">
       <span class="flbl">סיבת היעדרות</span>
-      <textarea class="finp" id="mf-reason" placeholder="סיבה..." rows=
+      <te
