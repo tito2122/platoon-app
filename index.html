@@ -994,7 +994,13 @@ function buildLeavesTab(s){
       if(s.phone){
         var phone=s.phone.replace(/\D/g,'');
         if(phone.startsWith('0'))phone='972'+phone.slice(1);
-        window.open('https://wa.me/'+phone,'_blank');
+        var a=document.createElement('a');
+        a.href='https://wa.me/'+phone;
+        a.target='_blank';
+        a.rel='noopener';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
     } else {
       s.nextApproved=false;
