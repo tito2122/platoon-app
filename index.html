@@ -304,7 +304,7 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 
 <script>
 (function(){
-var ROLES=['חובש','מאג','מטול','קלע','מ"כ','סמ"ל','מפקד מחלקה','רוגר','צלף','מטאדור','נהג נגמ"ש'];
+var ROLES=['חובש','מאג','מטול','קלע','מ"כ','סמ"ל','מפקד מחלקה','רוגר','צלף','מטאדור','נהג נגמ"ש','נגב'];
 var KEY=[0,4,6];
 var MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 var DAYS_HE=['א','ב','ג','ד','ה','ו','ש'];
@@ -441,9 +441,46 @@ function updateStats(){
     var tag=document.createElement('div');
     tag.style.cssText='background:#1E40AF;color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px';
     tag.innerHTML='<span>'+role+'</span><span style="background:rgba(255,255,255,0.25);border-radius:10px;padding:1px 6px;font-size:10px">'+cnt+'</span>';
+    tag.style.cursor='pointer';
+    (function(r,soldiers){
+      tag.addEventListener('click',function(){
+        var modal=document.getElementById('role-modal');
+        document.getElementById('role-modal-title').textContent='תפקיד: '+r;
+        var list=document.getElementById('role-modal-list');
+        list.innerHTML='';
+        soldiers.forEach(function(sol){
+          var row=document.createElement('div');
+          row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F8F9FB;border-radius:12px;cursor:pointer';
+          var av=document.createElement('div');
+          av.style.cssText='width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;background:linear-gradient(135deg,#34D399,#0F9454)';
+          if(sol.photoData){
+            var img=document.createElement('img');img.src=sol.photoData;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
+            av.appendChild(img);
+          } else {
+            av.textContent=initials(sol.name||'?');
+          }
+          var nm=document.createElement('div');nm.style.cssText='font-size:15px;font-weight:700';nm.textContent=sol.name||'חייל';
+          row.appendChild(av);row.appendChild(nm);
+          row.addEventListener('click',function(){modal.style.display='none';showDetail(sol.id);});
+          list.appendChild(row);
+        });
+        modal.style.display='flex';
+      });
+    })(role, pr.filter(function(sol){return sol.roles.indexOf(role)!==-1;}));
     roleWrap.appendChild(tag);
   });
   rs.appendChild(roleWrap);
+  // מודל תפקיד
+  var roleModal=document.getElementById('role-modal');
+  if(!roleModal){
+    roleModal=document.createElement('div');
+    roleModal.id='role-modal';
+    roleModal.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center';
+    roleModal.innerHTML='<div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:500px;padding:24px 20px 36px"><div style="width:40px;height:5px;background:#E2E6ED;border-radius:3px;margin:0 auto 16px"></div><div id="role-modal-title" style="font-size:18px;font-weight:800;margin-bottom:16px;text-align:center"></div><div id="role-modal-list" style="display:flex;flex-direction:column;gap:10px"></div><button id="role-modal-close" style="margin-top:18px;width:100%;min-height:44px;border-radius:12px;border:1.5px solid #E2E6ED;background:#F8F9FB;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer">סגור</button></div>';
+    document.body.appendChild(roleModal);
+    roleModal.addEventListener('click',function(e){if(e.target===roleModal)roleModal.style.display='none';});
+    document.getElementById('role-modal-close').addEventListener('click',function(){roleModal.style.display='none';});
+  }
 }
 function renderList(){
   var wrap=document.getElementById('list-wrap');wrap.innerHTML='';
@@ -484,19 +521,17 @@ function renderList(){
 
     // תגיות מידע
     var tagsRow=document.createElement('div');tagsRow.style.cssText='display:flex;gap:5px;flex-wrap:wrap;margin-top:4px';
-    var td=today();
     var tom=tomorrowStr();
-    // יציאה מחר — יציאה מאושרת שמתחילה מחר
-    var leaveTomorrow=s.nextApproved&&s.nextFrom===tom;
-    if(!leaveTomorrow&&s.leaves){
-      for(var li2=0;li2<s.leaves.length;li2++){
-        if(s.leaves[li2].from===tom){leaveTomorrow=true;break;}
-      }
+    // יציאה מאושרת — הצג "יוצא ב-X"
+    var approvedFrom=null;
+    if(s.nextApproved&&s.nextFrom&&s.nextTo){
+      approvedFrom=s.nextFrom;
     }
-    if(leaveTomorrow){
+    if(approvedFrom){
+      var dayNum=approvedFrom.split('-')[2].replace(/^0/,'');
       var tTag=document.createElement('span');
       tTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
-      tTag.textContent='✈️ יוצא מחר';
+      tTag.textContent='✈️ יוצא ב-'+dayNum;
       tagsRow.appendChild(tTag);
     }
     // ממתין לאישור — יש בקשת יציאה שלא אושרה
@@ -877,7 +912,7 @@ function buildLeavesTab(s){
       s.leaves.forEach(function(lv,li){
         var rec=document.createElement('div');rec.className='lv-rec';
         var inf=document.createElement('div');inf.className='lv-info';
-        inf.innerHTML='<div class="lv-dates">'+fmtDate(lv.from)+' → '+fmtDate(lv.to)+'</div><div class="lv-days">'+calcDays(lv.from,lv.to)+' ימים</div>';
+        inf.innerHTML='<div class="lv-dates">'+fmtDate(lv.to)+' ← '+fmtDate(lv.from)+'</div><div class="lv-days">'+calcDays(lv.from,lv.to)+' ימים</div>';
         var del=document.createElement('button');del.className='lv-del';del.textContent='×';
         del.addEventListener('click',(function(i,lv){return function(){
           if(!confirm('למחוק את היציאה '+fmtDate(lv.from)+' → '+fmtDate(lv.to)+'?'))return;
