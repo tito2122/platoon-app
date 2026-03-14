@@ -215,7 +215,7 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
     <div class="stats-row">
       <div class="stat-box s-blue" id="sb-all"><div class="stat-num" id="st-tot">0</div><div class="stat-lbl">סה"כ</div></div>
       <div class="stat-box s-green" id="sb-pr"><div class="stat-num" id="st-pr">0</div><div class="stat-lbl">נוכחים</div></div>
-      <div class="stat-box s-red" id="sb-ab"><div class="stat-num" id="st-ab">0</div><div class="stat-lbl">חסרים</div></div>
+      <div class="stat-box s-red" id="sb-ab"><div class="stat-num" id="st-ab">0</div><div class="stat-lbl">בחופשה</div></div>
       <div class="stat-box s-dark" id="sb-ms"><div class="stat-num" id="st-ms">0</div><div class="stat-lbl">🪦 נעדרים</div></div>
     </div>
     <div class="role-stats" id="role-stats"></div>
@@ -351,6 +351,7 @@ function initials(n){var p=(n||'').trim().split(/\s+/).filter(Boolean);if(!p.len
 function calcDays(a,b){if(!a||!b)return 0;var d=(new Date(b)-new Date(a))/864e5;return d>0?Math.round(d):0;}
 function toDateStr(y,m,d){return y+'-'+(m<9?'0':'')+(m+1)+'-'+(d<10?'0':'')+d;}
 function today(){var n=new Date();return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
+function tomorrowStr(){var n=new Date();n.setDate(n.getDate()+1);return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
 function fmtDate(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 function fmtDateHe(s){if(!s)return'';var p=s.split('-');return p[2]+' ב'+MONTHS_HE[+p[1]-1]+' '+p[0];}
 
@@ -386,7 +387,7 @@ function setFilter(f){
   document.getElementById('sb-ab').classList.toggle('active-filter',f==='absent');
   document.getElementById('sb-ms').classList.toggle('active-filter',f==='missing');
   if(f==='present'){banner.className='filter-banner show fb-green';document.getElementById('fb-label').textContent='מציג נוכחים בלבד';}
-  else if(f==='absent'){banner.className='filter-banner show fb-red';document.getElementById('fb-label').textContent='מציג חסרים בלבד';}
+  else if(f==='absent'){banner.className='filter-banner show fb-red';document.getElementById('fb-label').textContent='מציג בחופשה בלבד';}
   else{banner.className='filter-banner';}
   renderList();
 }
@@ -480,6 +481,33 @@ function renderList(){
     }
     var info=document.createElement('div');info.className='s-info';
     info.innerHTML='<div class="s-name">'+(s.name||'חייל חדש')+'</div><div class="s-roles">'+(s.roles.length?s.roles.join(' · '):'ללא תפקיד')+'</div>';
+
+    // תגיות מידע
+    var tagsRow=document.createElement('div');tagsRow.style.cssText='display:flex;gap:5px;flex-wrap:wrap;margin-top:4px';
+    var td=today();
+    var tom=tomorrowStr();
+    // יציאה מחר — יציאה מאושרת שמתחילה מחר
+    var leaveTomorrow=s.nextApproved&&s.nextFrom===tom;
+    if(!leaveTomorrow&&s.leaves){
+      for(var li2=0;li2<s.leaves.length;li2++){
+        if(s.leaves[li2].from===tom){leaveTomorrow=true;break;}
+      }
+    }
+    if(leaveTomorrow){
+      var tTag=document.createElement('span');
+      tTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
+      tTag.textContent='✈️ יוצא מחר';
+      tagsRow.appendChild(tTag);
+    }
+    // ממתין לאישור — יש בקשת יציאה שלא אושרה
+    if(s.nextFrom&&s.nextTo&&!s.nextApproved){
+      var pTag=document.createElement('span');
+      pTag.style.cssText='background:#EFF6FF;color:#1E40AF;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
+      pTag.textContent='⏳ ממתין לאישור';
+      tagsRow.appendChild(pTag);
+    }
+    if(tagsRow.children.length)info.appendChild(tagsRow);
+
     var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=st.label;
     item.appendChild(av);item.appendChild(info);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
     item.addEventListener('click',function(){showDetail(s.id);});
