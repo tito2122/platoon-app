@@ -263,7 +263,7 @@ body.dark-mode .loading-overlay-bg{background:#0F1320!important}
     <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
   </div>
   <div id="pin-error" style="font-size:13px;color:#E8354A;font-weight:700;min-height:18px"></div>
-  <div style="display:grid;grid-template-columns:repeat(3,72px);gap:12px">
+  <div style="display:grid;grid-template-columns:repeat(3,72px);gap:12px;direction:ltr">
     <button class="pin-btn" data-d="1">1</button>
     <button class="pin-btn" data-d="2">2</button>
     <button class="pin-btn" data-d="3">3</button>
@@ -668,7 +668,7 @@ function updateStats(){
     var cnt=pr.filter(function(s){return s.roles.indexOf(role)!==-1;}).length;
     if(cnt===0)return;
     var tag=document.createElement('div');
-    tag.style.cssText='background:#1E40AF;color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px';
+    tag.style.cssText='background:var(--blue-bg);color:var(--blue);border:1.5px solid var(--blue);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px';
     tag.innerHTML='<span>'+role+'</span><span style="background:rgba(255,255,255,0.25);border-radius:10px;padding:1px 6px;font-size:10px">'+cnt+'</span>';
     tag.style.cursor='pointer';
     (function(r,soldiers){
