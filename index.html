@@ -1,39 +1,3 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#1CB86A">
-<link rel="manifest" href="manifest.json">
-<title>סד"כ</title>
-<script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    regs.forEach(function(r){r.unregister();});
-  });
-}
-</script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const app = initializeApp({
-    apiKey: "AIzaSyDnNEMrqQyi4Al38APHL2QSZh5Cdx5EF9U",
-    authDomain: "class-1-9b07a.firebaseapp.com",
-    projectId: "class-1-9b07a",
-    storageBucket: "class-1-9b07a.firebasestorage.app",
-    messagingSenderId: "176761569042",
-    appId: "1:176761569042:web:591b8e01dbdc2e78627dcb"
-  });
-  const db = getFirestore(app);
-  const soldiersCol = collection(db, "soldiers");
-
-  window._db = db;
-  window._collection = collection;
-  window._soldiersCol = soldiersCol;
   window._setDoc = setDoc;
   window._deleteDoc = deleteDoc;
   window._doc = doc;
