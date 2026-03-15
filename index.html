@@ -243,6 +243,10 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
     </div>
     <div class="role-stats" id="role-stats"></div>
   </div>
+  <div class="filter-banner" id="filter-banner">
+    <span id="fb-label"></span>
+    <button class="fb-close" id="fb-close">✕</button>
+  </div>
   <div id="main-tab-list" class="scroll-area"><div class="list-pad" id="list-wrap"></div></div>
   <div id="main-tab-week" class="scroll-area" style="display:none"><div class="list-pad" id="week-wrap"></div></div>
   <button class="fab" id="fab">+</button>
@@ -454,7 +458,10 @@ function showDetailNewSoldier(id){
     toast('שגיאה בפתיחת כרטיס: '+e.message);
   }
 }
-function renderMain(){updateStats();renderList();renderWeek();}
+function renderMain(){
+  try{updateStats();renderList();renderWeek();}
+  catch(e){console.error('renderMain error:',e);}
+}
 
 function renderWeek(){
   var wrap=document.getElementById('week-wrap');
