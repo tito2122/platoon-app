@@ -61,8 +61,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
 .screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
 .screen.slide-left{transform:translateX(-38%);opacity:0;pointer-events:none}
-.app-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 16px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10;transition:margin-top .25s;overflow:hidden}
-.app-header.collapsed{margin-top:calc(-1 * var(--hh))}
+.app-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 16px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10}
 .logo-icon{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#1E40AF,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.35)}
 .title-wrap{flex:1;min-width:0}
 .title-wrap h1{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1043,13 +1042,27 @@ function buildInfoTab(s){
 
     // ── FAMILY ──
     var sec5=mkSec('משפחה');
-    var hasWifeRow=document.createElement('div');hasWifeRow.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px';
+    // שורת נשוי + ילדים זה לצד זה
+    var famCheckRow=document.createElement('div');famCheckRow.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px';
+
+    // נשוי
+    var wifeCheckBox=document.createElement('div');wifeCheckBox.style.cssText='display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer';
     var wifeChk=document.createElement('input');wifeChk.type='checkbox';wifeChk.className='ap-chk';wifeChk.checked=!!s.hasWife;
     var wifeChkId='wifechk'+s.id;wifeChk.id=wifeChkId;
-    var wifeChkLbl=document.createElement('label');wifeChkLbl.htmlFor=wifeChkId;wifeChkLbl.style.cssText='font-size:15px;font-weight:600;cursor:pointer';wifeChkLbl.textContent='נשוי';
-    hasWifeRow.appendChild(wifeChk);hasWifeRow.appendChild(wifeChkLbl);
-    sec5.body.appendChild(hasWifeRow);
+    var wifeChkLbl=document.createElement('label');wifeChkLbl.htmlFor=wifeChkId;wifeChkLbl.style.cssText='font-size:14px;font-weight:700;cursor:pointer;color:var(--text)';wifeChkLbl.textContent='💍 נשוי';
+    wifeCheckBox.appendChild(wifeChk);wifeCheckBox.appendChild(wifeChkLbl);
 
+    // ילדים
+    var kidsCheckBox=document.createElement('div');kidsCheckBox.style.cssText='display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer';
+    var kidsChk=document.createElement('input');kidsChk.type='checkbox';kidsChk.className='ap-chk';kidsChk.checked=!!s.hasKids;
+    var kidsChkId='kidschk'+s.id;kidsChk.id=kidsChkId;
+    var kidsChkLbl=document.createElement('label');kidsChkLbl.htmlFor=kidsChkId;kidsChkLbl.style.cssText='font-size:14px;font-weight:700;cursor:pointer;color:var(--text)';kidsChkLbl.textContent='👶 ילדים';
+    kidsCheckBox.appendChild(kidsChk);kidsCheckBox.appendChild(kidsChkLbl);
+
+    famCheckRow.appendChild(wifeCheckBox);famCheckRow.appendChild(kidsCheckBox);
+    sec5.body.appendChild(famCheckRow);
+
+    // שדות אישה
     var wifeFields=document.createElement('div');wifeFields.style.display=s.hasWife?'block':'none';
     var wnLbl=document.createElement('span');wnLbl.className='flbl';wnLbl.textContent='שם האישה';
     var wnInp=mkInp('text','שם האישה...',s.wifeName||'');
@@ -1058,15 +1071,10 @@ function buildInfoTab(s){
     var wpInp=mkInp('tel','050-0000000',s.wifePhone||'');
     wpInp.addEventListener('input',function(){s.wifePhone=wpInp.value;saveSoldier(s);});
     wifeFields.appendChild(wnLbl);wifeFields.appendChild(wnInp);wifeFields.appendChild(wpLbl);wifeFields.appendChild(wpInp);
+    sec5.body.appendChild(wifeFields);
 
-    var hasKidsRow=document.createElement('div');hasKidsRow.style.cssText='display:flex;align-items:center;gap:10px;margin:12px 0';
-    var kidsChk=document.createElement('input');kidsChk.type='checkbox';kidsChk.className='ap-chk';kidsChk.checked=!!s.hasKids;
-    var kidsChkId='kidschk'+s.id;kidsChk.id=kidsChkId;
-    var kidsChkLbl=document.createElement('label');kidsChkLbl.htmlFor=kidsChkId;kidsChkLbl.style.cssText='font-size:15px;font-weight:600;cursor:pointer';kidsChkLbl.textContent='יש ילדים';
-    hasKidsRow.appendChild(kidsChk);hasKidsRow.appendChild(kidsChkLbl);
-    wifeFields.appendChild(hasKidsRow);
-
-    var kidsArea=document.createElement('div');kidsArea.style.display=s.hasKids?'block':'none';
+    // שדות ילדים (עצמאי)
+    var kidsArea=document.createElement('div');kidsArea.style.display=s.hasKids?'block':'none';kidsArea.style.marginTop='8px';
     if(!s.kids)s.kids=[];
     function renderKids(){
       kidsArea.innerHTML='';
@@ -1083,10 +1091,11 @@ function buildInfoTab(s){
       kidsArea.appendChild(addKid);
     }
     renderKids();
-    wifeFields.appendChild(kidsArea);
+    sec5.body.appendChild(kidsArea);
+
+    wifeChk.addEventListener('change',function(){s.hasWife=wifeChk.checked;if(!s.hasWife){s.wifeName='';s.wifePhone='';}wifeFields.style.display=s.hasWife?'block':'none';saveSoldier(s);});
     kidsChk.addEventListener('change',function(){s.hasKids=kidsChk.checked;if(!s.hasKids)s.kids=[];kidsArea.style.display=s.hasKids?'block':'none';saveSoldier(s);renderKids();});
-    wifeChk.addEventListener('change',function(){s.hasWife=wifeChk.checked;if(!s.hasWife){s.wifeName='';s.wifePhone='';s.hasKids=false;s.kids=[];}wifeFields.style.display=s.hasWife?'block':'none';saveSoldier(s);});
-    sec5.body.appendChild(wifeFields);inner.appendChild(sec5.el);
+    inner.appendChild(sec5.el);
 
     // ── NOTES ──
     var sec6=mkSec('הערות');
@@ -1681,19 +1690,6 @@ function _handleBack(){
     _handleBack();
   });
 })();
-// כותרת מתכווצת בגלילה
-(function(){
-  var lastScroll=0;
-  var header=document.querySelector('.app-header');
-  function onScroll(){
-    var s=this.scrollTop;
-    if(s>60&&s>lastScroll){header.classList.add('collapsed');}
-    else if(s<lastScroll-10||s<20){header.classList.remove('collapsed');}
-    lastScroll=s;
-  }
-  document.getElementById('main-tab-list').addEventListener('scroll',onScroll);
-  document.getElementById('main-tab-week').addEventListener('scroll',onScroll);
-})();
 (function(){
   var indicator=document.getElementById('ptr-indicator');
   var spinner=document.getElementById('ptr-spinner');
@@ -1701,40 +1697,46 @@ function _handleBack(){
   var THRESHOLD=70;
 
   function isMainVisible(){
-    return document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')&&!document.getElementById('scr-main').classList.contains('slide-left');
+    var m=document.getElementById('scr-main');
+    return m&&!m.classList.contains('hidden')&&!m.classList.contains('slide-left');
+  }
+  function getActiveScroll(){
+    var list=document.getElementById('main-tab-list');
+    var week=document.getElementById('main-tab-week');
+    if(list&&list.style.display!=='none')return list;
+    if(week&&week.style.display!=='none')return week;
+    return null;
   }
 
-  function attachPTR(el){
-    el.addEventListener('touchstart',function(e){
-      if(el.scrollTop===0&&isMainVisible()){
-        startY=e.touches[0].clientY;pulling=true;triggered=false;
-      }
-    },{passive:true});
-    el.addEventListener('touchmove',function(e){
-      if(!pulling)return;
-      var dy=e.touches[0].clientY-startY;
-      if(dy<=0){indicator.style.height='0';return;}
-      var h=Math.min(dy*0.5,THRESHOLD);
-      indicator.style.height=h+'px';
-      spinner.style.transform='rotate('+(h/THRESHOLD*360)+'deg)';
-      if(h>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor='var(--green)';}
-    },{passive:true});
-    el.addEventListener('touchend',function(){
-      if(!pulling)return;
-      pulling=false;
-      if(triggered){
-        indicator.style.height='50px';
-        spinner.style.animation='spin .6s linear infinite';
-        setTimeout(function(){location.reload();},600);
-      } else {
-        indicator.style.height='0';
-        spinner.style.borderTopColor='var(--blue)';
-      }
-    });
-  }
+  document.addEventListener('touchstart',function(e){
+    var el=getActiveScroll();
+    if(el&&el.scrollTop===0&&isMainVisible()){
+      startY=e.touches[0].clientY;pulling=true;triggered=false;
+    }
+  },{passive:true});
 
-  attachPTR(document.getElementById('main-tab-list'));
-  attachPTR(document.getElementById('main-tab-week'));
+  document.addEventListener('touchmove',function(e){
+    if(!pulling)return;
+    var dy=e.touches[0].clientY-startY;
+    if(dy<=0){indicator.style.height='0';return;}
+    var h=Math.min(dy*0.5,THRESHOLD);
+    indicator.style.height=h+'px';
+    spinner.style.transform='rotate('+(h/THRESHOLD*360)+'deg)';
+    if(h>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor='var(--green)';}
+  },{passive:true});
+
+  document.addEventListener('touchend',function(){
+    if(!pulling)return;
+    pulling=false;
+    if(triggered){
+      indicator.style.height='50px';
+      spinner.style.animation='spin .6s linear infinite';
+      setTimeout(function(){location.reload();},600);
+    } else {
+      indicator.style.height='0';
+      spinner.style.borderTopColor='var(--blue)';
+    }
+  });
 })();
 startSync();
 scheduleMidnightCheck();
