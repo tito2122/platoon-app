@@ -399,6 +399,7 @@ function startSync(){
     incoming.forEach(function(s){if(s.id>maxId)maxId=s.id;});
     if(maxId>=state.nid)state.nid=maxId+1;
     state.soldiers=incoming;
+    checkAllExpiries(); // בדוק יציאות שפגו
     if(document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')){
       renderMain();
     }
@@ -430,6 +431,27 @@ function checkNextExpiry(s){
     s.nextFrom='';s.nextTo='';s.nextApproved=false;
     saveSoldier(s);
   }
+}
+function checkAllExpiries(){
+  var changed=false;
+  state.soldiers.forEach(function(s){
+    if(s.nextApproved&&s.nextFrom&&s.nextTo&&s.nextTo<today()){
+      s.leaves.push({from:s.nextFrom,to:s.nextTo});
+      s.nextFrom='';s.nextTo='';s.nextApproved=false;
+      saveSoldier(s);
+      changed=true;
+    }
+  });
+  if(changed)renderMain();
+}
+function scheduleMidnightCheck(){
+  var now=new Date();
+  var midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,5);
+  var msUntilMidnight=midnight-now;
+  setTimeout(function(){
+    checkAllExpiries();
+    scheduleMidnightCheck(); // תזמן לחצות הבאה
+  },msUntilMidnight);
 }
 function getStatusInfo(s){
   var td=today();
@@ -1550,6 +1572,7 @@ function _handleBack(){
   });
 })();
 startSync();
+scheduleMidnightCheck();
 })();
 </script>
 </body>
