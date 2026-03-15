@@ -860,7 +860,12 @@ function buildInfoTab(s){
       var phv=document.createElement('div');phv.className='field-val';phv.style.cssText='display:flex;align-items:center;justify-content:space-between';
       var pht=document.createElement('span');pht.textContent=s.phone;
       var callA=document.createElement('a');callA.className='btn btn-call';callA.style.cssText='min-height:38px;padding:0 16px;font-size:14px';callA.textContent='📞 התקשר';callA.href='tel:'+s.phone;
-      phv.appendChild(pht);phv.appendChild(callA);
+      var waPhone=s.phone.replace(/\D/g,'');if(waPhone.startsWith('0'))waPhone='972'+waPhone.slice(1);
+      var waA=document.createElement('a');waA.className='btn btn-wa';waA.style.cssText='min-height:38px;padding:0 16px;font-size:14px';waA.textContent='💬 וואטסאפ';waA.href='https://wa.me/'+waPhone;waA.target='_blank';
+      phv.appendChild(pht);
+      var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-top:4px';
+      btnRow.appendChild(callA);btnRow.appendChild(waA);
+      phv.appendChild(btnRow);
       phoneRow.appendChild(phv);
     } else {
       var phEmpty=document.createElement('div');phEmpty.className='field-val empty-val';phEmpty.textContent='לא הוזן';phoneRow.appendChild(phEmpty);
