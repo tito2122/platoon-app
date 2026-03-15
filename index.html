@@ -61,8 +61,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
 .screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
 .screen.slide-left{transform:translateX(-38%);opacity:0;pointer-events:none}
-.app-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 16px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10;transition:height .25s,opacity .25s,padding .25s;overflow:hidden}
-.app-header.collapsed{height:0;opacity:0;padding:0;pointer-events:none;border-bottom:none}
+.app-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 16px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10;transition:margin-top .25s;overflow:hidden}
+.app-header.collapsed{margin-top:calc(-1 * var(--hh))}
 .logo-icon{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#1E40AF,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.35)}
 .title-wrap{flex:1;min-width:0}
 .title-wrap h1{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1497,6 +1497,19 @@ init();
   var isChanging=false;
   var newPinTemp='';
 
+  function startChanging(){
+    isChanging=true;
+    newPinTemp='';
+    entered='';
+    updateDots();
+    document.getElementById('pin-error').textContent='';
+    document.getElementById('pin-subtitle').textContent='הכנס קוד חדש';
+    document.getElementById('pin-change-btn').textContent='ביטול';
+    document.getElementById('pin-screen').style.display='flex';
+  }
+
+  window._startPinChange=startChanging;
+
   if(sessionStorage.getItem('pinOk')==='1'){
     pinScreen.style.display='none';
     return;
@@ -1572,17 +1585,6 @@ init();
 
   // כפתור שינוי PIN - מטופל בתוך startChanging
 
-  function startChanging(){
-    isChanging=true;
-    newPinTemp='';
-    entered='';
-    updateDots();
-    document.getElementById('pin-error').textContent='';
-    document.getElementById('pin-subtitle').textContent='הכנס קוד חדש';
-    document.getElementById('pin-change-btn').textContent='ביטול';
-    document.getElementById('pin-screen').style.display='flex';
-  }
-
   // ביטול שינוי PIN
   document.getElementById('pin-change-btn').addEventListener('click',function(){
     if(isChanging){
@@ -1596,8 +1598,6 @@ init();
       setError('הכנס קוד נוכחי תחילה');
     }
   });
-
-  window._startPinChange=startChanging;
 })();
 
 // מצב יום/לילה
@@ -1690,45 +1690,46 @@ function _handleBack(){
   document.getElementById('main-tab-week').addEventListener('scroll',onScroll);
 })();
 (function(){
-  var scrollArea=document.querySelector('.scroll-area');
   var indicator=document.getElementById('ptr-indicator');
   var spinner=document.getElementById('ptr-spinner');
   var startY=0,pulling=false,triggered=false;
   var THRESHOLD=70;
 
-  scrollArea.addEventListener('touchstart',function(e){
-    if(scrollArea.scrollTop===0&&document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')&&!document.getElementById('scr-main').classList.contains('slide-left')){
-      startY=e.touches[0].clientY;pulling=true;triggered=false;
-    }
-  },{passive:true});
+  function isMainVisible(){
+    return document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')&&!document.getElementById('scr-main').classList.contains('slide-left');
+  }
 
-  scrollArea.addEventListener('touchmove',function(e){
-    if(!pulling)return;
-    var dy=e.touches[0].clientY-startY;
-    if(dy<=0){indicator.style.height='0';return;}
-    var h=Math.min(dy*0.5,THRESHOLD);
-    indicator.style.height=h+'px';
-    spinner.style.transform='rotate('+(h/THRESHOLD*360)+'deg)';
-    if(h>=THRESHOLD&&!triggered){
-      triggered=true;
-      spinner.style.borderTopColor='var(--green)';
-    }
-  },{passive:true});
+  function attachPTR(el){
+    el.addEventListener('touchstart',function(e){
+      if(el.scrollTop===0&&isMainVisible()){
+        startY=e.touches[0].clientY;pulling=true;triggered=false;
+      }
+    },{passive:true});
+    el.addEventListener('touchmove',function(e){
+      if(!pulling)return;
+      var dy=e.touches[0].clientY-startY;
+      if(dy<=0){indicator.style.height='0';return;}
+      var h=Math.min(dy*0.5,THRESHOLD);
+      indicator.style.height=h+'px';
+      spinner.style.transform='rotate('+(h/THRESHOLD*360)+'deg)';
+      if(h>=THRESHOLD&&!triggered){triggered=true;spinner.style.borderTopColor='var(--green)';}
+    },{passive:true});
+    el.addEventListener('touchend',function(){
+      if(!pulling)return;
+      pulling=false;
+      if(triggered){
+        indicator.style.height='50px';
+        spinner.style.animation='spin .6s linear infinite';
+        setTimeout(function(){location.reload();},600);
+      } else {
+        indicator.style.height='0';
+        spinner.style.borderTopColor='var(--blue)';
+      }
+    });
+  }
 
-  scrollArea.addEventListener('touchend',function(){
-    if(!pulling)return;
-    pulling=false;
-    if(triggered){
-      indicator.style.height='50px';
-      spinner.style.animation='spin .6s linear infinite';
-      setTimeout(function(){
-        location.reload();
-      },600);
-    } else {
-      indicator.style.height='0';
-      spinner.style.borderTopColor='var(--blue)';
-    }
-  });
+  attachPTR(document.getElementById('main-tab-list'));
+  attachPTR(document.getElementById('main-tab-week'));
 })();
 startSync();
 scheduleMidnightCheck();
