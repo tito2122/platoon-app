@@ -1644,17 +1644,19 @@ function _handleBack(){
   if(isInDetail){
     var sol=find(state.active);
     var isNew=sol&&!sol.name.trim();
+    // נעדר → תמיד חזור למסך נעדרים
+    if(sol&&sol.isMissing){
+      state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});
+      showMain();
+      setTimeout(function(){document.getElementById('modal-missing').classList.add('show');renderMissingList();},150);
+      return;
+    }
     var infoPanel=document.getElementById('tab-info');
     if(infoPanel.classList.contains('active')){
       if(isNew){
         state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});
         deleteSoldierRemote(state.active);
         showMain();
-      } else if(sol&&sol.isMissing){
-        // נעדר → חזור למסך נעדרים
-        state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});
-        showMain();
-        setTimeout(function(){document.getElementById('modal-missing').classList.add('show');renderMissingList();},150);
       } else {
         // מפרטים → יציאות
         document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
