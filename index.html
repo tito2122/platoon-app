@@ -1495,109 +1495,108 @@ init();
   var entered='';
   var pinScreen=document.getElementById('pin-screen');
   var isChanging=false;
+  var isVerifyingOld=false;
   var newPinTemp='';
-
-  function startChanging(){
-    isChanging=true;
-    newPinTemp='';
-    entered='';
-    updateDots();
-    document.getElementById('pin-error').textContent='';
-    document.getElementById('pin-subtitle').textContent='הכנס קוד חדש';
-    document.getElementById('pin-change-btn').textContent='ביטול';
-    document.getElementById('pin-screen').style.display='flex';
-  }
-
-  window._startPinChange=startChanging;
-
-  if(sessionStorage.getItem('pinOk')==='1'){
-    pinScreen.style.display='none';
-    return;
-  }
 
   function updateDots(){
     document.querySelectorAll('.pin-dot').forEach(function(d,i){
       d.classList.toggle('filled',i<entered.length);
     });
   }
-
   function setError(msg){
     document.getElementById('pin-error').textContent=msg;
-    setTimeout(function(){document.getElementById('pin-error').textContent='';},1500);
+    setTimeout(function(){document.getElementById('pin-error').textContent='';},1800);
   }
-
   function shake(){
-    document.getElementById('pin-dots').style.animation='none';
-    setTimeout(function(){
-      document.getElementById('pin-dots').style.animation='pinShake .4s ease';
-    },10);
+    var dots=document.getElementById('pin-dots');
+    dots.style.animation='none';
+    setTimeout(function(){dots.style.animation='pinShake .4s ease';},10);
   }
+  function setSubtitle(txt){document.getElementById('pin-subtitle').textContent=txt;}
 
   function tryPin(){
-    if(!isChanging){
+    if(!isChanging&&!isVerifyingOld){
+      // כניסה רגילה
       if(entered===PIN){
         sessionStorage.setItem('pinOk','1');
         pinScreen.style.display='none';
       } else {
-        shake();
-        setError('קוד שגוי, נסה שוב');
-        entered='';
-        updateDots();
+        shake();setError('קוד שגוי, נסה שוב');entered='';updateDots();
       }
-    } else if(newPinTemp===''){
-      // שלב 1 — הזן PIN חדש
-      newPinTemp=entered;
-      entered='';
-      updateDots();
-      document.getElementById('pin-subtitle').textContent='הזן שוב לאישור';
+    } else if(isVerifyingOld){
+      // אימות סיסמא ישנה לפני שינוי
+      if(entered===PIN){
+        isVerifyingOld=false;isChanging=true;newPinTemp='';
+        entered='';updateDots();
+        setSubtitle('הכנס קוד חדש');
+        document.getElementById('pin-error').textContent='';
+      } else {
+        shake();setError('קוד שגוי');entered='';updateDots();
+      }
+    } else if(isChanging&&newPinTemp===''){
+      // שלב 1 — קוד חדש
+      newPinTemp=entered;entered='';updateDots();
+      setSubtitle('הזן שוב לאישור');
     } else {
-      // שלב 2 — אישור
+      // שלב 2 — אישור קוד חדש
       if(entered===newPinTemp){
         localStorage.setItem('appPin',entered);
         PIN=entered;
-        sessionStorage.setItem('pinOk','1');
+        isChanging=false;newPinTemp='';entered='';
         pinScreen.style.display='none';
+        setSubtitle('הכנס קוד PIN');
+        document.getElementById('pin-change-btn').textContent='שנה קוד PIN';
         toast('הקוד עודכן ✓');
       } else {
-        shake();
-        setError('הקודים לא תואמים, נסה שוב');
-        newPinTemp='';
-        entered='';
-        updateDots();
-        document.getElementById('pin-subtitle').textContent='הכנס קוד חדש';
+        shake();setError('הקודים לא תואמים');
+        newPinTemp='';entered='';updateDots();
+        setSubtitle('הכנס קוד חדש');
       }
     }
   }
 
+  // רישום לחצנים
   document.querySelectorAll('.pin-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
       var d=btn.dataset.d;
-      if(d==='del'){
-        entered=entered.slice(0,-1);
-      } else {
-        if(entered.length>=4)return;
-        entered+=d;
-        if(entered.length===4)setTimeout(tryPin,100);
-      }
+      if(d==='del'){entered=entered.slice(0,-1);}
+      else{if(entered.length>=4)return;entered+=d;if(entered.length===4)setTimeout(tryPin,120);}
       updateDots();
     });
   });
 
-  // כפתור שינוי PIN - מטופל בתוך startChanging
-
-  // ביטול שינוי PIN
+  // כפתור שנה/ביטול
   document.getElementById('pin-change-btn').addEventListener('click',function(){
-    if(isChanging){
-      isChanging=false;newPinTemp='';entered='';updateDots();
-      document.getElementById('pin-subtitle').textContent='הכנס קוד PIN';
+    if(isChanging||isVerifyingOld){
+      // ביטול
+      isChanging=false;isVerifyingOld=false;newPinTemp='';entered='';updateDots();
+      setSubtitle('הכנס קוד PIN');
       document.getElementById('pin-change-btn').textContent='שנה קוד PIN';
-      document.getElementById('pin-screen').style.display='none';
-    } else if(sessionStorage.getItem('pinOk')==='1'){
-      startChanging();
+      document.getElementById('pin-error').textContent='';
+      if(sessionStorage.getItem('pinOk')==='1')pinScreen.style.display='none';
     } else {
-      setError('הכנס קוד נוכחי תחילה');
+      // התחל שינוי — בקש קוד ישן
+      isVerifyingOld=true;entered='';updateDots();
+      setSubtitle('הכנס קוד נוכחי');
+      document.getElementById('pin-change-btn').textContent='ביטול';
+      document.getElementById('pin-error').textContent='';
+      pinScreen.style.display='flex';
     }
   });
+
+  function startChanging(){
+    isVerifyingOld=true;isChanging=false;newPinTemp='';entered='';updateDots();
+    setSubtitle('הכנס קוד נוכחי');
+    document.getElementById('pin-change-btn').textContent='ביטול';
+    document.getElementById('pin-error').textContent='';
+    pinScreen.style.display='flex';
+  }
+  window._startPinChange=startChanging;
+
+  // הסתר אם כבר אומת
+  if(sessionStorage.getItem('pinOk')==='1'){
+    pinScreen.style.display='none';
+  }
 })();
 
 // מצב יום/לילה
