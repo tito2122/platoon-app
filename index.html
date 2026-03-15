@@ -255,13 +255,44 @@ body.dark-mode .loading-overlay-bg{background:#0F1320!important}
 </head>
 <body>
 
-<div id="ptr-indicator" style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .2s;z-index:10;background:var(--bg)">
+<div id="pin-screen" style="position:fixed;inset:0;background:#F0F2F5;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;font-family:'Rubik',sans-serif">
+  <div style="font-size:48px">🪖</div>
+  <div style="font-size:20px;font-weight:800;color:#1A1D23">מערכת ניהול סד"כ</div>
+  <div id="pin-subtitle" style="font-size:14px;color:#5A6070;font-weight:600">הכנס קוד PIN</div>
+  <div id="pin-dots" style="display:flex;gap:14px;margin:4px 0">
+    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+  </div>
+  <div id="pin-error" style="font-size:13px;color:#E8354A;font-weight:700;min-height:18px"></div>
+  <div style="display:grid;grid-template-columns:repeat(3,72px);gap:12px">
+    <button class="pin-btn" data-d="1">1</button>
+    <button class="pin-btn" data-d="2">2</button>
+    <button class="pin-btn" data-d="3">3</button>
+    <button class="pin-btn" data-d="4">4</button>
+    <button class="pin-btn" data-d="5">5</button>
+    <button class="pin-btn" data-d="6">6</button>
+    <button class="pin-btn" data-d="7">7</button>
+    <button class="pin-btn" data-d="8">8</button>
+    <button class="pin-btn" data-d="9">9</button>
+    <div></div>
+    <button class="pin-btn" data-d="0">0</button>
+    <button class="pin-btn" data-d="del" style="font-size:20px">⌫</button>
+  </div>
+  <button id="pin-change-btn" style="margin-top:8px;background:none;border:none;font-family:'Rubik',sans-serif;font-size:13px;color:#9BA3B2;cursor:pointer;text-decoration:underline">שנה קוד PIN</button>
+</div>
+<style>
+.pin-dot{width:16px;height:16px;border-radius:50%;background:#E2E6ED;transition:background .15s}
+.pin-dot.filled{background:#2563EB}
+.pin-btn{width:72px;height:72px;border-radius:50%;border:1.5px solid #E2E6ED;background:#fff;font-family:'Rubik',sans-serif;font-size:22px;font-weight:700;color:#1A1D23;cursor:pointer;transition:all .12s;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.pin-btn:active{transform:scale(.92);background:#EFF6FF}
+@keyframes pinShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+</style> style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .2s;z-index:10;background:var(--bg)">
   <div id="ptr-spinner" style="width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;transition:transform .3s"></div>
 </div>
 <div class="screen" id="scr-main">
   <div class="app-header">
     <div class="logo-icon">🪖</div>
     <div class="title-wrap"><h1>מערכת ניהול סד"כ</h1><div class="sub">מחלקה 1</div></div>
+    <button id="pin-settings-btn" title="שנה PIN" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">🔐</button>
     <button id="theme-toggle" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s">🌙</button>
   </div>
   <div id="main-tabs-bar" style="display:flex;background:var(--card);border-bottom:1.5px solid var(--border);flex-shrink:0">
@@ -1432,7 +1463,9 @@ function init(){
     document.getElementById('mf-reason').value='';
     toast('הנעדר נוסף ✓');
   });
-  document.getElementById('sb-all').addEventListener('click',function(){setFilter('all');});
+  document.getElementById('pin-settings-btn').addEventListener('click',function(){
+    if(window._startPinChange)window._startPinChange();
+  });
   document.getElementById('sb-pr').addEventListener('click',function(){setFilter(state.filter==='present'?'all':'present');});
   // main tabs
   document.querySelectorAll('.main-tab-btn').forEach(function(btn){
@@ -1454,6 +1487,112 @@ function init(){
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
 }
 init();
+// PIN אבטחה
+(function(){
+  var DEFAULT_PIN='3194';
+  var PIN=localStorage.getItem('appPin')||DEFAULT_PIN;
+  var entered='';
+  var pinScreen=document.getElementById('pin-screen');
+  var isChanging=false;
+  var newPinTemp='';
+
+  if(sessionStorage.getItem('pinOk')==='1'){
+    pinScreen.style.display='none';
+    return;
+  }
+
+  function updateDots(){
+    document.querySelectorAll('.pin-dot').forEach(function(d,i){
+      d.classList.toggle('filled',i<entered.length);
+    });
+  }
+
+  function setError(msg){
+    document.getElementById('pin-error').textContent=msg;
+    setTimeout(function(){document.getElementById('pin-error').textContent='';},1500);
+  }
+
+  function shake(){
+    document.getElementById('pin-dots').style.animation='none';
+    setTimeout(function(){
+      document.getElementById('pin-dots').style.animation='pinShake .4s ease';
+    },10);
+  }
+
+  function tryPin(){
+    if(!isChanging){
+      if(entered===PIN){
+        sessionStorage.setItem('pinOk','1');
+        pinScreen.style.display='none';
+      } else {
+        shake();
+        setError('קוד שגוי, נסה שוב');
+        entered='';
+        updateDots();
+      }
+    } else if(newPinTemp===''){
+      // שלב 1 — הזן PIN חדש
+      newPinTemp=entered;
+      entered='';
+      updateDots();
+      document.getElementById('pin-subtitle').textContent='הזן שוב לאישור';
+    } else {
+      // שלב 2 — אישור
+      if(entered===newPinTemp){
+        localStorage.setItem('appPin',entered);
+        PIN=entered;
+        sessionStorage.setItem('pinOk','1');
+        pinScreen.style.display='none';
+        toast('הקוד עודכן ✓');
+      } else {
+        shake();
+        setError('הקודים לא תואמים, נסה שוב');
+        newPinTemp='';
+        entered='';
+        updateDots();
+        document.getElementById('pin-subtitle').textContent='הכנס קוד חדש';
+      }
+    }
+  }
+
+  document.querySelectorAll('.pin-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var d=btn.dataset.d;
+      if(d==='del'){
+        entered=entered.slice(0,-1);
+      } else {
+        if(entered.length>=4)return;
+        entered+=d;
+        if(entered.length===4)setTimeout(tryPin,100);
+      }
+      updateDots();
+    });
+  });
+
+  // כפתור שינוי PIN
+  document.getElementById('pin-change-btn').addEventListener('click',function(){
+    if(!isChanging){
+      // צריך קודם לאמת את הקוד הנוכחי
+      if(sessionStorage.getItem('pinOk')==='1'){
+        startChanging();
+      } else {
+        setError('הכנס קוד נוכחי תחילה');
+      }
+    }
+  });
+
+  function startChanging(){
+    isChanging=true;
+    newPinTemp='';
+    entered='';
+    updateDots();
+    document.getElementById('pin-subtitle').textContent='הכנס קוד חדש';
+    document.getElementById('pin-screen').style.display='flex';
+  }
+
+  window._startPinChange=startChanging;
+})();
+
 // מצב יום/לילה
 (function(){
   var isDark=localStorage.getItem('darkMode')==='1';
