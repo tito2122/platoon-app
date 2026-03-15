@@ -1599,6 +1599,13 @@ init();
     if(btn)btn.textContent=isDark?'☀️':'🌙';
   }
   applyTheme();
+  document.querySelector('.logo-icon').style.cursor='pointer';
+  document.querySelector('.logo-icon').addEventListener('click',function(){
+    var lb=document.getElementById('photo-lightbox');
+    var img=document.getElementById('lightbox-img');
+    img.src=document.querySelector('.logo-icon img').src;
+    lb.style.display='flex';
+  });
   document.getElementById('theme-toggle').addEventListener('click',function(){
     isDark=!isDark;
     localStorage.setItem('darkMode',isDark?'1':'0');
