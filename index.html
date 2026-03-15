@@ -542,9 +542,16 @@ function showDetailNewSoldier(id){
     state.active=id;
     document.getElementById('scr-main').classList.add('slide-left');
     document.getElementById('scr-det').classList.remove('hidden');
-    document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
-    document.getElementById('tab-info').classList.add('active');
-    document.getElementById('tab-leaves').classList.remove('active');
+    var s=state.soldiers.find(function(x){return x.id===id;});
+    if(s&&s.isMissing){
+      document.querySelector('.tabs-bar').style.display='none';
+      document.getElementById('tab-info').classList.add('active');
+      document.getElementById('tab-leaves').classList.remove('active');
+    } else {
+      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
+      document.getElementById('tab-info').classList.add('active');
+      document.getElementById('tab-leaves').classList.remove('active');
+    }
     renderDetail(id);
   }catch(e){
     document.getElementById('scr-main').classList.remove('slide-left');
