@@ -415,6 +415,14 @@ var _tt=null;
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show');},2500);}
 
 function setFilter(f){
+  // עבור לטאב חיילים אם בלוח שבועי
+  var weekTab=document.getElementById('main-tab-week');
+  if(weekTab&&weekTab.style.display!=='none'){
+    document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='list');});
+    document.getElementById('main-tab-list').style.display='';
+    weekTab.style.display='none';
+    document.getElementById('fab').style.display='';
+  }
   state.filter=f;
   var banner=document.getElementById('filter-banner');
   document.getElementById('sb-all').classList.toggle('active-filter',f==='all');
