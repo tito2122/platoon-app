@@ -1192,8 +1192,13 @@ function buildLeavesTab(s){
   var nlDatesLbl=document.createElement('div');nlDatesLbl.style.cssText='font-size:20px;font-weight:800;color:var(--text);margin-bottom:10px;text-align:center;letter-spacing:.5px';
   nextTotEl=document.createElement('div');nextTotEl.style.cssText='font-size:12px;color:#0F9454;font-weight:600;margin-bottom:10px';
 
+  function fmtShort(ds){if(!ds)return'';var p=ds.split('-');return p[2]+'/'+p[1];}
   function updNlLbl(){
-    nlDatesLbl.textContent=s.nextFrom&&s.nextTo?fmtDate(s.nextFrom)+' → '+fmtDate(s.nextTo):'לא נבחר תאריך';
+    if(s.nextFrom&&s.nextTo){
+      nlDatesLbl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:22px;font-weight:900">'+fmtShort(s.nextFrom)+'</span><span style="font-size:36px;font-weight:900;color:var(--blue);line-height:1">←</span><span style="font-size:22px;font-weight:900">'+fmtShort(s.nextTo)+'</span></div>';
+    } else {
+      nlDatesLbl.textContent='לא נבחר תאריך';
+    }
     var nd=s.nextApproved&&s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo):0;
     nextTotEl.textContent=nd>0?'✅ אושר — '+nd+' ימים (יתווספו ליציאות)':(s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo)+' ימים':'');
   }
@@ -1389,20 +1394,42 @@ function renderMissingList(){
   state.missing.forEach(function(m){
     var card=document.createElement('div');
     card.style.cssText='background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px';
-    var nameEl=document.createElement('div');nameEl.style.cssText='font-size:16px;font-weight:700;margin-bottom:4px';nameEl.textContent='🪦 '+(m.name||'ללא שם');
+    var nameEl=document.createElement('div');nameEl.style.cssText='font-size:16px;font-weight:700;margin-bottom:4px;color:var(--text)';nameEl.textContent='🪦 '+(m.name||'ללא שם');
     var reasonEl=document.createElement('div');reasonEl.style.cssText='font-size:13px;color:var(--text2);margin-bottom:10px';reasonEl.textContent=m.reason?'סיבה: '+m.reason:'ללא סיבה רשומה';
     var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px';
+
+    // כפתור עריכת פרטים
+    var editBtn=document.createElement('button');
+    editBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
+    editBtn.textContent='📋 עריכת פרטים';
+    editBtn.addEventListener('click',(function(miss){return function(){
+      // צור חייל חדש בסטטוס נעדר
+      var s=mkSoldier();
+      s.isMissing=true;
+      s._missingId=miss.id;
+      // פצל שם לפרטי ומשפחה
+      var parts=(miss.name||'').trim().split(/\s+/);
+      if(parts.length>=2){s.lastName=parts[0];s.firstName=parts.slice(1).join(' ');}
+      else{s.lastName=parts[0]||'';s.firstName='';}
+      s.name=miss.name||'';
+      state.soldiers.push(s);
+      closeMissingModal();
+      showDetailNewSoldier(s.id);
+    };})(m));
+
+    // כפתור חזר לכשירות (קטן)
     var returnBtn=document.createElement('button');
-    returnBtn.style.cssText='flex:1;min-height:40px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#22C55E,var(--green-dark));color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
-    returnBtn.textContent='✅ חזר לכשירות';
+    returnBtn.style.cssText='min-height:36px;padding:0 10px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#22C55E,var(--green-dark));color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap';
+    returnBtn.textContent='✅ חזר';
     returnBtn.addEventListener('click',(function(mid){return function(){
       if(!confirm('להחזיר חייל זה לרשימת הסד"כ?'))return;
       deleteMissing(mid);
       toast('החייל הוחזר לסד"כ ✓');
       renderMissingList();
     };})(m.id));
+
     var delBtn=document.createElement('button');
-    delBtn.style.cssText='min-height:40px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
+    delBtn.style.cssText='min-height:36px;padding:0 12px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
     delBtn.textContent='🗑';
     delBtn.addEventListener('click',(function(mid){return function(){
       if(!confirm('למחוק נעדר זה לצמיתות?'))return;
@@ -1410,7 +1437,8 @@ function renderMissingList(){
       toast('הנעדר הוסר ✓');
       renderMissingList();
     };})(m.id));
-    btnRow.appendChild(returnBtn);btnRow.appendChild(delBtn);
+
+    btnRow.appendChild(editBtn);btnRow.appendChild(returnBtn);btnRow.appendChild(delBtn);
     card.appendChild(nameEl);card.appendChild(reasonEl);card.appendChild(btnRow);
     wrap.appendChild(card);
   });
@@ -1620,6 +1648,16 @@ function _handleBack(){
   }
   // פילטר פעיל → נקה
   if(state.filter!=='all'){setFilter('all');return;}
+  // לוח שבועי פתוח → חזור לחיילים
+  var weekTab=document.getElementById('main-tab-week');
+  if(weekTab&&weekTab.style.display!=='none'){
+    document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='list');});
+    document.getElementById('main-tab-list').style.display='';
+    weekTab.style.display='none';
+    document.getElementById('fab').style.display='';
+    document.querySelector('.dashboard').style.display='';
+    return;
+  }
   // דשבורד — נשאר
 }
 
