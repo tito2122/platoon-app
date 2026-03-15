@@ -1467,7 +1467,9 @@ function init(){
   document.getElementById('pin-settings-btn').addEventListener('click',function(){
     if(window._startPinChange)window._startPinChange();
   });
+  document.getElementById('sb-all').addEventListener('click',function(){setFilter('all');});
   document.getElementById('sb-pr').addEventListener('click',function(){setFilter(state.filter==='present'?'all':'present');});
+  document.getElementById('sb-ab').addEventListener('click',function(){setFilter(state.filter==='absent'?'all':'absent');});
   // main tabs
   document.querySelectorAll('.main-tab-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
@@ -1479,7 +1481,6 @@ function init(){
       if(t==='week')renderWeek();
     });
   });
-  document.getElementById('sb-ab').addEventListener('click',function(){setFilter(state.filter==='absent'?'all':'absent');});
   document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
   document.getElementById('btn-report').addEventListener('click',openReportModal);
   document.getElementById('modal-close').addEventListener('click',closeReportModal);
