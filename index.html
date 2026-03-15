@@ -68,7 +68,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .title-wrap .sub{font-size:12px;color:var(--text3)}
 .dashboard{background:var(--card);border-bottom:1.5px solid var(--border);padding:8px 12px;flex-shrink:0}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:7px}
-.stat-box{border-radius:var(--r-sm);padding:7px 4px;text-align:center;border:1.5px solid transparent;cursor:pointer;transition:transform .12s,box-shadow .12s;user-select:none}
+.stat-box{border-radius:var(--r-sm);padding:5px 4px;text-align:center;border:1.5px solid transparent;cursor:pointer;transition:transform .12s,box-shadow .12s;user-select:none;overflow:hidden}
 .stat-box:active{transform:scale(.94)}
 .stat-box.s-blue{background:var(--blue-bg);border-color:#BFDBFE}
 .stat-box.s-green{background:var(--green-bg);border-color:#A7F3D0}
@@ -77,7 +77,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .stat-box.s-dark .stat-num{color:#fff}
 .stat-box.s-dark .stat-lbl{color:#9BA3B2}
 .stat-box.active-filter{box-shadow:0 0 0 3px rgba(0,0,0,.15);transform:scale(.97)}
-.stat-num{font-size:40px;font-weight:900;line-height:1;margin-bottom:2px}
+.stat-num{font-size:26px;font-weight:900;line-height:1;margin-bottom:1px}
 .s-blue .stat-num{color:var(--blue)}.s-green .stat-num{color:var(--green-dark)}.s-red .stat-num{color:var(--red)}
 .stat-lbl{font-size:10px;font-weight:600;color:var(--text2)}
 .role-stats{display:flex;gap:5px;flex-wrap:wrap}
@@ -1189,7 +1189,7 @@ function buildLeavesTab(s){
   function nlBoxClass(){return 'nl-box'+(s.nextApproved?' approved':(s.nextFrom&&s.nextTo?' pending':''));}
   var nlBox=document.createElement('div');nlBox.className=nlBoxClass();
 
-  var nlDatesLbl=document.createElement('div');nlDatesLbl.style.cssText='font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px';
+  var nlDatesLbl=document.createElement('div');nlDatesLbl.style.cssText='font-size:20px;font-weight:800;color:var(--text);margin-bottom:10px;text-align:center;letter-spacing:.5px';
   nextTotEl=document.createElement('div');nextTotEl.style.cssText='font-size:12px;color:#0F9454;font-weight:600;margin-bottom:10px';
 
   function updNlLbl(){
