@@ -1560,9 +1560,19 @@ function renderMissingList(){
     returnBtn.textContent='✅ חזר';
     returnBtn.addEventListener('click',(function(mid){return function(){
       if(!confirm('להחזיר חייל זה לרשימת הסד"כ?'))return;
+      // מצא את החייל ב-state.soldiers לפי _missingId ואפס את הדגל
+      var linkedSoldier=state.soldiers.find(function(x){return x._missingId===mid;});
+      if(linkedSoldier){
+        linkedSoldier.isMissing=false;
+        linkedSoldier._missingId=null;
+        saveSoldier(linkedSoldier);
+      }
       deleteMissing(mid);
-      toast('החייל הוחזר לסד"כ ✓');
+      state.missing=state.missing.filter(function(x){return x.id!==mid;});
+      document.getElementById('st-ms').textContent=state.missing.length;
       renderMissingList();
+      renderMain();
+      toast('החייל הוחזר לסד"כ ✓');
     };})(m.id));
 
     var delBtn=document.createElement('button');
