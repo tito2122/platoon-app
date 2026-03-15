@@ -816,10 +816,13 @@ function buildInfoTab(s){
     }
     var topInfo=document.createElement('div');topInfo.style.cssText='flex:1;min-width:0';
     var stBox=document.createElement('div');stBox.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px';
-    var pill=document.createElement('div');pill.className='status-pill '+st.cls;pill.textContent=st.label;
+    if(!s.isMissing){
+      var pill=document.createElement('div');pill.className='status-pill '+st.cls;pill.textContent=st.label;
+      stBox.appendChild(pill);
+    }
     var editBtn=document.createElement('button');editBtn.className='btn btn-edit';editBtn.textContent='✏️ עריכה';
     editBtn.addEventListener('click',function(){editMode=true;renderEdit();});
-    stBox.appendChild(pill);stBox.appendChild(editBtn);
+    stBox.appendChild(editBtn);
     topInfo.appendChild(stBox);
     topRow.appendChild(avatarWrap);topRow.appendChild(topInfo);
     inner.appendChild(topRow);
@@ -1195,7 +1198,7 @@ function buildLeavesTab(s){
   function fmtShort(ds){if(!ds)return'';var p=ds.split('-');return p[2]+'/'+p[1];}
   function updNlLbl(){
     if(s.nextFrom&&s.nextTo){
-      nlDatesLbl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:22px;font-weight:900">'+fmtShort(s.nextFrom)+'</span><span style="font-size:36px;font-weight:900;color:var(--blue);line-height:1">←</span><span style="font-size:22px;font-weight:900">'+fmtShort(s.nextTo)+'</span></div>';
+      nlDatesLbl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:12px"><span style="font-size:26px;font-weight:900">'+fmtShort(s.nextFrom)+'</span><span style="font-size:18px;color:var(--text3)">←</span><span style="font-size:26px;font-weight:900">'+fmtShort(s.nextTo)+'</span></div>';
     } else {
       nlDatesLbl.textContent='לא נבחר תאריך';
     }
