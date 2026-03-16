@@ -1722,7 +1722,11 @@ function listenMissions(){
     if(docs.length>0)missionsState.nmid=Math.max.apply(null,docs.map(function(d){return d.id;}))+1;
     // רנדר רק אם טאב יזומות פתוח
     var mt=document.getElementById('main-tab-missions');
-    if(mt&&mt.style.display!=='none')renderMissions();
+    if(mt&&mt.style.display!=='none'){
+      var active=document.activeElement;
+      if(active&&mt.contains(active)&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'))return;
+      renderMissions();
+    }
   });
 }
 
