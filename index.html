@@ -1933,24 +1933,24 @@ function renderMissionDetail(m,container){
     tcmdRow.appendChild(tcmdInp);tcmdRow.appendChild(tcmdPaklInp);
     teamDiv.appendChild(tcmdRow);
     function saveTcmd(){team.commander={name:tcmdInp.value.trim(),pakl:tcmdPaklInp.value.trim()};saveMission(m);}
-    tcmdInp.addEventListener('blur',saveTcmd);
-    tcmdPaklInp.addEventListener('blur',saveTcmd);
     tcmdInp.addEventListener('keydown',function(e){
-      if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();tcmdPaklInp.focus();tcmdPaklInp.scrollIntoView({block:'center',behavior:'smooth'});}
+      if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();saveTcmd();setTimeout(function(){tcmdPaklInp.focus();tcmdPaklInp.scrollIntoView({block:'center',behavior:'smooth'});},50);}
     });
     tcmdPaklInp.addEventListener('keydown',function(e){
       if(e.key==='Enter'||e.key==='Tab'){
         e.preventDefault();saveTcmd();
-        var solInps=teamDiv.querySelectorAll('input[placeholder="שם חייל"]');
-        if(solInps.length){solInps[0].focus();solInps[0].scrollIntoView({block:'center',behavior:'smooth'});}
-        else{
-          team.soldiers.push({name:'',pakl:''});saveMission(m);
-          renderTeamSoldiers(team,m,container);
-          setTimeout(function(){
-            var ins=teamDiv.querySelectorAll('input[placeholder="שם חייל"]');
-            if(ins.length){ins[0].focus();ins[0].scrollIntoView({block:'center',behavior:'smooth'});}
-          },40);
-        }
+        setTimeout(function(){
+          var solInps=teamDiv.querySelectorAll('input[placeholder="שם חייל"]');
+          if(solInps.length){solInps[0].focus();solInps[0].scrollIntoView({block:'center',behavior:'smooth'});}
+          else{
+            team.soldiers.push({name:'',pakl:''});saveMission(m);
+            renderTeamSoldiers(team,m,container);
+            setTimeout(function(){
+              var ins=teamDiv.querySelectorAll('input[placeholder="שם חייל"]');
+              if(ins.length){ins[0].focus();ins[0].scrollIntoView({block:'center',behavior:'smooth'});}
+            },40);
+          }
+        },50);
       }
     });
 
@@ -2031,22 +2031,18 @@ function renderTeamSoldiers(team,m,detContainer){
     cont.appendChild(row);
 
     function saveRow(){team.soldiers[si]={name:inp.value.trim(),pakl:paklInp.value.trim()};if(m)saveMission(m);}
-    inp.addEventListener('blur',saveRow);
-    paklInp.addEventListener('blur',saveRow);
-
     inp.addEventListener('keydown',function(e){
-      if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();saveRow();paklInp.focus();paklInp.scrollIntoView({block:'center',behavior:'smooth'});}
+      if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();saveRow();setTimeout(function(){paklInp.focus();paklInp.scrollIntoView({block:'center',behavior:'smooth'});},50);}
     });
     paklInp.addEventListener('keydown',function(e){
       if(e.key==='Enter'){
         e.preventDefault();saveRow();
-        // הוסף גפרור חדש
         team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
         renderTeamSoldiers(team,m,detContainer);
         setTimeout(function(){
           var rows=cont.querySelectorAll('input[placeholder="שם חייל"]');
           if(rows.length){rows[rows.length-1].focus();rows[rows.length-1].scrollIntoView({block:'center',behavior:'smooth'});}
-        },40);
+        },50);
       }
     });
 
