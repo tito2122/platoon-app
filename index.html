@@ -1034,16 +1034,21 @@ function buildInfoTab(s){
       inner.appendChild(moveMissBtn);
     }
 
-    if(s.hasWife){
+    var hasFamData=(s.hasWife||s.wifeName||s.wifePhone)||((s.hasKids||(s.kids&&s.kids.filter(Boolean).length)));
+    if(hasFamData){
       var famBox=document.createElement('div');famBox.className='field-view';
       var famLbl=document.createElement('div');famLbl.className='field-lbl';famLbl.textContent='משפחה';
       famBox.appendChild(famLbl);
-      var wifeRow=document.createElement('div');wifeRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px';
-      var wt=document.createElement('div');wt.className='field-val';wt.textContent='💍 '+(s.wifeName||'אישה');
-      var wcallA=document.createElement('a');wcallA.className='btn btn-call';wcallA.style.cssText='min-height:34px;padding:0 14px;font-size:13px';wcallA.textContent='📞';wcallA.href='tel:'+(s.wifePhone||'');
-      if(s.wifePhone){wifeRow.appendChild(wt);wifeRow.appendChild(wcallA);}else{wifeRow.appendChild(wt);}
-      famBox.appendChild(wifeRow);
-      if(s.hasKids&&s.kids&&s.kids.length){
+      if(s.hasWife||s.wifeName||s.wifePhone){
+        var wifeRow=document.createElement('div');wifeRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px';
+        var wt=document.createElement('div');wt.className='field-val';wt.textContent='💍 '+(s.wifeName||'אישה');
+        if(s.wifePhone){
+          var wcallA=document.createElement('a');wcallA.className='btn btn-call';wcallA.style.cssText='min-height:34px;padding:0 14px;font-size:13px';wcallA.textContent='📞';wcallA.href='tel:'+s.wifePhone;
+          wifeRow.appendChild(wt);wifeRow.appendChild(wcallA);
+        } else {wifeRow.appendChild(wt);}
+        famBox.appendChild(wifeRow);
+      }
+      if(s.kids&&s.kids.filter(Boolean).length){
         var kl=document.createElement('div');kl.style.cssText='margin-top:6px;display:flex;flex-wrap:wrap;gap:6px';
         s.kids.filter(Boolean).forEach(function(k){var p=document.createElement('span');p.className='role-pill';p.textContent='👶 '+k;kl.appendChild(p);});
         famBox.appendChild(kl);
