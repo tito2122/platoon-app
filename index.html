@@ -1763,14 +1763,16 @@ function renderMissions(){
     var dateStr=(d.getDate()+'').padStart(2,'0')+'/'+(d.getMonth()+1+'').padStart(2,'0');
     var total=0;(m.teams||[]).forEach(function(t){total+=(t.soldiers||[]).length+(t.commander?1:0);});
 
+    var shareSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="white"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="white" stroke-width="2"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="white" stroke-width="2"/></svg>';
     card.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
       +'<div style="width:28px;height:28px;min-width:28px;background:linear-gradient(135deg,#1E40AF,#3B82F6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0">'+m.ironNum+'</div>'
       +'<div style="flex:1;min-width:0">'
       +'<div style="font-size:15px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+m.name+'</div>'
       +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+dateStr+' · '+(m.commander||'ללא מפקד')+' · '+(m.teams||[]).length+' חוליות · '+total+' אנשים</div>'
       +'</div>'
-      +'<button class="mission-rename-btn" data-mid="'+m.id+'" style="border:none;background:transparent;font-size:13px;cursor:pointer;padding:2px 6px;color:var(--text3);flex-shrink:0" title="ערוך שם">✏️</button>'
+      +'<button class="mission-share-btn" data-mid="'+m.id+'" style="border:none;background:#1a7a1a;border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0" title="שתף הרכב">'+shareSvg+'</button>'
       +'<button class="mission-delete-btn" data-mid="'+m.id+'" style="border:none;background:transparent;font-size:18px;cursor:pointer;padding:4px 6px;color:#E8354A;flex-shrink:0" title="מחק יזומה">✕</button>'
+      +'<button class="mission-rename-btn" data-mid="'+m.id+'" style="border:none;background:transparent;font-size:13px;cursor:pointer;padding:2px 6px;color:var(--text3);flex-shrink:0" title="ערוך שם">✏️</button>'
       +'</div>'
       +'<div class="mission-detail" id="mdet-'+m.id+'" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px"></div>';
 
@@ -1786,6 +1788,39 @@ function renderMissions(){
       deleteMissionRemote(m.id);
       renderMissions();
       toast('יזומה נמחקה');
+    });
+
+    // שיתוף הרכב
+    card.querySelector('.mission-share-btn').addEventListener('click',function(e){
+      e.stopPropagation();
+      var nums=calcMissionIronNums(m);
+      var lines=[];
+      lines.push('🎯 יזומה: '+m.name);
+      var d2=new Date(m.date);
+      lines.push('📅 '+(d2.getDate()+'').padStart(2,'0')+'/'+(d2.getMonth()+1+'').padStart(2,'0')+'/'+d2.getFullYear());
+      lines.push('');
+      if(m.commander){lines.push(nums['cmd']+'. מפקד: '+m.commander);}
+      (m.teams||[]).forEach(function(team,ti){
+        lines.push('');
+        lines.push('━━ חוליה '+(ti+1)+(team.name?' — '+team.name:'')+ ' ━━');
+        if(team.commander){
+          var cn=typeof team.commander==='object'?team.commander.name||'':team.commander;
+          var cp=typeof team.commander==='object'?team.commander.pakl||'':'';
+          lines.push(nums['tcmd-'+team.id]+'. מפקד: '+cn+(cp?' — '+cp:''));
+        }
+        (team.soldiers||[]).forEach(function(sol,si){
+          var sn=typeof sol==='object'?sol.name||'':sol;
+          var sp=typeof sol==='object'?sol.pakl||'':'';
+          if(sn)lines.push(nums['sol-'+team.id+'-'+si]+'. '+sn+(sp?' — '+sp:''));
+        });
+      });
+      lines.push('');
+      var total2=0;(m.teams||[]).forEach(function(t){total2+=(t.soldiers||[]).length+(t.commander?1:0);});
+      if(m.commander)total2++;
+      lines.push('סה"כ: '+total2+' לוחמים');
+      var text=lines.join('\n');
+      var url='https://wa.me/?text='+encodeURIComponent(text);
+      window.open(url,'_blank');
     });
 
     // עריכת שם
@@ -1805,7 +1840,7 @@ function renderMissions(){
       // אל תסגור אם הלחיצה היא בתוך אזור הפרטים (input, button וכו')
       var det=document.getElementById('mdet-'+m.id);
       if(det&&det.contains(e.target))return;
-      if(e.target.classList.contains('mission-delete-btn')||e.target.classList.contains('mission-rename-btn'))return;
+      if(e.target.classList.contains('mission-delete-btn')||e.target.classList.contains('mission-rename-btn')||e.target.closest('.mission-share-btn'))return;
       var isOpen=det.style.display!=='none';
       if(isOpen){det.style.display='none';_openMissionId=null;}
       else{_openMissionId=m.id;det.style.display='block';renderMissionDetail(m,det);}
