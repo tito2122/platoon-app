@@ -438,8 +438,13 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 </div>
 
 <!-- PHOTO LIGHTBOX -->
-<div id="photo-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center" onclick="this.style.display='none'">
-  <img id="lightbox-img" style="max-width:92%;max-height:88%;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,.6)">
+<div id="photo-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <img id="lightbox-img" style="max-width:92%;max-height:72%;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,.6)" onclick="document.getElementById('photo-lightbox').style.display='none'">
+  <div style="display:flex;gap:12px">
+    <label for="logo-file-input" style="padding:10px 22px;border-radius:30px;background:#2563EB;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.4)">✏️ החלף לוגו</label>
+    <input id="logo-file-input" type="file" accept="image/*" style="display:none">
+    <button onclick="document.getElementById('photo-lightbox').style.display='none'" style="padding:10px 22px;border-radius:30px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">סגור</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2476,6 +2481,27 @@ init();
     var img=document.getElementById('lightbox-img');
     img.src=document.querySelector('.logo-icon img').src;
     lb.style.display='flex';
+  });
+  // טעינת לוגו שמור
+  (function(){
+    var saved=localStorage.getItem('customLogoData');
+    if(saved){var li=document.querySelector('.logo-icon img');if(li)li.src=saved;}
+  })();
+  // בחירת קובץ לוגו חדש
+  document.getElementById('logo-file-input').addEventListener('change',function(e){
+    var file=e.target.files[0];
+    if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      var data=ev.target.result;
+      localStorage.setItem('customLogoData',data);
+      var li=document.querySelector('.logo-icon img');
+      if(li)li.src=data;
+      document.getElementById('lightbox-img').src=data;
+      toast('לוגו עודכן ✓');
+    };
+    reader.readAsDataURL(file);
+    e.target.value='';
   });
   document.getElementById('theme-toggle').addEventListener('click',function(){
     isDark=!isDark;
