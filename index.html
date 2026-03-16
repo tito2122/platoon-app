@@ -441,7 +441,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 <div id="photo-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <img id="lightbox-img" style="max-width:92%;max-height:72%;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,.6)" onclick="document.getElementById('photo-lightbox').style.display='none'">
   <div style="display:flex;gap:12px">
-    <label for="logo-file-input" style="padding:10px 22px;border-radius:30px;background:#2563EB;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.4)">✏️ החלף לוגו</label>
+    <label for="logo-file-input" style="padding:10px 22px;border-radius:30px;background:#2563EB;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.4)">✏️ החלף תמונה</label>
     <input id="logo-file-input" type="file" accept="image/*" style="display:none">
     <button onclick="document.getElementById('photo-lightbox').style.display='none'" style="padding:10px 22px;border-radius:30px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">סגור</button>
   </div>
@@ -2361,7 +2361,16 @@ function init(){
     document.getElementById('mf-reason').value='';
     toast('הנעדר נוסף ✓');
   });
-  document.getElementById('sb-all').addEventListener('click',function(){setFilter('all');});
+  document.getElementById('sb-all').addEventListener('click',function(){
+    var srch=document.getElementById('soldier-search');
+    if(srch&&srch.value.trim()){
+      srch.value='';
+      var clr=document.getElementById('search-clear');
+      if(clr)clr.style.display='none';
+      renderList();
+    }
+    setFilter('all');
+  });
   document.getElementById('sb-pr').addEventListener('click',function(){setFilter(state.filter==='present'?'all':'present');});
   document.getElementById('sb-ab').addEventListener('click',function(){setFilter(state.filter==='absent'?'all':'absent');});
   // חיפוש חיילים
