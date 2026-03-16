@@ -1981,6 +1981,8 @@ function renderMissionDetail(m,container){
     tcmdRow.appendChild(tcmdInp);tcmdRow.appendChild(tcmdPaklInp);
     teamDiv.appendChild(tcmdRow);
     function saveTcmd(){team.commander={name:tcmdInp.value.trim(),pakl:tcmdPaklInp.value.trim()};saveMission(m);}
+    tcmdInp.addEventListener('blur',saveTcmd);
+    tcmdPaklInp.addEventListener('blur',saveTcmd);
     tcmdInp.addEventListener('keydown',function(e){
       if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();saveTcmd();setTimeout(function(){tcmdPaklInp.focus();tcmdPaklInp.scrollIntoView({block:'center',behavior:'smooth'});},50);}
     });
@@ -2161,6 +2163,8 @@ function renderTeamSoldiers(team,m,detContainer){
     });
 
     function saveRow(){team.soldiers[si]={name:inp.value.trim(),pakl:paklInp.value.trim()};if(m)saveMission(m);}
+    inp.addEventListener('blur',saveRow);
+    paklInp.addEventListener('blur',saveRow);
     inp.addEventListener('keydown',function(e){
       if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();saveRow();setTimeout(function(){paklInp.focus();paklInp.scrollIntoView({block:'center',behavior:'smooth'});},50);}
     });
