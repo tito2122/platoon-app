@@ -1848,7 +1848,32 @@ function renderMissionDetail(m,container){
     +'<button id="mdagashim-btn-'+m.id+'" type="button" style="flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">📌 דגשים</button>'
     +'</div>';
   container.appendChild(cmdRow);
-  document.getElementById('mcmd-'+m.id).addEventListener('change',function(){m.commander=this.value.trim();saveMission(m);});
+  // החלף input מפקד משימה ב-makeNameInput עם dropup
+  (function(){
+    var mcmdInp=document.getElementById('mcmd-'+m.id);
+    if(!mcmdInp)return;
+    var mcmdWrap=makeNameInput(m.commander||'',
+      function(name){m.commander=name;saveMission(m);
+        // אחרי בחירה — עבור למפקד חוליה ראשון
+        setTimeout(function(){
+          var tcmd=document.querySelector('[id^="tcmd-"]');
+          if(tcmd){tcmd.focus();tcmd.scrollIntoView({block:'center',behavior:'smooth'});}
+        },30);
+      },
+      function(val){m.commander=val.trim();saveMission(m);
+        // Enter — עבור למפקד חוליה ראשון
+        setTimeout(function(){
+          var tcmd=document.querySelector('[id^="tcmd-"]');
+          if(tcmd){tcmd.focus();tcmd.scrollIntoView({block:'center',behavior:'smooth'});}
+        },30);
+      }
+    );
+    mcmdWrap._inp.value=m.commander||'';
+    mcmdWrap.style.cssText='flex:1;min-width:0';
+    mcmdWrap._inp.style.cssText='width:100%;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);box-sizing:border-box';
+    // החלף את ה-input הישן ב-wrap החדש
+    mcmdInp.parentNode.replaceChild(mcmdWrap,mcmdInp);
+  })();
 
   // popup דגשים מבצעיים
   (function(mLocal){
@@ -1916,40 +1941,48 @@ function renderMissionDetail(m,container){
 
     var cmdRow=document.createElement('div');
     cmdRow.style.cssText='display:flex;gap:6px;margin-bottom:8px';
-    var cmdInp=document.createElement('input');
-    cmdInp.id='tcmd-'+team.id;cmdInp.type='text';
-    cmdInp.placeholder='שם מפקד החוליה';
     var tcmdName=typeof team.commander==='object'?(team.commander.name||''):(team.commander||'');
     var tcmdPakl=typeof team.commander==='object'?(team.commander.pakl||''):'';
-    cmdInp.value=tcmdName;
-    cmdInp.style.cssText='width:100px;flex-shrink:0;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text)';
     var cmdPaklInp=document.createElement('input');
     cmdPaklInp.type='text';cmdPaklInp.placeholder='פק"ל';cmdPaklInp.value=tcmdPakl;
     cmdPaklInp.style.cssText='width:80px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
-    cmdRow.appendChild(cmdInp);cmdRow.appendChild(cmdPaklInp);
+
+    // מפקד חוליה עם makeNameInput (dropup)
+    var tcmdWrap=makeNameInput(tcmdName,
+      function(name){
+        team.commander={name:name,pakl:cmdPaklInp.value.trim()};saveMission(m);
+        setTimeout(function(){cmdPaklInp.focus();cmdPaklInp.scrollIntoView({block:'center',behavior:'smooth'});},30);
+      },
+      function(val){
+        team.commander={name:val.trim(),pakl:cmdPaklInp.value.trim()};saveMission(m);
+        setTimeout(function(){cmdPaklInp.focus();cmdPaklInp.scrollIntoView({block:'center',behavior:'smooth'});},30);
+      }
+    );
+    tcmdWrap._inp.id='tcmd-'+team.id;
+    tcmdWrap.style.cssText='width:100px;flex-shrink:0';
+    tcmdWrap._inp.style.cssText='width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text);box-sizing:border-box';
+    var cmdInp=tcmdWrap._inp;
+    cmdRow.appendChild(tcmdWrap);cmdRow.appendChild(cmdPaklInp);
     teamDiv.appendChild(cmdRow);
 
     function saveTcmd(){team.commander={name:cmdInp.value.trim(),pakl:cmdPaklInp.value.trim()};saveMission(m);}
-    cmdInp.addEventListener('blur',saveTcmd);
     cmdPaklInp.addEventListener('blur',saveTcmd);
 
-    // 9: Enter במפקד חוליה → פק"ל מפקד → גפרור ראשון
-    cmdInp.addEventListener('keydown',function(e){
-      if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();cmdPaklInp.focus();cmdPaklInp.scrollIntoView({block:'center',behavior:'smooth'});}
-    });
+    // פק"ל מפקד חוליה → Enter → שם חייל ראשון
     cmdPaklInp.addEventListener('keydown',function(e){
       if(e.key==='Enter'||e.key==='Tab'){
         e.preventDefault();
         saveTcmd();
-        var solInps=document.querySelectorAll('#tsols-'+team.id+' input[placeholder="שם חייל"]');
-        if(solInps.length){solInps[0].focus();solInps[0].scrollIntoView({block:'center',behavior:'smooth'});}
+        // חפש שדות שם חייל בחוליה זו
+        var solConts=document.querySelectorAll('#tsols-'+team.id+' input[placeholder="שם חייל"]');
+        if(solConts.length){setTimeout(function(){solConts[0].focus();solConts[0].scrollIntoView({block:'center',behavior:'smooth'});},30);}
         else{
           team.soldiers.push({name:'',pakl:''});saveMission(m);
           renderTeamSoldiers(team,m,container);
           setTimeout(function(){
             var ins=document.querySelectorAll('#tsols-'+team.id+' input[placeholder="שם חייל"]');
             if(ins.length){ins[0].focus();ins[0].scrollIntoView({block:'center',behavior:'smooth'});}
-          },40);
+          },50);
         }
       }
     });
@@ -2016,7 +2049,9 @@ function makeNameInput(initialValue, onSelect, onEnter) {
 
   function positionDrop() {
     var r = inp.getBoundingClientRect();
-    drop.style.top = (r.bottom + 4) + 'px';
+    var dropH = Math.min(180, drop.scrollHeight || 180);
+    drop.style.top = (r.top - dropH - 4) + 'px';
+    drop.style.bottom = 'auto';
     drop.style.right = (window.innerWidth - r.right) + 'px';
     drop.style.left = 'auto';
   }
