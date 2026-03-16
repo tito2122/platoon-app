@@ -2080,7 +2080,8 @@ function addSolRowToDOM(team,m,detContainer,cont){
   });
   newRow.appendChild(nb);newRow.appendChild(nInp);newRow.appendChild(nPakl);newRow.appendChild(nDel);
   cont.appendChild(newRow);
-  setTimeout(function(){nInp.focus();nInp.scrollIntoView({block:'center',behavior:'smooth'});},50);
+  nInp.focus();
+  setTimeout(function(){nInp.scrollIntoView({block:'center',behavior:'smooth'});},50);
 }
 
 
