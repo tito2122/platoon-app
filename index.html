@@ -1841,44 +1841,38 @@ function renderMissionDetail(m,container){
     dl.appendChild(opt);
   });
 
-  // מפקד משימה — עם מספר ברזל
+  // מפקד משימה — בנייה ישירה כ-DOM (לא innerHTML) כדי שכפתור הדגשים יישאר תקין
   var cmdRow=document.createElement('div');
   cmdRow.style.cssText='margin-bottom:12px';
-  cmdRow.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
-    +'<div style="width:22px;height:22px;min-width:22px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['cmd']+'</div>'
-    +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד המשימה</div>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;align-items:center">'
-    +'<input id="mcmd-'+m.id+'" type="text" placeholder="שם המפקד" value="'+(m.commander||'')+'" style="flex:1;min-width:0;box-sizing:border-box;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text)">'
-    +'<button id="mdagashim-btn-'+m.id+'" type="button" style="flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">📌 דגשים</button>'
-    +'</div>';
+  // שורת כותרת
+  var cmdLblRow=document.createElement('div');
+  cmdLblRow.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:4px';
+  cmdLblRow.innerHTML='<div style="width:22px;height:22px;min-width:22px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['cmd']+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד המשימה</div>';
+  cmdRow.appendChild(cmdLblRow);
+  // שורת input + דגשים
+  var cmdInputRow=document.createElement('div');
+  cmdInputRow.style.cssText='display:flex;gap:8px;align-items:center';
+  // input מפקד — input רגיל (לא makeNameInput, לא dropup)
+  var mcmdInp=document.createElement('input');
+  mcmdInp.type='text';
+  mcmdInp.id='mcmd-'+m.id;
+  mcmdInp.placeholder='שם המפקד';
+  mcmdInp.value=m.commander||'';
+  mcmdInp.autocomplete='off';
+  mcmdInp.style.cssText='flex:1;min-width:0;box-sizing:border-box;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text)';
+  mcmdInp.addEventListener('change',function(){m.commander=this.value.trim();saveMission(m);});
+  mcmdInp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();m.commander=this.value.trim();saveMission(m);}});
+  // כפתור דגשים
+  var dagashimBtn=document.createElement('button');
+  dagashimBtn.type='button';
+  dagashimBtn.id='mdagashim-btn-'+m.id;
+  dagashimBtn.style.cssText='flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap';
+  dagashimBtn.textContent='📌 דגשים';
+  cmdInputRow.appendChild(mcmdInp);
+  cmdInputRow.appendChild(dagashimBtn);
+  cmdRow.appendChild(cmdInputRow);
   container.appendChild(cmdRow);
-  // החלף input מפקד משימה ב-makeNameInput עם dropup
-  (function(){
-    var mcmdInp=document.getElementById('mcmd-'+m.id);
-    if(!mcmdInp)return;
-    var mcmdWrap=makeNameInput(m.commander||'',
-      function(name){m.commander=name;saveMission(m);
-        // אחרי בחירה — עבור למפקד חוליה ראשון
-        setTimeout(function(){
-          var tcmd=document.querySelector('[id^="tcmd-"]');
-          if(tcmd){tcmd.focus();tcmd.scrollIntoView({block:'center',behavior:'smooth'});}
-        },30);
-      },
-      function(val){m.commander=val.trim();saveMission(m);
-        // Enter — עבור למפקד חוליה ראשון
-        setTimeout(function(){
-          var tcmd=document.querySelector('[id^="tcmd-"]');
-          if(tcmd){tcmd.focus();tcmd.scrollIntoView({block:'center',behavior:'smooth'});}
-        },30);
-      }
-    );
-    mcmdWrap._inp.value=m.commander||'';
-    mcmdWrap.style.cssText='flex:1;min-width:0';
-    mcmdWrap._inp.style.cssText='width:100%;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);box-sizing:border-box';
-    // החלף את ה-input הישן ב-wrap החדש
-    mcmdInp.parentNode.replaceChild(mcmdWrap,mcmdInp);
-  })();
 
   // popup דגשים מבצעיים
   (function(mLocal){
