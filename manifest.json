@@ -3,7 +3,7 @@
   "short_name": "סד\"כ מח 1",
   "start_url": "/platoon-app/",
   "scope": "/platoon-app/",
-  "display": "fullscreen",
+  "display": "browser",
   "background_color": "#F0F2F5",
   "theme_color": "#1CB86A",
   "orientation": "portrait",
