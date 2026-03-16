@@ -1524,8 +1524,11 @@ function showReportResult(ds){
       if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
       return true;
     });
-    var onLeave=total.length-present.length;
-    var msg='🪖 *סה"כ — '+fmtDateHe(ds)+'*\n\n✅ נוכחים: '+present.length+'\n🏖️ בחופשה: '+onLeave+'\n\n*סה"כ: '+total.length+' חיילים*';
+    var onLeave=total.filter(function(s){return present.indexOf(s)===-1;});
+    var msg='🪖 *סה"כ — '+fmtDateHe(ds)+'*\n\n'
+      +'✅ *נוכחים ('+present.length+'):*\n'+present.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
+      +'\n\n🏖️ *בחופשה ('+onLeave.length+'):*\n'+onLeave.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
+      +'\n\n*סה"כ: '+total.length+' חיילים*';
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   };
   document.getElementById('rr-xl').onclick=function(){
