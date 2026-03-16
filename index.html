@@ -1798,24 +1798,26 @@ function renderMissions(){
       lines.push('🎯 יזומה: '+m.name);
       var d2=new Date(m.date);
       lines.push('📅 '+(d2.getDate()+'').padStart(2,'0')+'/'+(d2.getMonth()+1+'').padStart(2,'0')+'/'+d2.getFullYear());
-      lines.push('');
-      if(m.commander){lines.push(nums['cmd']+'. מפקד: '+m.commander);}
+      if(m.commander){lines.push(nums['cmd']+'. '+m.commander);}
       (m.teams||[]).forEach(function(team,ti){
         lines.push('');
-        lines.push('━━ חוליה '+(ti+1)+(team.name?' — '+team.name:'')+ ' ━━');
+        lines.push('━━ חוליה '+(ti+1)+' ━━');
         if(team.commander){
           var cn=typeof team.commander==='object'?team.commander.name||'':team.commander;
           var cp=typeof team.commander==='object'?team.commander.pakl||'':'';
-          lines.push(nums['tcmd-'+team.id]+'. מפקד: '+cn+(cp?' — '+cp:''));
+          if(cn)lines.push(nums['tcmd-'+team.id]+'. '+cn+(cp?' - '+cp:''));
         }
         (team.soldiers||[]).forEach(function(sol,si){
           var sn=typeof sol==='object'?sol.name||'':sol;
           var sp=typeof sol==='object'?sol.pakl||'':'';
-          if(sn)lines.push(nums['sol-'+team.id+'-'+si]+'. '+sn+(sp?' — '+sp:''));
+          if(sn)lines.push(nums['sol-'+team.id+'-'+si]+'. '+sn+(sp?' - '+sp:''));
         });
       });
       lines.push('');
-      var total2=0;(m.teams||[]).forEach(function(t){total2+=(t.soldiers||[]).length+(t.commander?1:0);});
+      var total2=0;(m.teams||[]).forEach(function(t){
+        (t.soldiers||[]).forEach(function(s){if(typeof s==='object'?s.name:s)total2++;});
+        if(t.commander){var cn2=typeof t.commander==='object'?t.commander.name:t.commander;if(cn2)total2++;}
+      });
       if(m.commander)total2++;
       lines.push('סה"כ: '+total2+' לוחמים');
       var text=lines.join('\n');
