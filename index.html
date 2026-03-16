@@ -2466,8 +2466,9 @@ function init(){
       return true;
     });
     var onLeave=total.filter(function(s){return present.indexOf(s)===-1;});
+    var sorted=total.slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
     var msg='🪖 *סה"כ — '+fmtDateHe(ds)+'*\n\n'
-      +total.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
+      +sorted.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
       +'\n\nסה"כ: '+total.length+' חיילים';
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   });
