@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <!-- mobile-web-app-capable הוסר כדי שסרגל הניווט של הטלפון יישאר גלוי -->
 <meta name="theme-color" content="#1CB86A">
 <link rel="manifest" href="manifest.json">
@@ -13,6 +13,12 @@ if('serviceWorker' in navigator){
 }
 </script>
 <!-- Firebase v8 compat (עובד על כל דפדפן כולל Safari) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://firestore.googleapis.com">
+<link rel="preload" href="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" as="script">
+<link rel="preload" href="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" as="script">
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script>
@@ -68,7 +74,9 @@ if('serviceWorker' in navigator){
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -131,9 +139,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .empty{text-align:center;padding:64px 24px;color:var(--text3)}
 .empty .ei{font-size:60px;margin-bottom:18px;opacity:.55}
 .empty h3{font-size:19px;font-weight:700;color:var(--text2);margin-bottom:8px}
-.fab{position:fixed;bottom:86px;left:18px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-size:28px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 24px rgba(37,99,235,.45);transition:transform .15s;z-index:30}
+.fab{position:fixed;bottom:calc(86px + env(safe-area-inset-bottom));left:18px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-size:28px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 24px rgba(37,99,235,.45);transition:transform .15s;z-index:30}
 .fab:active{transform:scale(.88)}
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--border);padding:12px 14px;z-index:20;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--border);padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:20;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
 .btn-report{width:100%;min-height:52px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-family:var(--font);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 16px rgba(37,99,235,.35);transition:transform .12s}
 .btn-report:active{transform:scale(.97)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 20px;border-radius:var(--r-sm);border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none}
