@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <!-- mobile-web-app-capable הוסר כדי שסרגל הניווט של הטלפון יישאר גלוי -->
 <meta name="theme-color" content="#1CB86A">
-<!-- manifest הוסר כדי למנוע מסך מלא -->
+<link rel="manifest" href="manifest.json">
 <title>סד"כ</title>
 <script>
 if('serviceWorker' in navigator){
@@ -2644,7 +2644,8 @@ function _handleBack(){
 
   document.addEventListener('touchstart',function(e){
     var el=getActiveScroll();
-    if(el&&el.scrollTop===0&&isMainVisible()){
+    var missingOpen=document.getElementById('modal-missing').classList.contains('show');
+    if(el&&el.scrollTop===0&&isMainVisible()&&!missingOpen){
       startY=e.touches[0].clientY;pulling=true;triggered=false;
     }
   },{passive:true});
