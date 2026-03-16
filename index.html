@@ -2467,9 +2467,8 @@ function init(){
     });
     var onLeave=total.filter(function(s){return present.indexOf(s)===-1;});
     var msg='🪖 *סה"כ — '+fmtDateHe(ds)+'*\n\n'
-      +'✅ *נוכחים ('+present.length+'):*\n'+present.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
-      +'\n\n🏖️ *בחופשה ('+onLeave.length+'):*\n'+onLeave.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
-      +'\n\n*סה"כ: '+total.length+' חיילים*';
+      +total.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
+      +'\n\nסה"כ: '+total.length+' חיילים';
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   });
   document.getElementById('modal-report').addEventListener('click',function(e){if(e.target===this)closeReportModal();});
