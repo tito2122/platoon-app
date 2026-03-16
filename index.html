@@ -1798,7 +1798,7 @@ function renderMissions(){
       lines.push('🎯 יזומה: '+m.name);
       var d2=new Date(m.date);
       lines.push('📅 '+(d2.getDate()+'').padStart(2,'0')+'/'+(d2.getMonth()+1+'').padStart(2,'0')+'/'+d2.getFullYear());
-      if(m.commander){lines.push(nums['cmd']+'. '+m.commander);}
+      if(m.commander){lines.push(nums['cmd']+'. מפקד המשימה: '+m.commander);}
       (m.teams||[]).forEach(function(team,ti){
         lines.push('');
         lines.push('━━ חוליה '+(ti+1)+' ━━');
@@ -1820,6 +1820,7 @@ function renderMissions(){
       });
       if(m.commander)total2++;
       lines.push('סה"כ: '+total2+' לוחמים');
+      if(m.dagashim&&m.dagashim.trim()){lines.push('');lines.push('📌 דגשים:');lines.push(m.dagashim.trim());}
       var text=lines.join('\n');
       var url='https://wa.me/?text='+encodeURIComponent(text);
       window.open(url,'_blank');
