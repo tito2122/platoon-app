@@ -1996,6 +1996,48 @@ function renderMissionDetail(m,container){
   container.appendChild(addTeamBtn);
 }
 
+// הוספת שורת גפרור ישירות ל-DOM בלי רנדור מחדש
+function addSolRowToDOM(team,m,detContainer,cont){
+  var newIdx=team.soldiers.length;
+  team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
+  var nums2=calcMissionIronNums(m);
+  var ironN2=nums2['sol-'+team.id+'-'+newIdx]||'';
+  var newRow=document.createElement('div');
+  newRow.style.cssText='display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 0';
+  newRow.setAttribute('draggable','true');
+  newRow.dataset.teamid=team.id;
+  newRow.dataset.si=String(newIdx);
+  var nb=document.createElement('div');
+  nb.style.cssText='width:20px;height:20px;min-width:20px;background:#1CB86A;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0';
+  nb.textContent=ironN2;
+  var nInp=document.createElement('input');
+  nInp.type='text';nInp.placeholder='שם חייל';nInp.autocomplete='off';
+  nInp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+  var nPakl=document.createElement('input');
+  nPakl.type='text';nPakl.placeholder='פק"ל';nPakl.autocomplete='off';
+  nPakl.style.cssText='width:70px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+  var nDel=document.createElement('button');
+  nDel.textContent='✕';
+  nDel.style.cssText='border:none;background:transparent;color:#E8354A;font-size:14px;cursor:pointer;padding:2px 4px;font-weight:700;flex-shrink:0';
+  nDel.addEventListener('click',function(e2){
+    e2.stopPropagation();
+    if(team.soldiers.length<=1){toast('חוליה חייבת לכלול לפחות גפרור אחד');return;}
+    team.soldiers.splice(newIdx,1);if(m)saveMission(m);
+    renderTeamSoldiers(team,m,detContainer);
+  });
+  function saveNewRow(){team.soldiers[newIdx]={name:nInp.value.trim(),pakl:nPakl.value.trim()};if(m)saveMission(m);}
+  nInp.addEventListener('keydown',function(e2){
+    if(e2.key==='Enter'||e2.key==='Tab'){e2.preventDefault();saveNewRow();setTimeout(function(){nPakl.focus();nPakl.scrollIntoView({block:'center',behavior:'smooth'});},50);}
+  });
+  nPakl.addEventListener('keydown',function(e2){
+    if(e2.key==='Enter'){e2.preventDefault();saveNewRow();var c=document.getElementById('tsols-'+team.id);if(c)addSolRowToDOM(team,m,detContainer,c);}
+  });
+  newRow.appendChild(nb);newRow.appendChild(nInp);newRow.appendChild(nPakl);newRow.appendChild(nDel);
+  cont.appendChild(newRow);
+  setTimeout(function(){nInp.focus();nInp.scrollIntoView({block:'center',behavior:'smooth'});},50);
+}
+
+
 function renderTeamSoldiers(team,m,detContainer){
   var cont=document.getElementById('tsols-'+team.id);
   if(!cont)return;
@@ -2076,54 +2118,8 @@ function renderTeamSoldiers(team,m,detContainer){
     paklInp.addEventListener('keydown',function(e){
       if(e.key==='Enter'){
         e.preventDefault();saveRow();
-        // הוסף שורה חדשה ישירות ל-DOM בלי לרנדר הכל מחדש
-        var newIdx=team.soldiers.length;
-        team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
         var newCont=document.getElementById('tsols-'+team.id);
-        if(!newCont)return;
-        var nums2=calcMissionIronNums(m);
-        var ironN2=nums2['sol-'+team.id+'-'+newIdx]||'';
-        var newRow=document.createElement('div');
-        newRow.style.cssText='display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 0';
-        var nb=document.createElement('div');
-        nb.style.cssText='width:20px;height:20px;min-width:20px;background:#1CB86A;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0';
-        nb.textContent=ironN2;
-        var nInp=document.createElement('input');
-        nInp.type='text';nInp.placeholder='שם חייל';nInp.autocomplete='off';
-        nInp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
-        var nPakl=document.createElement('input');
-        nPakl.type='text';nPakl.placeholder='פק"ל';nPakl.autocomplete='off';
-        nPakl.style.cssText='width:70px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
-        var nDel=document.createElement('button');
-        nDel.textContent='✕';
-        nDel.style.cssText='border:none;background:transparent;color:#E8354A;font-size:14px;cursor:pointer;padding:2px 4px;font-weight:700;flex-shrink:0';
-        nDel.addEventListener('click',function(e2){
-          e2.stopPropagation();
-          if(team.soldiers.length<=1){toast('חוליה חייבת לכלול לפחות גפרור אחד');return;}
-          team.soldiers.splice(newIdx,1);if(m)saveMission(m);
-          renderTeamSoldiers(team,m,detContainer);
-        });
-        function saveNewRow(){team.soldiers[newIdx]={name:nInp.value.trim(),pakl:nPakl.value.trim()};if(m)saveMission(m);}
-        nInp.addEventListener('keydown',function(e2){
-          if(e2.key==='Enter'||e2.key==='Tab'){e2.preventDefault();saveNewRow();setTimeout(function(){nPakl.focus();nPakl.scrollIntoView({block:'center',behavior:'smooth'});},50);}
-        });
-        nPakl.addEventListener('keydown',function(e2){
-          if(e2.key==='Enter'){
-            e2.preventDefault();saveNewRow();
-            var newIdx2=team.soldiers.length;
-            team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
-            renderTeamSoldiers(team,m,detContainer);
-            setTimeout(function(){
-              var c=document.getElementById('tsols-'+team.id);
-              if(!c)return;
-              var rr=c.querySelectorAll('input[placeholder="שם חייל"]');
-              if(rr.length){rr[rr.length-1].focus();rr[rr.length-1].scrollIntoView({block:'center',behavior:'smooth'});}
-            },50);
-          }
-        });
-        newRow.appendChild(nb);newRow.appendChild(nInp);newRow.appendChild(nPakl);newRow.appendChild(nDel);
-        newCont.appendChild(newRow);
-        setTimeout(function(){nInp.focus();nInp.scrollIntoView({block:'center',behavior:'smooth'});},50);
+        if(newCont)addSolRowToDOM(team,m,detContainer,newCont);
       }
     });
 
