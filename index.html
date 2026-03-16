@@ -2076,12 +2076,25 @@ function makeNameInput(initialValue, onSelect, onEnter) {
         drop.style.display = 'none';
         if (onSelect) onSelect(name);
       });
+      // במובייל: touchstart מסמן את הבחירה, touchend מבצע אותה ומחזיר פוקוס
+      var _touchSelected = false;
       opt.addEventListener('touchstart', function(e) {
         e.preventDefault();
+        e.stopPropagation();
+        _touchSelected = true;
+      }, {passive: false});
+      opt.addEventListener('touchend', function(e) {
+        if (!_touchSelected) return;
+        _touchSelected = false;
+        e.preventDefault();
+        e.stopPropagation();
         inp.value = name;
         drop.style.display = 'none';
+        // מחזיר פוקוס ל-input — מקלדת נשארת/נפתחת
+        inp.focus();
         if (onSelect) onSelect(name);
       }, {passive: false});
+      opt.addEventListener('touchcancel', function() { _touchSelected = false; });
       drop.appendChild(opt);
     });
     positionDrop();
