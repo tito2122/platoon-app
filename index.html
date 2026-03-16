@@ -2027,8 +2027,47 @@ function renderTeamSoldiers(team,m,detContainer){
     del.textContent='✕';
     del.style.cssText='border:none;background:transparent;color:#E8354A;font-size:14px;cursor:pointer;padding:2px 4px;font-weight:700;flex-shrink:0';
 
+    row.setAttribute('draggable','true');
+    row.dataset.teamid=team.id;
+    row.dataset.si=String(si);
     row.appendChild(numBadge);row.appendChild(inp);row.appendChild(paklInp);row.appendChild(del);
     cont.appendChild(row);
+
+    // drag&drop — גרור שורה
+    row.addEventListener('dragstart',function(e){
+      e.stopPropagation();
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',JSON.stringify({fromTeam:team.id,fromIdx:si}));
+      row.style.opacity='0.4';
+    });
+    row.addEventListener('dragend',function(){row.style.opacity='';});
+    row.addEventListener('dragover',function(e){
+      e.preventDefault();e.stopPropagation();
+      e.dataTransfer.dropEffect='move';
+      var rect=row.getBoundingClientRect();
+      row.style.borderTop=e.clientY<rect.top+rect.height/2?'2px solid var(--blue)':'';
+      row.style.borderBottom=e.clientY>=rect.top+rect.height/2?'2px solid var(--blue)':'';
+    });
+    row.addEventListener('dragleave',function(){row.style.borderTop='';row.style.borderBottom='';});
+    row.addEventListener('drop',function(e){
+      e.preventDefault();e.stopPropagation();
+      row.style.borderTop='';row.style.borderBottom='';
+      try{
+        var data=JSON.parse(e.dataTransfer.getData('text/plain'));
+        var fromTeamObj=m.teams.find(function(x){return x.id==data.fromTeam;});
+        var toTeamObj=team;
+        if(!fromTeamObj||!toTeamObj)return;
+        var soldier=fromTeamObj.soldiers.splice(data.fromIdx,1)[0];
+        if(fromTeamObj.soldiers.length<1)fromTeamObj.soldiers.push({name:'',pakl:''});
+        var rect2=row.getBoundingClientRect();
+        var toIdx=si;
+        if(e.clientY>=rect2.top+rect2.height/2)toIdx++;
+        if(fromTeamObj===toTeamObj&&data.fromIdx<toIdx)toIdx--;
+        toTeamObj.soldiers.splice(toIdx,0,soldier);
+        if(m)saveMission(m);
+        m.teams.forEach(function(t){renderTeamSoldiers(t,m,detContainer);});
+      }catch(ex){}
+    });
 
     function saveRow(){team.soldiers[si]={name:inp.value.trim(),pakl:paklInp.value.trim()};if(m)saveMission(m);}
     inp.addEventListener('keydown',function(e){
@@ -2037,15 +2076,54 @@ function renderTeamSoldiers(team,m,detContainer){
     paklInp.addEventListener('keydown',function(e){
       if(e.key==='Enter'){
         e.preventDefault();saveRow();
+        // הוסף שורה חדשה ישירות ל-DOM בלי לרנדר הכל מחדש
+        var newIdx=team.soldiers.length;
         team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
-        renderTeamSoldiers(team,m,detContainer);
-        setTimeout(function(){
-          // cont התחדש אחרי renderTeamSoldiers — חפש מחדש
-          var newCont=document.getElementById('tsols-'+team.id);
-          if(!newCont)return;
-          var rows=newCont.querySelectorAll('input[placeholder="שם חייל"]');
-          if(rows.length){rows[rows.length-1].focus();rows[rows.length-1].scrollIntoView({block:'center',behavior:'smooth'});}
-        },50);
+        var newCont=document.getElementById('tsols-'+team.id);
+        if(!newCont)return;
+        var nums2=calcMissionIronNums(m);
+        var ironN2=nums2['sol-'+team.id+'-'+newIdx]||'';
+        var newRow=document.createElement('div');
+        newRow.style.cssText='display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 0';
+        var nb=document.createElement('div');
+        nb.style.cssText='width:20px;height:20px;min-width:20px;background:#1CB86A;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0';
+        nb.textContent=ironN2;
+        var nInp=document.createElement('input');
+        nInp.type='text';nInp.placeholder='שם חייל';nInp.autocomplete='off';
+        nInp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+        var nPakl=document.createElement('input');
+        nPakl.type='text';nPakl.placeholder='פק"ל';nPakl.autocomplete='off';
+        nPakl.style.cssText='width:70px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+        var nDel=document.createElement('button');
+        nDel.textContent='✕';
+        nDel.style.cssText='border:none;background:transparent;color:#E8354A;font-size:14px;cursor:pointer;padding:2px 4px;font-weight:700;flex-shrink:0';
+        nDel.addEventListener('click',function(e2){
+          e2.stopPropagation();
+          if(team.soldiers.length<=1){toast('חוליה חייבת לכלול לפחות גפרור אחד');return;}
+          team.soldiers.splice(newIdx,1);if(m)saveMission(m);
+          renderTeamSoldiers(team,m,detContainer);
+        });
+        function saveNewRow(){team.soldiers[newIdx]={name:nInp.value.trim(),pakl:nPakl.value.trim()};if(m)saveMission(m);}
+        nInp.addEventListener('keydown',function(e2){
+          if(e2.key==='Enter'||e2.key==='Tab'){e2.preventDefault();saveNewRow();setTimeout(function(){nPakl.focus();nPakl.scrollIntoView({block:'center',behavior:'smooth'});},50);}
+        });
+        nPakl.addEventListener('keydown',function(e2){
+          if(e2.key==='Enter'){
+            e2.preventDefault();saveNewRow();
+            var newIdx2=team.soldiers.length;
+            team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
+            renderTeamSoldiers(team,m,detContainer);
+            setTimeout(function(){
+              var c=document.getElementById('tsols-'+team.id);
+              if(!c)return;
+              var rr=c.querySelectorAll('input[placeholder="שם חייל"]');
+              if(rr.length){rr[rr.length-1].focus();rr[rr.length-1].scrollIntoView({block:'center',behavior:'smooth'});}
+            },50);
+          }
+        });
+        newRow.appendChild(nb);newRow.appendChild(nInp);newRow.appendChild(nPakl);newRow.appendChild(nDel);
+        newCont.appendChild(newRow);
+        setTimeout(function(){nInp.focus();nInp.scrollIntoView({block:'center',behavior:'smooth'});},50);
       }
     });
 
@@ -2055,6 +2133,23 @@ function renderTeamSoldiers(team,m,detContainer){
       team.soldiers.splice(si,1);if(m)saveMission(m);
       renderTeamSoldiers(team,m,detContainer);
     });
+  });
+
+  // drop zone על ה-container עצמו = הוסף בסוף
+  cont.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';});
+  cont.addEventListener('drop',function(e){
+    if(e.target!==cont)return;
+    e.preventDefault();e.stopPropagation();
+    try{
+      var data=JSON.parse(e.dataTransfer.getData('text/plain'));
+      var fromTeamObj=m.teams.find(function(x){return x.id==data.fromTeam;});
+      if(!fromTeamObj)return;
+      var soldier=fromTeamObj.soldiers.splice(data.fromIdx,1)[0];
+      if(fromTeamObj.soldiers.length<1)fromTeamObj.soldiers.push({name:'',pakl:''});
+      team.soldiers.push(soldier);
+      if(m)saveMission(m);
+      m.teams.forEach(function(t){renderTeamSoldiers(t,m,detContainer);});
+    }catch(ex){}
   });
 }
 
