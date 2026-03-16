@@ -590,6 +590,13 @@ function scheduleMidnightCheck(){
     scheduleMidnightCheck();
   },msUntil6);
 }
+function getMissingIds(){
+  var ids={};
+  state.missing.forEach(function(m){
+    if(m.soldierData&&m.soldierData.id!=null)ids[m.soldierData.id]=true;
+  });
+  return ids;
+}
 function getStatusInfo(s){
   var td=today();
   for(var i=0;i<s.leaves.length;i++){if(td>=s.leaves[i].from&&td<s.leaves[i].to)return{label:'🏖️ בחופשה',cls:'sp-leave'};}
@@ -767,7 +774,7 @@ function renderWeek(){
   wrap.appendChild(toggleBtn);
 }
 function updateStats(){
-  var activeSoldiers=state.soldiers.filter(function(s){return !s.isMissing;});
+  var _mid=getMissingIds();var activeSoldiers=state.soldiers.filter(function(s){return !s.isMissing&&!_mid[s.id];});
   var pr=activeSoldiers.filter(function(s){return getStatusInfo(s).cls==='sp-present';});
   var ab=activeSoldiers.filter(function(s){return getStatusInfo(s).cls!=='sp-present';});
   document.getElementById('st-tot').textContent=activeSoldiers.length;
@@ -828,8 +835,8 @@ function renderList(){
   var wrap=document.getElementById('list-wrap');wrap.innerHTML='';
   state.soldiers.forEach(function(s){checkNextExpiry(s);});
   var searchQ=(document.getElementById('soldier-search')?document.getElementById('soldier-search').value.trim().toLowerCase():'');
-  var list=state.soldiers.filter(function(s){
-    if(s.isMissing)return false;
+  var _mid2=getMissingIds();var list=state.soldiers.filter(function(s){
+    if(s.isMissing||_mid2[s.id])return false;
     if(state.filter==='present')return s.status==='present'&&getStatusInfo(s).cls!=='sp-leave';
     if(state.filter==='absent')return s.status==='absent'||getStatusInfo(s).cls==='sp-leave';
     if(searchQ){var nm=((s.firstName||'')+' '+(s.lastName||'')+(s.name||'')).toLowerCase();if(nm.indexOf(searchQ)<0)return false;}
@@ -2475,7 +2482,7 @@ function init(){
   document.getElementById('modal-close').addEventListener('click',closeReportModal);
   document.getElementById('rr-total').addEventListener('click',function(){
     var ds=rcalSel||today();
-    var total=state.soldiers.filter(function(s){return !s.isMissing;});
+    var _mid3=getMissingIds();var total=state.soldiers.filter(function(s){return !s.isMissing&&!_mid3[s.id];});
     var present=total.filter(function(s){
       if(s.status!=='present')return false;
       for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
