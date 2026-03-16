@@ -435,6 +435,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
       <div class="share-row">
         <button class="btn btn-wa" id="rr-wa">📲 WhatsApp</button>
         <button class="btn btn-xl" id="rr-xl">📊 Excel</button>
+        <button class="btn" id="rr-total" style="background:#25D366;color:#fff;flex:1">📤 סה"כ</button>
       </div>
     </div>
     <button class="btn btn-ghost btn-full" id="modal-close">סגור</button>
@@ -1513,6 +1514,18 @@ function showReportResult(ds){
   document.getElementById('report-result').classList.add('show');
   document.getElementById('rr-wa').onclick=function(){
     var msg='🪖 *דו"ח נוכחות מח\' 1 — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  };
+  document.getElementById('rr-total').onclick=function(){
+    var total=state.soldiers.filter(function(s){return !s.isMissing;});
+    var present=total.filter(function(s){
+      if(s.status!=='present')return false;
+      for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+      if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
+      return true;
+    });
+    var onLeave=total.length-present.length;
+    var msg='🪖 *סה"כ — '+fmtDateHe(ds)+'*\n\n✅ נוכחים: '+present.length+'\n🏖️ בחופשה: '+onLeave+'\n\n*סה"כ: '+total.length+' חיילים*';
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   };
   document.getElementById('rr-xl').onclick=function(){
