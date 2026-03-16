@@ -683,18 +683,6 @@ function renderWeek(){
   if(!wrap)return;
   wrap.innerHTML='';
 
-  // כפתור הסרת לוח שבועי
-  var toggleBtn=document.createElement('div');
-  toggleBtn.className='week-toggle';
-  toggleBtn.innerHTML='⚙️ הסר לוח שבועי';
-  toggleBtn.addEventListener('click',function(){
-    if(confirm('להסיר את הלוח השבועי?')){
-      document.getElementById('main-tabs-bar').style.display='none';
-      document.getElementById('main-tab-week').style.display='none';
-      document.getElementById('main-tab-list').style.display='';
-      toast('הלוח הוסר. ניתן להחזיר דרך ⚙️');
-    }
-  });
 
   var today=new Date();
   var DAY_NAMES=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
