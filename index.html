@@ -2023,10 +2023,10 @@ function addSolRowToDOM(team,m,detContainer,cont){
   nb.textContent=ironN2;
   var nInp=document.createElement('input');
   nInp.type='text';nInp.placeholder='שם חייל';nInp.autocomplete='off';
-  nInp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+  nInp.style.cssText='flex:0.6;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
   var nPakl=document.createElement('input');
   nPakl.type='text';nPakl.placeholder='פק"ל';nPakl.autocomplete='off';
-  nPakl.style.cssText='width:70px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+  nPakl.style.cssText='width:110px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
   var nDel=document.createElement('button');
   nDel.textContent='✕';
   nDel.style.cssText='border:none;background:transparent;color:#E8354A;font-size:14px;cursor:pointer;padding:2px 4px;font-weight:700;flex-shrink:0';
@@ -2070,11 +2070,11 @@ function renderTeamSoldiers(team,m,detContainer){
 
     var inp=document.createElement('input');
     inp.type='text';inp.value=solName;inp.placeholder='שם חייל';inp.autocomplete='off';
-    inp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+    inp.style.cssText='flex:0.6;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
 
     var paklInp=document.createElement('input');
     paklInp.type='text';paklInp.value=solPakl;paklInp.placeholder='פק"ל';paklInp.autocomplete='off';
-    paklInp.style.cssText='width:70px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+    paklInp.style.cssText='width:110px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
 
     var del=document.createElement('button');
     del.textContent='✕';
