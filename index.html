@@ -1964,6 +1964,7 @@ function renderTeamWizard(team, m, teamDiv) {
   var wiz = existing || document.createElement('div');
   wiz.id = wizId;
   wiz.innerHTML = '';
+  if (!existing) teamDiv.appendChild(wiz); // תמיד מוסיף בהתחלה
 
   var soldiers = team.soldiers || [];
   var tcmdName = typeof team.commander === 'object' ? (team.commander.name || '') : (team.commander || '');
@@ -2032,7 +2033,6 @@ function renderTeamWizard(team, m, teamDiv) {
     });
     wiz.appendChild(f0);
     setTimeout(function(){ f0._inp.focus(); f0._inp.scrollIntoView({block:'center',behavior:'smooth'}); }, 30);
-    if (!existing) teamDiv.appendChild(wiz);
     return;
   }
 
@@ -2048,7 +2048,6 @@ function renderTeamWizard(team, m, teamDiv) {
     });
     wiz.appendChild(f1);
     setTimeout(function(){ f1._inp.focus(); f1._inp.scrollIntoView({block:'center',behavior:'smooth'}); }, 30);
-    if (!existing) teamDiv.appendChild(wiz);
     return;
   }
 
@@ -2103,9 +2102,9 @@ function renderTeamWizard(team, m, teamDiv) {
     }
   });
 
-  // כפתור הוסף גפרור (גלוי רק כשאין שדה פעיל)
-  var hasActive = soldiers.some(function(s){ return !(typeof s==='object' && s.name && !s._paklPending); });
-  if (!hasActive || soldiers.length === 0) {
+  // כפתור הוסף גפרור — גלוי תמיד
+  var hasOpenField = soldiers.some(function(s){ return !(typeof s==='object' && s.name && !s._paklPending); });
+  if (!hasOpenField) {
     var addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.style.cssText = 'margin-top:6px;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);border-radius:8px;padding:6px 12px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;width:100%';
@@ -2120,7 +2119,6 @@ function renderTeamWizard(team, m, teamDiv) {
     wiz.appendChild(addBtn);
   }
 
-  if (!existing) teamDiv.appendChild(wiz);
 }
 
 // שמור תאימות לקוד ישן שקורא ל-renderTeamSoldiers
