@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <!-- mobile-web-app-capable הוסר כדי שסרגל הניווט של הטלפון יישאר גלוי -->
 <meta name="theme-color" content="#1CB86A">
-<link rel="manifest" href="manifest.json">
+<!-- manifest הוסר כדי למנוע מסך מלא -->
 <title>סד"כ</title>
 <script>
 if('serviceWorker' in navigator){
@@ -1018,7 +1018,8 @@ function buildInfoTab(s){
         var reason=prompt('סיבת היעדרות (אופציונלי):','');
         if(reason===null)return; // ביטול
         if(!confirm('להעביר את '+(s.name||s.firstName||'החייל')+' לרשימת הנעדרים?'))return;
-        var miss={id:state.nmid++,name:s.name||(((s.firstName||'')+' '+(s.lastName||'')).trim()),reason:reason||''};
+        var soldierSnapshot=JSON.parse(JSON.stringify(s)); // שמור עותק מלא
+        var miss={id:state.nmid++,name:s.name||(((s.firstName||'')+' '+(s.lastName||'')).trim()),reason:reason||'',soldierData:soldierSnapshot};
         saveMissing(miss);
         // מחק את החייל מרשימת החיילים לחלוטין
         deleteSoldierRemote(s.id);
@@ -1571,14 +1572,21 @@ function renderMissingList(){
     returnBtn.textContent='✅ חזר';
     returnBtn.addEventListener('click',(function(mid, missData){return function(){
       if(!confirm('להחזיר חייל זה לרשימת הסד"כ?'))return;
-      // חפש חייל קיים עם _missingId תואם
-      // צור חייל חדש נקי מהנתונים של הנעדר
-      var newSol=mkSoldier();
-      var parts=(missData.name||'').trim().split(/\s+/);
-      if(parts.length>=2){newSol.lastName=parts[0];newSol.firstName=parts.slice(1).join(' ');}
-      else{newSol.lastName=parts[0]||'';newSol.firstName='';}
-      newSol.name=missData.name||'';
-      newSol.isMissing=false;
+      var newSol;
+      if(missData.soldierData){
+        // שחזר את הנתונים המקוריים המלאים
+        newSol=JSON.parse(JSON.stringify(missData.soldierData));
+        newSol.isMissing=false;
+        newSol._missingId=null;
+      } else {
+        // נוסף ידנית — צור חדש עם השם בלבד
+        newSol=mkSoldier();
+        var parts=(missData.name||'').trim().split(/\s+/);
+        if(parts.length>=2){newSol.lastName=parts[0];newSol.firstName=parts.slice(1).join(' ');}
+        else{newSol.lastName=parts[0]||'';newSol.firstName='';}
+        newSol.name=missData.name||'';
+        newSol.isMissing=false;
+      }
       state.soldiers.push(newSol);
       saveSoldier(newSol);
       // מחק מרשימת הנעדרים
