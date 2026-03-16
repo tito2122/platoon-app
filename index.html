@@ -1926,10 +1926,10 @@ function renderMissionDetail(m,container){
     var tcmdInp=document.createElement('input');
     tcmdInp.id='tcmd-'+team.id;tcmdInp.type='text';tcmdInp.placeholder='שם מפקד החוליה';
     tcmdInp.value=tcmdName;tcmdInp.autocomplete='off';
-    tcmdInp.style.cssText='flex:1;min-width:0;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text)';
+    tcmdInp.style.cssText='width:90px;flex-shrink:0;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text)';
     var tcmdPaklInp=document.createElement('input');
     tcmdPaklInp.type='text';tcmdPaklInp.placeholder='פק"ל';tcmdPaklInp.value=tcmdPakl;tcmdPaklInp.autocomplete='off';
-    tcmdPaklInp.style.cssText='width:80px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+    tcmdPaklInp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
     tcmdRow.appendChild(tcmdInp);tcmdRow.appendChild(tcmdPaklInp);
     teamDiv.appendChild(tcmdRow);
     function saveTcmd(){team.commander={name:tcmdInp.value.trim(),pakl:tcmdPaklInp.value.trim()};saveMission(m);}
@@ -2040,7 +2040,10 @@ function renderTeamSoldiers(team,m,detContainer){
         team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
         renderTeamSoldiers(team,m,detContainer);
         setTimeout(function(){
-          var rows=cont.querySelectorAll('input[placeholder="שם חייל"]');
+          // cont התחדש אחרי renderTeamSoldiers — חפש מחדש
+          var newCont=document.getElementById('tsols-'+team.id);
+          if(!newCont)return;
+          var rows=newCont.querySelectorAll('input[placeholder="שם חייל"]');
           if(rows.length){rows[rows.length-1].focus();rows[rows.length-1].scrollIntoView({block:'center',behavior:'smooth'});}
         },50);
       }
