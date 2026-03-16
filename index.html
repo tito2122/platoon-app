@@ -2167,8 +2167,15 @@ function renderTeamSoldiers(team,m,detContainer){
     paklInp.addEventListener('keydown',function(e){
       if(e.key==='Enter'){
         e.preventDefault();saveRow();
-        var newCont=document.getElementById('tsols-'+team.id);
-        if(newCont)addSolRowToDOM(team,m,detContainer,newCont);
+        var isLast=si===team.soldiers.length-1;
+        if(isLast){
+          var newCont=document.getElementById('tsols-'+team.id);
+          if(newCont)addSolRowToDOM(team,m,detContainer,newCont);
+        } else {
+          var allNameInps=document.getElementById('tsols-'+team.id).querySelectorAll('input[placeholder="שם חייל"]');
+          var nextInp=allNameInps[si+1];
+          if(nextInp){nextInp.focus();nextInp.scrollIntoView({block:'center',behavior:'smooth'});}
+        }
       }
     });
 
