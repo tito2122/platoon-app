@@ -555,7 +555,7 @@ function wrapWithUndo(ta){
   return wrap;
 }
 function toDateStr(y,m,d){return y+'-'+(m<9?'0':'')+(m+1)+'-'+(d<10?'0':'')+d;}
-function today(){var n=new Date();return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
+function today(){var n=new Date();if(n.getHours()<6){n.setDate(n.getDate()-1);}return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
 function tomorrowStr(){var n=new Date();n.setDate(n.getDate()+1);return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
 function fmtDate(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 function fmtDateHe(s){if(!s)return'';var p=s.split('-');return p[2]+' ב'+MONTHS_HE[+p[1]-1]+' '+p[0];}
@@ -581,12 +581,13 @@ function checkAllExpiries(){
 }
 function scheduleMidnightCheck(){
   var now=new Date();
-  var midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,5);
-  var msUntilMidnight=midnight-now;
+  var next6=new Date(now.getFullYear(),now.getMonth(),now.getDate(),6,0,5);
+  if(now>=next6)next6.setDate(next6.getDate()+1);
+  var msUntil6=next6-now;
   setTimeout(function(){
     checkAllExpiries();
-    scheduleMidnightCheck(); // תזמן לחצות הבאה
-  },msUntilMidnight);
+    scheduleMidnightCheck();
+  },msUntil6);
 }
 function getStatusInfo(s){
   var td=today();
