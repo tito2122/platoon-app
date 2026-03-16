@@ -400,6 +400,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <div class="modal-sheet" style="max-height:85vh;overflow-y:auto">
     <div class="modal-drag"></div>
     <div class="modal-title">🪦 נעדרים</div>
+    <input id="missing-search" type="text" placeholder="🔍 חיפוש לפי שם..." style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:15px;color:var(--text);margin-bottom:12px;outline:none">
     <div id="missing-list" style="margin-bottom:16px"></div>
     <button class="btn btn-full" id="btn-add-missing" style="background:linear-gradient(135deg,#111827,#374151);color:#fff;min-height:50px;border-radius:var(--r-sm);border:none;font-family:var(--font);font-size:15px;font-weight:700;margin-bottom:12px">+ הוסף נעדר</button>
     <div id="missing-add-form" style="display:none;background:var(--bg);border-radius:var(--r-sm);border:1.5px dashed var(--border);padding:14px;margin-bottom:12px">
@@ -1535,6 +1536,7 @@ function deleteMissing(id){
   window._deleteDoc(window._doc(getMissingCol(),String(id)));
 }
 function openMissingModal(){
+  document.getElementById('missing-search').value='';
   renderMissingList();
   document.getElementById('missing-add-form').style.display='none';
   document.getElementById('mf-name').value='';
@@ -1544,11 +1546,13 @@ function openMissingModal(){
 function closeMissingModal(){document.getElementById('modal-missing').classList.remove('show');}
 function renderMissingList(){
   var wrap=document.getElementById('missing-list');wrap.innerHTML='';
-  if(!state.missing.length){
-    var em=document.createElement('div');em.style.cssText='text-align:center;padding:24px;color:var(--text3);font-size:14px';em.textContent='אין נעדרים רשומים';
+  var q=(document.getElementById('missing-search').value||'').trim().toLowerCase();
+  var list=state.missing.filter(function(m){return !q||(m.name||'').toLowerCase().includes(q);});
+  if(!list.length){
+    var em=document.createElement('div');em.style.cssText='text-align:center;padding:24px;color:var(--text3);font-size:14px';em.textContent=q?'לא נמצאו תוצאות':'אין נעדרים רשומים';
     wrap.appendChild(em);return;
   }
-  state.missing.forEach(function(m){
+  list.forEach(function(m){
     var card=document.createElement('div');
     card.style.cssText='background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px';
     var nameEl=document.createElement('div');nameEl.style.cssText='font-size:16px;font-weight:700;margin-bottom:4px;color:var(--text)';nameEl.textContent='🪦 '+(m.name||'ללא שם');
@@ -2404,6 +2408,7 @@ function init(){
   });
   document.getElementById('sb-ms').addEventListener('click',function(){openMissingModal();});
   document.getElementById('modal-missing-close').addEventListener('click',closeMissingModal);
+  document.getElementById('missing-search').addEventListener('input',renderMissingList);
   document.getElementById('modal-missing').addEventListener('click',function(e){if(e.target===this)closeMissingModal();});
   document.getElementById('btn-add-missing').addEventListener('click',function(){
     document.getElementById('missing-add-form').style.display='block';
