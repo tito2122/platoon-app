@@ -1022,8 +1022,9 @@ function buildInfoTab(s){
         if(!confirm('להעביר את '+(s.name||s.firstName||'החייל')+' לרשימת הנעדרים?'))return;
         var miss={id:state.nmid++,name:s.name||(((s.firstName||'')+' '+(s.lastName||'')).trim()),reason:reason||''};
         saveMissing(miss);
-        s.isMissing=true;s._missingId=miss.id;
-        saveSoldier(s);
+        // מחק את החייל מרשימת החיילים לחלוטין
+        deleteSoldierRemote(s.id);
+        state.soldiers=state.soldiers.filter(function(x){return x.id!==s.id;});
         toast('הועבר לנעדרים ✓');
         showMain();
       });
@@ -1573,23 +1574,16 @@ function renderMissingList(){
     returnBtn.addEventListener('click',(function(mid, missData){return function(){
       if(!confirm('להחזיר חייל זה לרשימת הסד"כ?'))return;
       // חפש חייל קיים עם _missingId תואם
-      var linkedSoldier=state.soldiers.find(function(x){return x._missingId===mid;});
-      if(linkedSoldier){
-        // חייל שהועבר דרך מסך הפרטים — אפס את הדגלים
-        linkedSoldier.isMissing=false;
-        linkedSoldier._missingId=null;
-        saveSoldier(linkedSoldier);
-      } else {
-        // חייל שנוסף ישירות לרשימת נעדרים — צור רשומה חדשה
-        var newSol=mkSoldier();
-        var parts=(missData.name||'').trim().split(/\s+/);
-        if(parts.length>=2){newSol.lastName=parts[0];newSol.firstName=parts.slice(1).join(' ');}
-        else{newSol.lastName=parts[0]||'';newSol.firstName='';}
-        newSol.name=missData.name||'';
-        newSol.isMissing=false;
-        state.soldiers.push(newSol);
-        saveSoldier(newSol);
-      }
+      // צור חייל חדש נקי מהנתונים של הנעדר
+      var newSol=mkSoldier();
+      var parts=(missData.name||'').trim().split(/\s+/);
+      if(parts.length>=2){newSol.lastName=parts[0];newSol.firstName=parts.slice(1).join(' ');}
+      else{newSol.lastName=parts[0]||'';newSol.firstName='';}
+      newSol.name=missData.name||'';
+      newSol.isMissing=false;
+      state.soldiers.push(newSol);
+      saveSoldier(newSol);
+      // מחק מרשימת הנעדרים
       deleteMissing(mid);
       state.missing=state.missing.filter(function(x){return x.id!==mid;});
       document.getElementById('st-ms').textContent=state.missing.length;
@@ -2665,6 +2659,13 @@ function _handleBack(){
 })();
 startSync();
 scheduleMidnightCheck();
+// תיקון: כשמקלדת נסגרת viewport לא חוזר — גורם לנעלם של bottom bar
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',function(){
+    document.body.style.height=window.visualViewport.height+'px';
+    setTimeout(function(){document.body.style.height='';},300);
+  });
+}
 })();
 </script>
 </body>
