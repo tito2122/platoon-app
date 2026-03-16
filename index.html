@@ -9,9 +9,7 @@
 <title>סד"כ</title>
 <script>
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    regs.forEach(function(r){r.unregister();});
-  });
+  navigator.serviceWorker.register('/platoon-app/sw.js').catch(function(){});
 }
 </script>
 <!-- Firebase v8 compat (עובד על כל דפדפן כולל Safari) -->
