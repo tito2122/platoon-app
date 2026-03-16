@@ -420,6 +420,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title">📋 דו"ח 1</div>
+    <button class="btn" id="rr-total" style="background:#25D366;color:#fff;width:100%;margin-bottom:12px">📤 סה"כ</button>
     <div class="rcal-wrap">
       <div class="rcal-nav">
         <button class="rcal-nav-btn" id="rcal-prev">‹</button>
@@ -435,7 +436,6 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
       <div class="share-row">
         <button class="btn btn-wa" id="rr-wa">📲 WhatsApp</button>
         <button class="btn btn-xl" id="rr-xl">📊 Excel</button>
-        <button class="btn" id="rr-total" style="background:#25D366;color:#fff;flex:1">📤 סה"כ</button>
       </div>
     </div>
     <button class="btn btn-ghost btn-full" id="modal-close">סגור</button>
@@ -1516,21 +1516,6 @@ function showReportResult(ds){
     var msg='🪖 *דו"ח נוכחות מח\' 1 — '+fmtDateHe(ds)+'*\n\n✅ *נוכחים ('+pl.length+'):*\n'+pl.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n');
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   };
-  document.getElementById('rr-total').onclick=function(){
-    var total=state.soldiers.filter(function(s){return !s.isMissing;});
-    var present=total.filter(function(s){
-      if(s.status!=='present')return false;
-      for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
-      if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
-      return true;
-    });
-    var onLeave=total.filter(function(s){return present.indexOf(s)===-1;});
-    var msg='🪖 *סה"כ — '+fmtDateHe(ds)+'*\n\n'
-      +'✅ *נוכחים ('+present.length+'):*\n'+present.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
-      +'\n\n🏖️ *בחופשה ('+onLeave.length+'):*\n'+onLeave.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
-      +'\n\n*סה"כ: '+total.length+' חיילים*';
-    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
-  };
   document.getElementById('rr-xl').onclick=function(){
     var rows=[['דו"ח נוכחות מח\' 1 — '+fmtDateHe(ds)],[],['#','שם','תפקידים','טלפון','מגורים']].concat(pl.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
     var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
@@ -2471,6 +2456,22 @@ function init(){
   document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
   document.getElementById('btn-report').addEventListener('click',openReportModal);
   document.getElementById('modal-close').addEventListener('click',closeReportModal);
+  document.getElementById('rr-total').addEventListener('click',function(){
+    var ds=rcalSel||today();
+    var total=state.soldiers.filter(function(s){return !s.isMissing;});
+    var present=total.filter(function(s){
+      if(s.status!=='present')return false;
+      for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+      if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
+      return true;
+    });
+    var onLeave=total.filter(function(s){return present.indexOf(s)===-1;});
+    var msg='🪖 *סה"כ — '+fmtDateHe(ds)+'*\n\n'
+      +'✅ *נוכחים ('+present.length+'):*\n'+present.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
+      +'\n\n🏖️ *בחופשה ('+onLeave.length+'):*\n'+onLeave.map(function(s,i){return(i+1)+'. '+(s.name||'חייל');}).join('\n')
+      +'\n\n*סה"כ: '+total.length+' חיילים*';
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  });
   document.getElementById('modal-report').addEventListener('click',function(e){if(e.target===this)closeReportModal();});
   document.getElementById('rcal-prev').addEventListener('click',function(){rcalMonth--;if(rcalMonth<0){rcalMonth=11;rcalYear--;}renderRcal();});
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
