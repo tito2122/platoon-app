@@ -1841,38 +1841,19 @@ function renderMissionDetail(m,container){
     dl.appendChild(opt);
   });
 
-  // מפקד משימה — בנייה ישירה כ-DOM (לא innerHTML) כדי שכפתור הדגשים יישאר תקין
+  // מפקד משימה
   var cmdRow=document.createElement('div');
   cmdRow.style.cssText='margin-bottom:12px';
-  // שורת כותרת
-  var cmdLblRow=document.createElement('div');
-  cmdLblRow.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:4px';
-  cmdLblRow.innerHTML='<div style="width:22px;height:22px;min-width:22px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['cmd']+'</div>'
-    +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד המשימה</div>';
-  cmdRow.appendChild(cmdLblRow);
-  // שורת input + דגשים
-  var cmdInputRow=document.createElement('div');
-  cmdInputRow.style.cssText='display:flex;gap:8px;align-items:center';
-  // input מפקד — input רגיל (לא makeNameInput, לא dropup)
-  var mcmdInp=document.createElement('input');
-  mcmdInp.type='text';
-  mcmdInp.id='mcmd-'+m.id;
-  mcmdInp.placeholder='שם המפקד';
-  mcmdInp.value=m.commander||'';
-  mcmdInp.autocomplete='off';
-  mcmdInp.style.cssText='flex:1;min-width:0;box-sizing:border-box;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text)';
-  mcmdInp.addEventListener('change',function(){m.commander=this.value.trim();saveMission(m);});
-  mcmdInp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();m.commander=this.value.trim();saveMission(m);}});
-  // כפתור דגשים
-  var dagashimBtn=document.createElement('button');
-  dagashimBtn.type='button';
-  dagashimBtn.id='mdagashim-btn-'+m.id;
-  dagashimBtn.style.cssText='flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap';
-  dagashimBtn.textContent='📌 דגשים';
-  cmdInputRow.appendChild(mcmdInp);
-  cmdInputRow.appendChild(dagashimBtn);
-  cmdRow.appendChild(cmdInputRow);
+  cmdRow.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+    +'<div style="width:22px;height:22px;min-width:22px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['cmd']+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד המשימה</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'
+    +'<input id="mcmd-'+m.id+'" type="text" placeholder="שם המפקד" value="'+(m.commander||'')+'" autocomplete="off" style="flex:1;min-width:0;box-sizing:border-box;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text)">'
+    +'<button id="mdagashim-btn-'+m.id+'" type="button" style="flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">📌 דגשים</button>'
+    +'</div>';
   container.appendChild(cmdRow);
+  document.getElementById('mcmd-'+m.id).addEventListener('change',function(){m.commander=this.value.trim();saveMission(m);});
 
   // popup דגשים מבצעיים
   (function(mLocal){
@@ -1931,9 +1912,74 @@ function renderMissionDetail(m,container){
     hdr.appendChild(hdrTitle);hdr.appendChild(delBtn);
     teamDiv.appendChild(hdr);
 
-    // wizard מפקד + גפרורים
+    // מפקד חוליה
+    var tcmdLblRow=document.createElement('div');
+    tcmdLblRow.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:4px';
+    tcmdLblRow.innerHTML='<div style="width:22px;height:22px;min-width:22px;background:#7C3AED;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['tcmd-'+team.id]+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד החוליה</div>';
+    teamDiv.appendChild(tcmdLblRow);
+
+    var tcmdRow=document.createElement('div');
+    tcmdRow.style.cssText='display:flex;gap:6px;margin-bottom:8px';
+    var tcmdName=typeof team.commander==='object'?(team.commander.name||''):(team.commander||'');
+    var tcmdPakl=typeof team.commander==='object'?(team.commander.pakl||''):'';
+    var tcmdInp=document.createElement('input');
+    tcmdInp.id='tcmd-'+team.id;tcmdInp.type='text';tcmdInp.placeholder='שם מפקד החוליה';
+    tcmdInp.value=tcmdName;tcmdInp.autocomplete='off';
+    tcmdInp.style.cssText='flex:1;min-width:0;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text)';
+    var tcmdPaklInp=document.createElement('input');
+    tcmdPaklInp.type='text';tcmdPaklInp.placeholder='פק"ל';tcmdPaklInp.value=tcmdPakl;tcmdPaklInp.autocomplete='off';
+    tcmdPaklInp.style.cssText='width:80px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+    tcmdRow.appendChild(tcmdInp);tcmdRow.appendChild(tcmdPaklInp);
+    teamDiv.appendChild(tcmdRow);
+    function saveTcmd(){team.commander={name:tcmdInp.value.trim(),pakl:tcmdPaklInp.value.trim()};saveMission(m);}
+    tcmdInp.addEventListener('blur',saveTcmd);
+    tcmdPaklInp.addEventListener('blur',saveTcmd);
+    tcmdInp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();tcmdPaklInp.focus();tcmdPaklInp.scrollIntoView({block:'center',behavior:'smooth'});}
+    });
+    tcmdPaklInp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key==='Tab'){
+        e.preventDefault();saveTcmd();
+        var solInps=teamDiv.querySelectorAll('input[placeholder="שם חייל"]');
+        if(solInps.length){solInps[0].focus();solInps[0].scrollIntoView({block:'center',behavior:'smooth'});}
+        else{
+          team.soldiers.push({name:'',pakl:''});saveMission(m);
+          renderTeamSoldiers(team,m,container);
+          setTimeout(function(){
+            var ins=teamDiv.querySelectorAll('input[placeholder="שם חייל"]');
+            if(ins.length){ins[0].focus();ins[0].scrollIntoView({block:'center',behavior:'smooth'});}
+          },40);
+        }
+      }
+    });
+
+    // גפרורים
+    var solsLbl=document.createElement('div');
+    solsLbl.style.cssText='font-size:12px;font-weight:700;color:var(--text3);margin-bottom:4px';
+    solsLbl.textContent='חיילים';
+    teamDiv.appendChild(solsLbl);
+    var solsCont=document.createElement('div');
+    solsCont.id='tsols-'+team.id;
+    teamDiv.appendChild(solsCont);
+
+    var addSolBtn=document.createElement('button');
+    addSolBtn.style.cssText='margin-top:6px;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);border-radius:8px;padding:6px 12px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;width:100%';
+    addSolBtn.textContent='+ הוסף גפרור';
+    (function(t){
+      addSolBtn.addEventListener('click',function(e){
+        e.stopPropagation();
+        t.soldiers.push({name:'',pakl:''});saveMission(m);
+        renderTeamSoldiers(t,m,container);
+        setTimeout(function(){
+          var ins=teamDiv.querySelectorAll('input[placeholder="שם חייל"]');
+          if(ins.length){var last=ins[ins.length-1];last.focus();last.scrollIntoView({block:'center',behavior:'smooth'});}
+        },40);
+      });
+    })(team);
+    teamDiv.appendChild(addSolBtn);
     container.appendChild(teamDiv);
-    renderTeamWizard(team,m,teamDiv);
+    renderTeamSoldiers(team,m,container);
   });
 
   // הוסף חוליה
@@ -1942,183 +1988,75 @@ function renderMissionDetail(m,container){
   addTeamBtn.textContent='+ הוסף חוליה';
   addTeamBtn.addEventListener('click',function(e){
     e.stopPropagation();
-    var team={id:'t'+Date.now(),commander:'',soldiers:[]};
+    var team={id:'t'+Date.now(),commander:'',soldiers:[{name:'',pakl:''}]};
     m.teams.push(team);saveMission(m);
     renderMissionDetail(m,container);
-    // wizard יפתח מקלדת אוטומטית
+    setTimeout(function(){var inp=document.getElementById('tcmd-'+team.id);if(inp)inp.focus();},60);
   });
   container.appendChild(addTeamBtn);
 }
 
-
-// ─── WIZARD לחוליה: מפקד + גפרורים, מקלדת רציפה ─────────────────────────────
-function renderTeamWizard(team, m, teamDiv) {
-  var wizId = 'wiz-' + team.id;
-  var existing = document.getElementById(wizId);
-  var wiz = existing || document.createElement('div');
-  wiz.id = wizId;
-  wiz.innerHTML = '';
-  if (!existing) teamDiv.appendChild(wiz); // תמיד מוסיף בהתחלה
-
-  var soldiers = team.soldiers || [];
-  var tcmdName = typeof team.commander === 'object' ? (team.commander.name || '') : (team.commander || '');
-  var tcmdPakl = typeof team.commander === 'object' ? (team.commander.pakl || '') : '';
-
-  // ── עזר: צור "תג נעול" לפריט שכבר הוזן ──
-  function makeLocked(ironColor, ironNum, label, sublabel, onEdit) {
-    var tag = document.createElement('div');
-    tag.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:var(--card2);border:1px solid var(--border);margin-bottom:4px;cursor:pointer';
-    tag.innerHTML = '<div style="width:18px;height:18px;min-width:18px;background:'+ironColor+';border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff">'+ironNum+'</div>'
-      + '<div style="flex:1;font-size:13px;font-weight:700;color:var(--text)">'+label+'</div>'
-      + (sublabel ? '<div style="font-size:11px;color:var(--text3)">'+sublabel+'</div>' : '')
-      + '<div style="font-size:11px;color:var(--blue);font-weight:700">✏️</div>';
-    tag.addEventListener('click', function(e){ e.stopPropagation(); if(onEdit) onEdit(); });
-    tag.addEventListener('touchend', function(e){ e.stopPropagation(); if(onEdit) onEdit(); });
-    return tag;
-  }
-
-  // ── עזר: צור שדה wizard פעיל ──
-  function makeActiveField(placeholder, initialVal, onDone) {
-    var row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
-    var inp = document.createElement('input');
-    inp.type = 'text';
-    inp.value = initialVal || '';
-    inp.placeholder = placeholder;
-    inp.autocomplete = 'off';
-    inp.style.cssText = 'flex:1;padding:9px 12px;border-radius:10px;border:2px solid var(--blue);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);outline:none';
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = '✓';
-    btn.style.cssText = 'width:38px;height:38px;border-radius:10px;border:none;background:var(--blue);color:#fff;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0';
-    function confirm_() { var v = inp.value.trim(); onDone(v); }
-    btn.addEventListener('mousedown', function(e){ e.preventDefault(); confirm_(); });
-    btn.addEventListener('touchend', function(e){ e.preventDefault(); e.stopPropagation(); confirm_(); }, {passive:false});
-    inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();confirm_();} });
-    row.appendChild(inp);
-    row.appendChild(btn);
-    row._inp = inp;
-    return row;
-  }
-
-  // ── מפקד חוליה ──
-  var nums = calcMissionIronNums(m);
-  var tcmdIron = nums['tcmd-' + team.id] || '?';
-
-  if (tcmdName) {
-    // נעול — מציג תג + אפשרות עריכה
-    wiz.appendChild(makeLocked('#7C3AED', tcmdIron,
-      tcmdName, tcmdPakl ? 'פק"ל: ' + tcmdPakl : '',
-      function(){ team.commander = ''; saveMission(m); renderTeamWizard(team, m, teamDiv); setTimeout(function(){ var f=teamDiv.querySelector('input');if(f){f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});}},30); }
-    ));
-  } else {
-    // שדה פעיל — שם מפקד
-    var lbl0 = document.createElement('div');
-    lbl0.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px';
-    lbl0.innerHTML = '<div style="width:18px;height:18px;min-width:18px;background:#7C3AED;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff">'+tcmdIron+'</div><div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד החוליה</div>';
-    wiz.appendChild(lbl0);
-    var f0 = makeActiveField('שם מפקד החוליה', '', function(name){
-      if (!name) return;
-      // שמור שם, פתח פק"ל
-      team.commander = {name: name, pakl: ''};
-      saveMission(m);
-      renderTeamWizard(team, m, teamDiv);
-      setTimeout(function(){ var f=teamDiv.querySelector('input');if(f){f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});}},30);
-    });
-    wiz.appendChild(f0);
-    setTimeout(function(){ f0._inp.focus(); f0._inp.scrollIntoView({block:'center',behavior:'smooth'}); }, 30);
-    return;
-  }
-
-  // פק"ל מפקד חוליה — אם שם קיים אבל פק"ל עדיין לא הוזן (null = לא הוזן, '' = הוזן ריק)
-  var needsPakl = typeof team.commander === 'object' && team.commander._paklPending;
-  if (needsPakl) {
-    var f1 = makeActiveField('פק"ל מפקד (אופציונלי)', '', function(pakl){
-      team.commander.pakl = pakl;
-      team.commander._paklPending = false;
-      saveMission(m);
-      renderTeamWizard(team, m, teamDiv);
-      setTimeout(function(){ var f=teamDiv.querySelector('input');if(f){f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});}},30);
-    });
-    wiz.appendChild(f1);
-    setTimeout(function(){ f1._inp.focus(); f1._inp.scrollIntoView({block:'center',behavior:'smooth'}); }, 30);
-    return;
-  }
-
-  // ── גפרורים ──
-  var lbl2 = document.createElement('div');
-  lbl2.style.cssText = 'font-size:11px;font-weight:700;color:var(--text3);margin:6px 0 4px';
-  lbl2.textContent = 'חיילים';
-  wiz.appendChild(lbl2);
-
-  soldiers.forEach(function(sol, si) {
-    var solName = typeof sol === 'object' ? (sol.name || '') : (sol || '');
-    var solPakl = typeof sol === 'object' ? (sol.pakl || '') : '';
-    var ironN = nums['sol-' + team.id + '-' + si] || '';
-    var needsSolPakl = typeof sol === 'object' && sol._paklPending;
-
-    if (solName && !needsSolPakl) {
-      // תג נעול
-      wiz.appendChild(makeLocked('#1CB86A', ironN,
-        solName, solPakl ? 'פק"ל: ' + solPakl : '',
-        function(){
-          team.soldiers[si] = {name:'', pakl:'', _paklPending:false};
-          saveMission(m);
-          renderTeamWizard(team, m, teamDiv);
-          setTimeout(function(){ var f=teamDiv.querySelector('input');if(f){f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});}},30);
-        }
-      ));
-    } else if (solName && needsSolPakl) {
-      // פק"ל פעיל
-      var fp = makeActiveField('פק"ל (אופציונלי)', solPakl, function(pakl){
-        team.soldiers[si] = {name: solName, pakl: pakl, _paklPending: false};
-        saveMission(m);
-        renderTeamWizard(team, m, teamDiv);
-        setTimeout(function(){ var f=teamDiv.querySelector('input');if(f){f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});}},30);
-      });
-      wiz.appendChild(fp);
-      setTimeout(function(){ fp._inp.focus(); fp._inp.scrollIntoView({block:'center',behavior:'smooth'}); }, 30);
-    } else {
-      // שם פעיל
-      var lbl3 = document.createElement('div');
-      lbl3.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px';
-      lbl3.innerHTML = '<div style="width:18px;height:18px;min-width:18px;background:#1CB86A;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff">'+ironN+'</div><div style="font-size:12px;font-weight:700;color:var(--text3)">גפרור</div>';
-      wiz.appendChild(lbl3);
-      var fs = makeActiveField('שם חייל', '', function(name){
-        if (!name) return;
-        team.soldiers[si] = {name: name, pakl: '', _paklPending: true};
-        saveMission(m);
-        renderTeamWizard(team, m, teamDiv);
-        setTimeout(function(){ var f=teamDiv.querySelector('input');if(f){f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});}},30);
-      });
-      wiz.appendChild(fs);
-      setTimeout(function(){ fs._inp.focus(); fs._inp.scrollIntoView({block:'center',behavior:'smooth'}); }, 30);
-    }
-  });
-
-  // כפתור הוסף גפרור — גלוי תמיד
-  var hasOpenField = soldiers.some(function(s){ return !(typeof s==='object' && s.name && !s._paklPending); });
-  if (!hasOpenField) {
-    var addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.style.cssText = 'margin-top:6px;border:1.5px dashed var(--blue);background:transparent;color:var(--blue);border-radius:8px;padding:6px 12px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;width:100%';
-    addBtn.textContent = '+ הוסף גפרור';
-    addBtn.addEventListener('click', function(e){
-      e.stopPropagation();
-      team.soldiers.push({name:'',pakl:'',_paklPending:false});
-      saveMission(m);
-      renderTeamWizard(team, m, teamDiv);
-      setTimeout(function(){ var f=teamDiv.querySelector('input');if(f){f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});}},40);
-    });
-    wiz.appendChild(addBtn);
-  }
-
-}
-
-// שמור תאימות לקוד ישן שקורא ל-renderTeamSoldiers
 function renderTeamSoldiers(team,m,detContainer){
-  var teamDiv=document.getElementById('teamdiv-'+team.id);
-  if(teamDiv) renderTeamWizard(team,m,teamDiv);
+  var cont=document.getElementById('tsols-'+team.id);
+  if(!cont)return;
+  cont.innerHTML='';
+  var nums=calcMissionIronNums(m);
+  var soldiers=team.soldiers||[];
+
+  soldiers.forEach(function(solObj,si){
+    var solName=typeof solObj==='object'?(solObj.name||''):(solObj||'');
+    var solPakl=typeof solObj==='object'?(solObj.pakl||''):'';
+    var ironN=nums['sol-'+team.id+'-'+si]||'';
+
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 0';
+
+    var numBadge=document.createElement('div');
+    numBadge.style.cssText='width:20px;height:20px;min-width:20px;background:#1CB86A;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0';
+    numBadge.textContent=ironN;
+
+    var inp=document.createElement('input');
+    inp.type='text';inp.value=solName;inp.placeholder='שם חייל';inp.autocomplete='off';
+    inp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+
+    var paklInp=document.createElement('input');
+    paklInp.type='text';paklInp.value=solPakl;paklInp.placeholder='פק"ל';paklInp.autocomplete='off';
+    paklInp.style.cssText='width:70px;flex-shrink:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+
+    var del=document.createElement('button');
+    del.textContent='✕';
+    del.style.cssText='border:none;background:transparent;color:#E8354A;font-size:14px;cursor:pointer;padding:2px 4px;font-weight:700;flex-shrink:0';
+
+    row.appendChild(numBadge);row.appendChild(inp);row.appendChild(paklInp);row.appendChild(del);
+    cont.appendChild(row);
+
+    function saveRow(){team.soldiers[si]={name:inp.value.trim(),pakl:paklInp.value.trim()};if(m)saveMission(m);}
+    inp.addEventListener('blur',saveRow);
+    paklInp.addEventListener('blur',saveRow);
+
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();saveRow();paklInp.focus();paklInp.scrollIntoView({block:'center',behavior:'smooth'});}
+    });
+    paklInp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){
+        e.preventDefault();saveRow();
+        // הוסף גפרור חדש
+        team.soldiers.push({name:'',pakl:''});if(m)saveMission(m);
+        renderTeamSoldiers(team,m,detContainer);
+        setTimeout(function(){
+          var rows=cont.querySelectorAll('input[placeholder="שם חייל"]');
+          if(rows.length){rows[rows.length-1].focus();rows[rows.length-1].scrollIntoView({block:'center',behavior:'smooth'});}
+        },40);
+      }
+    });
+
+    del.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(team.soldiers.length<=1){toast('חוליה חייבת לכלול לפחות גפרור אחד');return;}
+      team.soldiers.splice(si,1);if(m)saveMission(m);
+      renderTeamSoldiers(team,m,detContainer);
+    });
+  });
 }
 
 
