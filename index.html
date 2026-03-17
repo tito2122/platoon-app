@@ -586,10 +586,11 @@ function startSync(){
     },8000);
     return;
   }
-  // ודא שמסמך platoons/3194 קיים (לכניסה ממכשיר חדש)
-  window._db.collection('platoons').doc('3194').get().then(function(doc){
-    if(!doc.exists){window._db.collection('platoons').doc('3194').set({name:'מחלקה 1',password:'3194',createdAt:Date.now(),legacy:true});}
-  }).catch(function(){});
+  // fallback — אם snapshot לא מגיע תוך 6 שניות פתח בכל זאת
+  setTimeout(function(){
+    var lo=document.getElementById('loading-overlay');
+    if(lo&&lo.style.display!=='none'){lo.style.display='none';showMain();}
+  },6000);
   window._onSnapshot(getSoldiersCol(), function(snapshot){
     var incoming=[];
     snapshot.forEach(function(d){incoming.push(d.data());});
