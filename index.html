@@ -1911,13 +1911,14 @@ function renderMissions(){
     card.querySelector('.mission-delete-btn').addEventListener('click',function(e){
       e.stopPropagation();
       showConfirm('למחוק את יזומה "'+m.name+'"?',function(){
-      _openMissionId=null;
-      missionsState.missions=missionsState.missions.filter(function(x){return x.id!==m.id;});
-      missionsState.missions.forEach(function(x,i){x.ironNum=i+1;saveMission(x);});
-      deleteMissionRemote(m.id);
-      renderMissions();
-      toast('יזומה נמחקה');
+        _openMissionId=null;
+        missionsState.missions=missionsState.missions.filter(function(x){return x.id!==m.id;});
+        missionsState.missions.forEach(function(x,i){x.ironNum=i+1;saveMission(x);});
+        deleteMissionRemote(m.id);
+        renderMissions();
+        toast('יזומה נמחקה');
       },{icon:'🗑',danger:true});
+    });
 
     // שיתוף הרכב
     card.querySelector('.mission-share-btn').addEventListener('click',function(e){
