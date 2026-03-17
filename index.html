@@ -676,14 +676,14 @@ function getMissingIds(){
 }
 function getStatusInfo(s){
   var td=today();
-  for(var i=0;i<s.leaves.length;i++){if(td>=s.leaves[i].from&&td<s.leaves[i].to)return{label:'🏖️ בחופשה',cls:'sp-leave'};}
+  for(var i=0;i<(s.leaves||[]).length;i++){if(td>=(s.leaves||[])[i].from&&td<(s.leaves||[])[i].to)return{label:'🏖️ בחופשה',cls:'sp-leave'};}
   if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&td>=pl.from&&td<pl.to;}))return{label:'🏖️ בחופשה',cls:'sp-leave'};
   if(s.status==='present')return{label:'✅ נוכח',cls:'sp-present'};
   return{label:'❌ חסר',cls:'sp-absent'};
 }
 function presentOnDate(s,ds){
   if(s.status!=='present')return false;
-  for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+  for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
   if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<pl.to;}))return false;
   return true;
 }
@@ -1579,7 +1579,7 @@ function renderRcal(){
 function showReportResult(ds){
   var pl=state.soldiers.filter(function(s){
     if(s.status!=='present')return false;
-    for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+    for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
     if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
     return true;
   });
@@ -2563,7 +2563,7 @@ function init(){
     var _mid3=getMissingIds();var total=state.soldiers.filter(function(s){return !s.isMissing&&!_mid3[s.id];});
     var present=total.filter(function(s){
       if(s.status!=='present')return false;
-      for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+      for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
       if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<pl.to;}))return false;
       return true;
     });
