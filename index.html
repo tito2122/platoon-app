@@ -1553,7 +1553,7 @@ function buildLeavesTab(s){
       delBtn.addEventListener('click',(function(capturedIdx){return function(e){
         e.stopPropagation();
         showConfirm('למחוק בקשה זו?',function(){
-          s.pendingLeaves.splice(capturedIdx,1);saveSoldier(s);renderPendingLeaves();
+          var had=s.pendingLeaves[capturedIdx].from;s.pendingLeaves.splice(capturedIdx,1);if(had)saveSoldier(s);renderPendingLeaves();
         },{icon:'🗑',danger:true});
       };})(idx));
       body.appendChild(delBtn);
@@ -1571,7 +1571,7 @@ function buildLeavesTab(s){
     addBtn.addEventListener('click',function(){
       if(!s.pendingLeaves)s.pendingLeaves=[];
       s.pendingLeaves.push({from:'',to:'',approved:false,notes:''});
-      saveSoldier(s);renderPendingLeaves();
+      renderPendingLeaves();
     });
     container.appendChild(addBtn);
   }
