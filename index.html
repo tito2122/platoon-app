@@ -1493,6 +1493,31 @@ function buildLeavesTab(s){
     var pls=s.pendingLeaves||[];
     container.innerHTML='';
     pls.forEach(function(pl,idx){
+      // בקשה ללא תאריכים — הצג כטופס פתוח (לא כרטיס)
+      if(!pl.from||!pl.to){
+        var openBox=document.createElement('div');
+        openBox.style.cssText='border-radius:12px;padding:12px 14px;border:2px solid var(--blue);margin-bottom:8px;background:var(--blue-bg);';
+        var openHdr=document.createElement('div');
+        openHdr.style.cssText='font-weight:700;margin-bottom:10px;color:var(--text1);';
+        openHdr.textContent='בקשת יציאה חדשה — בחר תאריכים';
+        openBox.appendChild(openHdr);
+        var plCal=buildCal(s,'leave',function(from,to){
+          var overlap=(s.pendingLeaves||[]).some(function(other,oi){
+            if(oi===idx)return false;
+            if(!other.from||!other.to)return false;
+            return from<other.to&&to>other.from;
+          });
+          if(overlap){toast('⚠️ תאריכים חופפים לבקשה אחרת');return;}
+          pl.from=from;pl.to=to;saveSoldier(s);renderPendingLeaves();
+        },{blockPast:true});
+        openBox.appendChild(plCal.el);
+        var cancelBtn=document.createElement('button');
+        cancelBtn.className='btn btn-ghost btn-full';cancelBtn.style.marginTop='6px';cancelBtn.textContent='ביטול';
+        cancelBtn.addEventListener('click',function(){s.pendingLeaves.splice(idx,1);renderPendingLeaves();});
+        openBox.appendChild(cancelBtn);
+        container.appendChild(openBox);
+        return;
+      }
       var box=document.createElement('div');
       box.className='nl-box '+(pl.approved?'approved':'pending');
       box.style.cssText='border-radius:12px;padding:12px 14px;border:2px solid;margin-bottom:8px;cursor:pointer;';
