@@ -2764,12 +2764,7 @@ init();
     showConfirm('לצאת מהמחלקה?',function(){
       localStorage.removeItem('platoonLastUnlock');
       localStorage.removeItem('pinLastUnlock');
-      var ls=document.getElementById('login-screen');
-      if(ls){ls.style.display='flex';}
-      var lc=document.getElementById('login-code');
-      var lp=document.getElementById('login-pass');
-      if(lc)lc.value=localStorage.getItem('platoonId')||'';
-      if(lp){lp.value='';lp.focus();}
+      location.reload();
     },{icon:'🔓',okText:'יציאה',danger:true});
   });
 })();
