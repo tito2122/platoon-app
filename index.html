@@ -308,7 +308,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <input id="login-code" type="text" placeholder="קוד מחלקה" autocomplete="off" style="width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid #E2E6ED;background:#fff;font-family:'Rubik',sans-serif;font-size:16px;color:#1A1D23;outline:none;text-align:right;direction:rtl">
     <input id="login-pass" type="password" placeholder="סיסמה" autocomplete="off" style="width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid #E2E6ED;background:#fff;font-family:'Rubik',sans-serif;font-size:16px;color:#1A1D23;outline:none;text-align:right;direction:rtl">
     <div id="login-error" style="font-size:13px;color:#E8354A;font-weight:700;min-height:18px;text-align:center"></div>
-    <button id="login-btn" style="width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-family:'Rubik',sans-serif;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.35)">כניסה</button>
+    <button id="login-btn" onclick="doLogin()" style="width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-family:'Rubik',sans-serif;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.35)">כניסה</button>
     <div style="text-align:center;margin-top:4px">
       <a href="register.html" style="font-size:13px;color:#2563EB;font-weight:600;text-decoration:none">מחלקה חדשה? לחץ כאן להרשמה</a>
     </div>
@@ -2617,6 +2617,34 @@ function init(){
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
 }
 init();
+// פונקציית כניסה גלובלית — נקראת ישירות מה-HTML
+function doLogin(){
+  var code=(document.getElementById('login-code').value||'').trim();
+  var pass=(document.getElementById('login-pass').value||'').trim();
+  var errEl=document.getElementById('login-error');
+  var btn=document.getElementById('login-btn');
+  function showErr(m){errEl.style.fontSize='15px';errEl.textContent=m;}
+  if(!code){showErr('יש להזין קוד מחלקה');return;}
+  if(!pass){showErr('יש להזין סיסמה');return;}
+  btn.textContent='מתחבר...';btn.disabled=true;errEl.textContent='';
+  function onSuccess(name,logo){
+    try{localStorage.setItem('platoonId',code);localStorage.setItem('platoonName',name);localStorage.setItem('platoonLastUnlock',Date.now().toString());if(logo)localStorage.setItem('customLogoData',logo);}catch(e){}
+    btn.textContent='כניסה';btn.disabled=false;
+    document.getElementById('login-screen').style.display='none';
+    var ns=document.getElementById('platoon-name-sub');if(ns)ns.textContent=name;
+    if(typeof startSync==='function')startSync();
+  }
+  // מחלקה 1 — ישירה
+  if(code==='3194'&&pass==='3194'){onSuccess('מחלקה 1',null);return;}
+  // שאר המחלקות — דרך Firestore
+  if(!window._db){showErr('שגיאת חיבור — רענן את הדף');btn.textContent='כניסה';btn.disabled=false;return;}
+  window._db.collection('platoons').doc(code).get().then(function(doc){
+    if(!doc.exists){showErr('קוד מחלקה לא קיים');btn.textContent='כניסה';btn.disabled=false;return;}
+    var d=doc.data();
+    if(d.password!==pass){showErr('סיסמה שגויה');btn.textContent='כניסה';btn.disabled=false;return;}
+    onSuccess(d.name||('מחלקה '+code),d.logo||null);
+  }).catch(function(){showErr('שגיאת רשת — נסה שוב');btn.textContent='כניסה';btn.disabled=false;});
+}
 // אבטחה — כניסה פעם ביום
 (function(){
   // כניסה ישירה דרך URL עבור מחלקה 1
