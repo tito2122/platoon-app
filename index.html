@@ -2689,6 +2689,7 @@ init();
       lsSetL('platoonLastUnlock',Date.now().toString());
       if(data.logo){lsSetL('customLogoData',data.logo);}
       applyPlatoonName();
+      btn.textContent='כניסה';btn.disabled=false;
       loginScreen.style.display='none';
       startSync();
     }).catch(function(err){
