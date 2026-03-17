@@ -2619,6 +2619,14 @@ function init(){
 init();
 // אבטחה — כניסה פעם ביום
 (function(){
+  // כניסה ישירה דרך URL עבור מחלקה 1
+  if(location.search.indexOf('login3194')!==-1){
+    try{localStorage.setItem('platoonId','3194');localStorage.setItem('platoonName','מחלקה 1');localStorage.setItem('platoonLastUnlock',Date.now().toString());}catch(e){}
+    history.replaceState(null,'',location.pathname);
+    document.getElementById('login-screen').style.display='none';
+    if(typeof startSync==='function')startSync();
+    return;
+  }
   function lsGetL(k){try{return localStorage.getItem(k);}catch(e){return null;}}
   function lsSetL(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 
