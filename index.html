@@ -35,8 +35,12 @@ if('serviceWorker' in navigator){
   try {
     var app = firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
-    // iOS Safari חוסם WebSockets — long polling פותר את זה
-    db.settings({ experimentalForceLongPolling: true, merge: true });
+    // Long polling רק על iOS/Safari — WebSockets מהירים יותר על שאר הדפדפנים
+    var _isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+    var _isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if(_isIOS||_isSafari){db.settings({experimentalForceLongPolling:true,merge:true});}
+    // Cache מקומי — מציג נתונים מיד בפתיחה חוזרת
+    db.enablePersistence({synchronizeTabs:false}).catch(function(){});
 
     window._db = db;
     window._collection = function(db, path){ return db.collection(path); };
