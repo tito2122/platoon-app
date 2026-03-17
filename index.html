@@ -2654,6 +2654,18 @@ init();
     var btn=document.getElementById('login-btn');
     btn.textContent='מתחבר...';btn.disabled=true;
     setLoginError('');
+    // כניסה ישירה למחלקה הראשית ללא Firestore
+    if(code==='3194'&&pass==='3194'){
+      lsSetL('platoonId','3194');
+      lsSetL('platoonName','מחלקה 1');
+      lsSetL('platoonLastUnlock',Date.now().toString());
+      applyPlatoonName();
+      btn.textContent='כניסה';btn.disabled=false;
+      loginScreen.style.display='none';
+      startSync();
+      return;
+    }
+    if(!window._db){setLoginError('Firebase לא מוכן, רענן ונסה שוב');btn.textContent='כניסה';btn.disabled=false;return;}
     window._db.collection('platoons').doc(code).get().then(function(doc){
       if(!doc.exists){
         setLoginError('קוד מחלקה לא קיים');
