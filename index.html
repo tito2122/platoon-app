@@ -2629,27 +2629,6 @@ init();
     return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
   }
 
-  // Auto-login for existing platoon 3194 (had old PIN system)
-  if(!lsGetL('platoonId')){
-    var oldPin=lsGetL('pinLastUnlock');
-    if(oldPin){
-      var od=new Date(parseInt(oldPin)),nn=new Date();
-      var oldToday=od.getFullYear()===nn.getFullYear()&&od.getMonth()===nn.getMonth()&&od.getDate()===nn.getDate();
-      if(oldToday){
-        lsSetL('platoonId','3194');
-        lsSetL('platoonName','מחלקה 1');
-        lsSetL('platoonLastUnlock',Date.now().toString());
-        loginScreen.style.display='none';
-        return;
-      }
-    }
-  }
-
-  if(lsGetL('platoonId')&&alreadyUnlockedToday()){
-    loginScreen.style.display='none';
-    return;
-  }
-
   // Update platoon name in header after login
   function applyPlatoonName(){
     var n=lsGetL('platoonName');
@@ -2664,6 +2643,7 @@ init();
     document.getElementById('login-error').textContent=msg;
   }
 
+  // רישום event listeners תמיד — לפני כל בדיקת auto-login
   document.getElementById('login-btn').addEventListener('click',function(){
     var code=(document.getElementById('login-code').value||'').trim();
     var pass=(document.getElementById('login-pass').value||'').trim();
@@ -2705,6 +2685,27 @@ init();
   document.getElementById('login-code').addEventListener('keydown',function(e){
     if(e.key==='Enter')document.getElementById('login-pass').focus();
   });
+
+  // Auto-login for existing platoon 3194 (had old PIN system)
+  if(!lsGetL('platoonId')){
+    var oldPin=lsGetL('pinLastUnlock');
+    if(oldPin){
+      var od=new Date(parseInt(oldPin)),nn=new Date();
+      var oldToday=od.getFullYear()===nn.getFullYear()&&od.getMonth()===nn.getMonth()&&od.getDate()===nn.getDate();
+      if(oldToday){
+        lsSetL('platoonId','3194');
+        lsSetL('platoonName','מחלקה 1');
+        lsSetL('platoonLastUnlock',Date.now().toString());
+        loginScreen.style.display='none';
+        return;
+      }
+    }
+  }
+
+  if(lsGetL('platoonId')&&alreadyUnlockedToday()){
+    loginScreen.style.display='none';
+    return;
+  }
 
   // If platoonId exists but not unlocked today — show login with pre-filled code
   if(lsGetL('platoonId')){
