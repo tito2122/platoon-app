@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>הרשמת מחלקה חדשה</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Rubik',sans-serif;background:#F0F2F5;color:#1A1D23;direction:rtl;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.12)}
+h1{font-size:22px;font-weight:800;text-align:center;margin-bottom:6px}
+.sub{font-size:14px;color:#5A6070;text-align:center;margin-bottom:28px}
+.icon{text-align:center;font-size:48px;margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:700;color:#5A6070;margin-bottom:6px;margin-top:14px}
+input[type=text],input[type=password]{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid #E2E6ED;background:#F8F9FB;font-family:'Rubik',sans-serif;font-size:15px;color:#1A1D23;outline:none;direction:rtl;text-align:right;transition:border-color .15s}
+input:focus{border-color:#2563EB;background:#fff}
+.logo-area{border:2px dashed #E2E6ED;border-radius:12px;padding:18px;text-align:center;cursor:pointer;margin-top:6px;transition:border-color .15s;color:#9BA3B2;font-size:14px}
+.logo-area:hover{border-color:#2563EB;color:#2563EB}
+.logo-area.has-img{border-style:solid;border-color:#A7F3D0;padding:8px}
+.logo-preview{max-width:100%;max-height:80px;border-radius:8px;display:none}
+#error{font-size:13px;color:#E8354A;font-weight:700;min-height:18px;text-align:center;margin-top:12px}
+#success{display:none;background:#D1FAE5;border-radius:12px;padding:16px;text-align:center;margin-top:12px}
+#success .scode{font-size:22px;font-weight:900;color:#0F9454;letter-spacing:2px;margin:8px 0}
+#success p{font-size:14px;color:#065F46;font-weight:600}
+.btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-family:'Rubik',sans-serif;font-size:17px;font-weight:800;cursor:pointer;margin-top:20px;box-shadow:0 4px 16px rgba(37,99,235,.35)}
+.btn:disabled{opacity:.6;cursor:default}
+.back{display:block;text-align:center;margin-top:16px;font-size:13px;color:#2563EB;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🪖</div>
+  <h1>הרשמת מחלקה חדשה</h1>
+  <div class="sub">צור חשבון למחלקה שלך</div>
+
+  <label>שם המחלקה *</label>
+  <input type="text" id="inp-name" placeholder="לדוגמה: מחלקה ב׳">
+
+  <label>קוד מחלקה * <span style="font-weight:400;color:#9BA3B2">(אותיות ומספרים, לבחירתך)</span></label>
+  <input type="text" id="inp-code" placeholder="לדוגמה: gimel3 או mem2024" autocomplete="off">
+
+  <label>סיסמה *</label>
+  <input type="password" id="inp-pass" placeholder="סיסמה לכניסה">
+
+  <label>לוגו מחלקה <span style="font-weight:400;color:#9BA3B2">(אופציונלי)</span></label>
+  <div class="logo-area" id="logo-drop" onclick="document.getElementById('logo-file').click()">
+    <div id="logo-placeholder">לחץ להעלאת לוגו</div>
+    <img id="logo-preview" class="logo-preview">
+  </div>
+  <input type="file" id="logo-file" accept="image/*" style="display:none">
+
+  <div id="error"></div>
+  <button class="btn" id="submit-btn">צור מחלקה</button>
+
+  <div id="success">
+    <div>✅ המחלקה נוצרה בהצלחה!</div>
+    <div class="scode" id="success-code"></div>
+    <p>שמור את הקוד — תצטרך אותו בכניסה</p>
+    <a href="index.html" style="display:block;margin-top:12px;color:#0F9454;font-weight:700;text-decoration:none">← כניסה לאפליקציה</a>
+  </div>
+
+  <a href="index.html" class="back">← חזרה לכניסה</a>
+</div>
+
+<script>
+var firebaseConfig={
+  apiKey:"AIzaSyDnNEMrqQyi4Al38APHL2QSZh5Cdx5EF9U",
+  authDomain:"class-1-9b07a.firebaseapp.com",
+  projectId:"class-1-9b07a",
+  storageBucket:"class-1-9b07a.firebasestorage.app",
+  messagingSenderId:"176761569042",
+  appId:"1:176761569042:web:591b8e01dbdc2e78627dcb"
+};
+firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+
+var logoData=null;
+
+document.getElementById('logo-file').addEventListener('change',function(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    // Resize image to max 256x256 for storage efficiency
+    var img=new Image();
+    img.onload=function(){
+      var MAX=256;
+      var canvas=document.createElement('canvas');
+      var ratio=Math.min(MAX/img.width,MAX/img.height,1);
+      canvas.width=Math.round(img.width*ratio);
+      canvas.height=Math.round(img.height*ratio);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      logoData=canvas.toDataURL('image/jpeg',0.7);
+      var preview=document.getElementById('logo-preview');
+      preview.src=logoData;preview.style.display='block';
+      document.getElementById('logo-placeholder').style.display='none';
+      document.getElementById('logo-drop').classList.add('has-img');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('submit-btn').addEventListener('click',function(){
+  var name=(document.getElementById('inp-name').value||'').trim();
+  var code=(document.getElementById('inp-code').value||'').trim().toLowerCase().replace(/\s+/g,'');
+  var pass=(document.getElementById('inp-pass').value||'').trim();
+  var errEl=document.getElementById('error');
+  errEl.textContent='';
+
+  if(!name){errEl.textContent='יש להזין שם מחלקה';return;}
+  if(!code){errEl.textContent='יש להזין קוד מחלקה';return;}
+  if(code.length<2){errEl.textContent='הקוד חייב להכיל לפחות 2 תווים';return;}
+  if(!/^[a-z0-9\u0590-\u05ff]+$/.test(code)){errEl.textContent='הקוד יכול להכיל אותיות, מספרים ועברית בלבד';return;}
+  if(!pass){errEl.textContent='יש להזין סיסמה';return;}
+  if(pass.length<2){errEl.textContent='הסיסמה חייבת להכיל לפחות 2 תווים';return;}
+
+  var btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='יוצר מחלקה...';
+
+  db.collection('platoons').doc(code).get().then(function(doc){
+    if(doc.exists){
+      errEl.textContent='קוד זה כבר תפוס, בחר קוד אחר';
+      btn.disabled=false;btn.textContent='צור מחלקה';
+      return;
+    }
+    var platoonData={name:name,password:pass,createdAt:Date.now()};
+    if(logoData)platoonData.logo=logoData;
+    return db.collection('platoons').doc(code).set(platoonData).then(function(){
+      document.getElementById('success-code').textContent=code;
+      document.getElementById('success').style.display='block';
+      btn.style.display='none';
+    });
+  }).catch(function(err){
+    errEl.textContent='שגיאת חיבור, נסה שוב';
+    btn.disabled=false;btn.textContent='צור מחלקה';
+    console.error(err);
+  });
+});
+</script>
+</body>
+</html>
