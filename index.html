@@ -1515,7 +1515,15 @@ function buildLeavesTab(s){
 
       // Calendar for date selection
       var calDiv=document.createElement('div');
-      var plCal=buildCal(s,'leave',function(from,to){pl.from=from;pl.to=to;saveSoldier(s);renderPendingLeaves();});
+      var plCal=buildCal(s,'leave',function(from,to){
+        var overlap=(s.pendingLeaves||[]).some(function(other,oi){
+          if(oi===idx)return false;
+          if(!other.from||!other.to)return false;
+          return from<other.to&&to>other.from;
+        });
+        if(overlap){toast('⚠️ תאריכים חופפים לבקשה אחרת');return;}
+        pl.from=from;pl.to=to;saveSoldier(s);renderPendingLeaves();
+      });
       calDiv.appendChild(plCal.el);
       body.appendChild(calDiv);
 
