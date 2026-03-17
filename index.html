@@ -2633,8 +2633,8 @@ init();
 
   // מחלקה 1 (3194) — כניסה ישירה ללא סיסמא
   var pid=lsGetL('platoonId');
-  if(!pid||pid==='3194'){
-    lsSetL('platoonId','3194');
+  if(!pid){pid='3194';lsSetL('platoonId','3194');}  // ברירת מחדל — מחלקה 1
+  if(pid==='3194'){
     lsSetL('platoonName','מחלקה 1');
     lsSetL('platoonLastUnlock',Date.now().toString());
     loginScreen.style.display='none';
