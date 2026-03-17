@@ -600,6 +600,7 @@ function startSync(){
   window._onSnapshot(window._soldiersCol, function(snapshot){
     var incoming=[];
     snapshot.forEach(function(d){incoming.push(d.data());});
+    incoming.forEach(function(s){migratePending(s);});
     var maxId=0;
     incoming.forEach(function(s){if(s.id>maxId)maxId=s.id;});
     if(maxId>=state.nid)state.nid=maxId+1;
