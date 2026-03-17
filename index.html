@@ -1637,7 +1637,7 @@ function showReportResult(ds){
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   };
   document.getElementById('rr-xl').onclick=function(){
-    var rows=[['דו"ח נוכחות מח\' 1 — '+fmtDateHe(ds)],[],['#','שם','תפקידים','טלפון','מגורים']].concat(pl.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
+    var rows=[['דו"ח נוכחות — מחלקה 1'],['תאריך:',fmtDateHe(ds)],['סה"כ נוכחים:',pl.length],[],['#','שם','תפקידים','טלפון','מגורים']].concat(pl.map(function(s,i){return[i+1,s.name||'',s.roles.join(' | '),s.phone||'',s.residence||''];}));
     var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
     var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='נוכחות_מח1_'+ds+'.csv';a.click();toast('הקובץ הורד ✓');
   };
