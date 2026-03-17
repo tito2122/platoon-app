@@ -628,8 +628,7 @@ function startSync(){
     var lo=document.getElementById('loading-overlay');
     if(lo)lo.style.display='none';
   });
-  var missingCol=window._collection(window._db,'missing');
-  window._onSnapshot(missingCol, function(snapshot){
+  window._onSnapshot(getMissingCol(), function(snapshot){
     var inc=[];snapshot.forEach(function(d){inc.push(d.data());});
     var mx=0;inc.forEach(function(m){if(m.id>mx)mx=m.id;});
     if(mx>=state.nmid)state.nmid=mx+1;
@@ -2700,6 +2699,7 @@ init();
       if(data.logo){lsSetL('customLogoData',data.logo);}
       applyPlatoonName();
       loginScreen.style.display='none';
+      startSync();
     }).catch(function(err){
       setLoginError('שגיאת חיבור, נסה שוב');
       btn.textContent='כניסה';btn.disabled=false;
@@ -2923,7 +2923,7 @@ function _handleBack(){
     }
   });
 })();
-startSync();
+if(document.getElementById("login-screen").style.display==="none"){startSync();};
 scheduleMidnightCheck();
 // תיקון: כשמקלדת נסגרת viewport לא חוזר — גורם לנעלם של bottom bar
 if(window.visualViewport){
