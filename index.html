@@ -636,6 +636,8 @@ function migratePending(s){
   if(!s.pendingLeaves)s.pendingLeaves=[];
   if(s.nextFrom&&s.pendingLeaves.length===0){
     s.pendingLeaves.push({from:s.nextFrom,to:s.nextTo||'',approved:!!s.nextApproved,notes:s.nextNotes||''});
+    s.nextFrom='';s.nextTo='';s.nextApproved=false;s.nextNotes='';
+    saveSoldier(s);
   }
 }
 
