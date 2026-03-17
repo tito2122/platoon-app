@@ -1001,9 +1001,7 @@ function renderList(){
     var tom=tomorrowStr();
     // יציאה מאושרת — הצג "יוצא ב-X"
     var approvedFrom=null;
-    if(s.nextApproved&&s.nextFrom&&s.nextTo){
-      approvedFrom=s.nextFrom;
-    }
+    if(false){/* nextFrom legacy — ignored */}
     if(!approvedFrom){
       var firstApproved=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to;}).sort(function(a,b){return a.from<b.from?-1:1;})[0];
       if(firstApproved)approvedFrom=firstApproved.from;
@@ -1016,7 +1014,7 @@ function renderList(){
       tagsRow.appendChild(tTag);
     }
     // ממתין לאישור — יש בקשת יציאה שלא אושרה
-    var hasPendingUnapproved=(s.nextFrom&&s.nextTo&&!s.nextApproved)||((s.pendingLeaves||[]).some(function(pl){return !pl.approved&&pl.from&&pl.to;}));
+    var hasPendingUnapproved=(s.pendingLeaves||[]).some(function(pl){return !pl.approved&&pl.from&&pl.to;});
     if(hasPendingUnapproved){
       var pTag=document.createElement('span');
       pTag.style.cssText='background:#EFF6FF;color:#1E40AF;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
