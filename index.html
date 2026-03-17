@@ -1524,7 +1524,7 @@ function buildLeavesTab(s){
         });
         if(overlap){toast('⚠️ תאריכים חופפים לבקשה אחרת');return;}
         pl.from=from;pl.to=to;saveSoldier(s);renderPendingLeaves();
-      });
+      },{blockPast:true,initialFrom:pl.from||null,initialTo:pl.to||null});
       calDiv.appendChild(plCal.el);
       body.appendChild(calDiv);
 
@@ -1583,7 +1583,8 @@ function buildLeavesTab(s){
 }
 
 /* ── CALENDAR ── */
-function buildCal(s,mode,onSave){
+function buildCal(s,mode,onSave,opts){
+  opts=opts||{};
   var wrap=document.createElement('div');
   var cw=document.createElement('div');cw.className='cal-wrap';
   var nav=document.createElement('div');nav.className='cal-nav';
@@ -1594,9 +1595,14 @@ function buildCal(s,mode,onSave){
   var grid=document.createElement('div');grid.className='cal-grid';
   nav.appendChild(prev);nav.appendChild(lbl);nav.appendChild(nxt);
   cw.appendChild(nav);cw.appendChild(hint);cw.appendChild(grid);
-  var cy=new Date().getFullYear(),cm=new Date().getMonth();
-  var pf=mode==='next'&&s.nextFrom?s.nextFrom:null;
-  var pt=mode==='next'&&s.nextTo?s.nextTo:null;
+  var blockPast=mode==='next'||!!opts.blockPast;
+  var initFrom=opts.initialFrom||(mode==='next'&&s.nextFrom?s.nextFrom:null);
+  var initTo=opts.initialTo||(mode==='next'&&s.nextTo?s.nextTo:null);
+  // פתח את החודש של תאריך ההתחלה אם קיים
+  var initDate=initFrom?new Date(initFrom):new Date();
+  var cy=initDate.getFullYear(),cm=initDate.getMonth();
+  var pf=initFrom||null;
+  var pt=initTo||null;
   function rc(){
     lbl.textContent=MONTHS_HE[cm]+' '+cy;
     if(!pf)hint.textContent='בחר תאריך תחילה';
@@ -1610,9 +1616,9 @@ function buildCal(s,mode,onSave){
     for(var d=1;d<=dim;d++){
       var ds=toDateStr(cy,cm,d);
       var isPast=pf&&!pt&&ds<pf;
-      var isBeforeToday=mode==='next'&&ds<today();
+      var isBeforeToday=blockPast&&ds<today();
       var cls='cal-day';
-      if(mode==='next'){
+      if(mode==='next'||opts.blockPast){
         if(ds===pf||ds===pt)cls+=' pending-from';
         else if(pf&&pt&&ds>pf&&ds<pt)cls+=' pending-range';
         else if(isPast||isBeforeToday)cls+=' disabled';
