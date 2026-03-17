@@ -2510,9 +2510,12 @@ init();
   var entered='';
   var pinScreen=document.getElementById('pin-screen');
 
+  function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
   // בדוק אם כבר הוזן היום
   function alreadyUnlockedToday(){
-    var last=localStorage.getItem('pinLastUnlock');
+    var last=lsGet('pinLastUnlock');
     if(!last)return false;
     var lastDate=new Date(parseInt(last));
     var now=new Date();
@@ -2543,7 +2546,7 @@ init();
 
   function tryPin(){
     if(entered===PIN){
-      localStorage.setItem('pinLastUnlock',Date.now().toString());
+      lsSet('pinLastUnlock',Date.now().toString());
       pinScreen.style.display='none';
     } else {
       shake();
