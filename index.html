@@ -628,10 +628,16 @@ function startSync(){
   });
   listenMissions();
 }
-function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',photoData:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:'',hofpa:false};}
+function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',photoData:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:'',hofpa:false,pendingLeaves:[]};}
 function find(id){return state.soldiers.find(function(s){return s.id===id;});}
 function initials(n){var p=(n||'').trim().split(/\s+/).filter(Boolean);if(!p.length)return'?';if(p.length===1)return p[0].slice(0,2);return p[0][0]+(p[p.length-1][0]||'');}
 function calcDays(a,b){if(!a||!b)return 0;var d=(new Date(b)-new Date(a))/864e5;return d>0?Math.round(d):0;}
+function migratePending(s){
+  if(!s.pendingLeaves)s.pendingLeaves=[];
+  if(s.nextFrom&&s.pendingLeaves.length===0){
+    s.pendingLeaves.push({from:s.nextFrom,to:s.nextTo||'',approved:!!s.nextApproved,notes:s.nextNotes||''});
+  }
+}
 
 // עטוף textarea עם כפתור undo
 function wrapWithUndo(ta){
@@ -665,20 +671,37 @@ function fmtDate(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p
 function fmtDateHe(s){if(!s)return'';var p=s.split('-');return p[2]+' ב'+MONTHS_HE[+p[1]-1]+' '+p[0];}
 
 function checkNextExpiry(s){
+  migratePending(s);
   if(s.nextApproved&&s.nextFrom&&s.nextTo&&s.nextTo<today()){
+    if(!s.leaves)s.leaves=[];
     s.leaves.push({from:s.nextFrom,to:s.nextTo});
     s.nextFrom='';s.nextTo='';s.nextApproved=false;
+    saveSoldier(s);
+  }
+  var expired=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<today();});
+  if(expired.length){
+    if(!s.leaves)s.leaves=[];
+    expired.forEach(function(pl){s.leaves.push({from:pl.from,to:pl.to});});
+    s.pendingLeaves=s.pendingLeaves.filter(function(pl){return !(pl.approved&&pl.from&&pl.to&&pl.to<today());});
     saveSoldier(s);
   }
 }
 function checkAllExpiries(){
   var changed=false;
   state.soldiers.forEach(function(s){
+    migratePending(s);
     if(s.nextApproved&&s.nextFrom&&s.nextTo&&s.nextTo<today()){
+      if(!s.leaves)s.leaves=[];
       s.leaves.push({from:s.nextFrom,to:s.nextTo});
       s.nextFrom='';s.nextTo='';s.nextApproved=false;
-      saveSoldier(s);
-      changed=true;
+      saveSoldier(s);changed=true;
+    }
+    var expired=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<today();});
+    if(expired.length){
+      if(!s.leaves)s.leaves=[];
+      expired.forEach(function(pl){s.leaves.push({from:pl.from,to:pl.to});});
+      s.pendingLeaves=s.pendingLeaves.filter(function(pl){return !(pl.approved&&pl.from&&pl.to&&pl.to<today());});
+      saveSoldier(s);changed=true;
     }
   });
   if(changed)renderMain();
@@ -702,15 +725,17 @@ function getMissingIds(){
 }
 function getStatusInfo(s){
   var td=today();
-  for(var i=0;i<s.leaves.length;i++){if(td>=s.leaves[i].from&&td<s.leaves[i].to)return{label:'🏖️ בחופשה',cls:'sp-leave'};}
+  for(var i=0;i<(s.leaves||[]).length;i++){if(td>=(s.leaves||[])[i].from&&td<(s.leaves||[])[i].to)return{label:'🏖️ בחופשה',cls:'sp-leave'};}
   if(s.nextApproved&&s.nextFrom&&s.nextTo&&td>=s.nextFrom&&td<s.nextTo)return{label:'🏖️ בחופשה',cls:'sp-leave'};
+  if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&td>=pl.from&&td<pl.to;}))return{label:'🏖️ בחופשה',cls:'sp-leave'};
   if(s.status==='present')return{label:'✅ נוכח',cls:'sp-present'};
   return{label:'❌ חסר',cls:'sp-absent'};
 }
 function presentOnDate(s,ds){
   if(s.status!=='present')return false;
-  for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+  for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
   if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
+  if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<pl.to;}))return false;
   return true;
 }
 
@@ -798,19 +823,21 @@ function renderWeek(){
     var dayName='יום '+DAY_NAMES[d.getDay()];
     var dateStr=d.getDate()+'/'+(d.getMonth()+1);
 
-    // מי יוצא היום (nextFrom === ds ומאושר, או leaves שמתחיל היום)
+    // מי יוצא היום (nextFrom === ds ומאושר, leaves שמתחיל היום, או pendingLeaves מאושרות)
     var leaving=state.soldiers.filter(function(s){
       if(s.isMissing)return false;
       if(s.nextApproved&&s.nextFrom===ds)return true;
       if(s.leaves&&s.leaves.some(function(l){return l.from===ds;}))return true;
+      if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from===ds;}))return true;
       return false;
     });
 
-    // מי חוזר היום (nextTo === ds ומאושר, או leaves שמסתיים היום)
+    // מי חוזר היום (nextTo === ds ומאושר, leaves שמסתיים היום, או pendingLeaves מאושרות)
     var returning=state.soldiers.filter(function(s){
       if(s.isMissing)return false;
       if(s.nextApproved&&s.nextTo===ds)return true;
       if(s.leaves&&s.leaves.some(function(l){return l.to===ds;}))return true;
+      if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.to===ds;}))return true;
       return false;
     });
 
@@ -972,6 +999,10 @@ function renderList(){
     if(s.nextApproved&&s.nextFrom&&s.nextTo){
       approvedFrom=s.nextFrom;
     }
+    if(!approvedFrom){
+      var firstApproved=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to;}).sort(function(a,b){return a.from<b.from?-1:1;})[0];
+      if(firstApproved)approvedFrom=firstApproved.from;
+    }
     if(approvedFrom){
       var dayNum=approvedFrom.split('-')[2].replace(/^0/,'');
       var tTag=document.createElement('span');
@@ -980,7 +1011,8 @@ function renderList(){
       tagsRow.appendChild(tTag);
     }
     // ממתין לאישור — יש בקשת יציאה שלא אושרה
-    if(s.nextFrom&&s.nextTo&&!s.nextApproved){
+    var hasPendingUnapproved=(s.nextFrom&&s.nextTo&&!s.nextApproved)||((s.pendingLeaves||[]).some(function(pl){return !pl.approved&&pl.from&&pl.to;}));
+    if(hasPendingUnapproved){
       var pTag=document.createElement('span');
       pTag.style.cssText='background:#EFF6FF;color:#1E40AF;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
       pTag.textContent='⏳ ממתין לאישור';
@@ -1405,18 +1437,18 @@ function buildLeavesTab(s){
   var nextTotEl=null;
 
   function calcTotal(){
-    var t=0;s.leaves.forEach(function(lv){t+=calcDays(lv.from,lv.to);});return t;
+    var t=0;(s.leaves||[]).forEach(function(lv){t+=calcDays(lv.from,lv.to);});return t;
   }
   function renderLv(){
     lvList.innerHTML='';
     totNum.textContent=calcTotal()+' ימים';
-    var sorted=s.leaves.slice().sort(function(a,b){return a.from<b.from?-1:a.from>b.from?1:0;});
+    var sorted=(s.leaves||[]).slice().sort(function(a,b){return a.from<b.from?-1:a.from>b.from?1:0;});
     if(!sorted.length){
       var empty=document.createElement('div');empty.style.cssText='color:var(--text3);font-size:14px;padding:8px 0;text-align:center';empty.textContent='אין יציאות רשומות';
       lvList.appendChild(empty);
     } else {
       sorted.forEach(function(lv){
-        var li=s.leaves.indexOf(lv);
+        var li=(s.leaves||[]).indexOf(lv);
         var rec=document.createElement('div');rec.className='lv-rec';
         var inf=document.createElement('div');inf.className='lv-info';
         inf.innerHTML='<div class="lv-dates">'+fmtDate(lv.to)+' ← '+fmtDate(lv.from)+'</div><div class="lv-days">'+calcDays(lv.from,lv.to)+' ימים</div>';
@@ -1438,6 +1470,7 @@ function buildLeavesTab(s){
   var addBtn=document.createElement('button');addBtn.className='btn btn-ghost btn-full';addBtn.textContent='+ הוסף יציאה';addBtn.style.marginTop='8px';
   var addForm=document.createElement('div');addForm.className='lv-form';
   var calObj=buildCal(s,'leave',function(from,to){
+    if(!s.leaves)s.leaves=[];
     s.leaves.push({from:from,to:to});
     s.leaves.sort(function(a,b){return a.from<b.from?-1:a.from>b.from?1:0;});
     saveSoldier(s);renderLv();addForm.classList.remove('open');
@@ -1449,84 +1482,90 @@ function buildLeavesTab(s){
   inner.appendChild(totBox);inner.appendChild(lvList);inner.appendChild(addBtn);inner.appendChild(addForm);
 
   var nlSec=document.createElement('div');nlSec.className='edit-section';nlSec.style.marginTop='18px';
-  var nlHdr=document.createElement('div');nlHdr.className='edit-sec-hdr';nlHdr.textContent='בקשת יציאה הבאה';
+  var nlHdr=document.createElement('div');nlHdr.className='edit-sec-hdr';nlHdr.textContent='בקשות יציאה ממתינות';
   var nlBody=document.createElement('div');nlBody.className='edit-sec-body';
-  function nlBoxClass(){return 'nl-box'+(s.nextApproved?' approved':(s.nextFrom&&s.nextTo?' pending':''));}
-  var nlBox=document.createElement('div');nlBox.className=nlBoxClass();
-
-  var nlDatesLbl=document.createElement('div');nlDatesLbl.style.cssText='font-size:20px;font-weight:800;color:var(--text);margin-bottom:10px;text-align:center;letter-spacing:.5px';
-  nextTotEl=document.createElement('div');nextTotEl.style.cssText='font-size:12px;color:#0F9454;font-weight:600;margin-bottom:10px';
-
-  function fmtShort(ds){if(!ds)return'';var p=ds.split('-');return p[2]+'/'+p[1];}
-  function updNlLbl(){
-    if(s.nextFrom&&s.nextTo){
-      nlDatesLbl.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:12px"><span style="font-size:26px;font-weight:900">'+fmtShort(s.nextFrom)+'</span><span style="font-size:18px;color:var(--text3)">←</span><span style="font-size:26px;font-weight:900">'+fmtShort(s.nextTo)+'</span></div>';
-    } else {
-      nlDatesLbl.textContent='לא נבחר תאריך';
-    }
-    var nd=s.nextApproved&&s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo):0;
-    nextTotEl.textContent=nd>0?'✅ אושר — '+nd+' ימים (יתווספו ליציאות)':(s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo)+' ימים':'');
-  }
-  updNlLbl();
-
-  var calTog=document.createElement('button');calTog.className='btn btn-ghost';calTog.textContent='📅 בחר תאריכים';calTog.style.cssText='flex:1;min-height:42px';
-  var clrBtn=document.createElement('button');clrBtn.className='btn btn-danger';clrBtn.textContent='✕';clrBtn.style.cssText='min-height:42px;padding:0 16px';
-  var calRow=document.createElement('div');calRow.style.cssText='display:flex;gap:8px;margin-bottom:8px';calRow.appendChild(calTog);calRow.appendChild(clrBtn);
-
-  var nxForm=document.createElement('div');nxForm.className='lv-form';
-  var nxCal=buildCal(s,'next',function(from,to){s.nextFrom=from;s.nextTo=to;saveSoldier(s);updNlLbl();nlBox.className=nlBoxClass();renderLv();nxForm.classList.remove('open');apRow.style.display='flex';});
-  nxCal.cancel.addEventListener('click',function(){nxForm.classList.remove('open');});
-  nxForm.appendChild(nxCal.el);
-  calTog.addEventListener('click',function(){var o=nxForm.classList.contains('open');nxForm.classList.toggle('open');if(!o)nxCal.reset();});
-  clrBtn.addEventListener('click',function(){s.nextFrom='';s.nextTo='';s.nextApproved=false;apChk.checked=false;nlBox.className='nl-box';apRow.style.display='none';saveSoldier(s);updNlLbl();renderLv();});
-
-  var apRow=document.createElement('div');apRow.className='ap-row';
-  apRow.style.display=(s.nextFrom&&s.nextTo)?'flex':'none';
-  var apChk=document.createElement('input');apChk.type='checkbox';apChk.className='ap-chk';apChk.checked=!!s.nextApproved;
-  var apId='apchk'+s.id;apChk.id=apId;
-  var apLbl=document.createElement('label');apLbl.className='ap-lbl';apLbl.textContent='אושר יציאה';apLbl.htmlFor=apId;
-  apChk.addEventListener('change',function(){
-    if(apChk.checked){
-      apChk.checked=false; // נחזיר אחרי אישור
-      // מודל אישור מותאם
-      var overlay=document.createElement('div');
-      overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  var container=document.createElement('div');
+  migratePending(s);
+  function renderPendingLeaves(){
+    var pls=s.pendingLeaves||[];
+    container.innerHTML='';
+    pls.forEach(function(pl,idx){
       var box=document.createElement('div');
-      box.style.cssText='background:#fff;border-radius:16px;padding:24px 20px;width:100%;max-width:320px;text-align:center';
-      box.innerHTML='<div style="font-size:18px;font-weight:800;margin-bottom:10px">אישור יציאה</div><div style="font-size:15px;color:#5A6070;margin-bottom:20px">לאשר יציאה ל'+s.name+'?</div>';
-      var btnRow=document.createElement('div');btnRow.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px';
-      var cancelBtn=document.createElement('button');
-      cancelBtn.style.cssText='padding:12px;border-radius:10px;border:1.5px solid #E2E6ED;background:#F8F9FB;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font)';
-      cancelBtn.textContent='ביטול';
-      var phone='';
-      if(s.phone){phone=s.phone.replace(/\D/g,'');if(phone.startsWith('0'))phone='972'+phone.slice(1);}
-      var confirmA=document.createElement('a');
-      confirmA.style.cssText='padding:12px;border-radius:10px;border:none;background:#1CB86A;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);text-decoration:none;display:flex;align-items:center;justify-content:center';
-      confirmA.textContent='אשר ✓';
-      if(phone){confirmA.href='https://wa.me/'+phone;confirmA.target='_blank';}
-      confirmA.addEventListener('click',function(){
-        s.nextApproved=true;
-        apChk.checked=true;
-        nlBox.className=nlBoxClass();updNlLbl();renderLv();saveSoldier(s);
-        document.body.removeChild(overlay);
-      });
-      cancelBtn.addEventListener('click',function(){document.body.removeChild(overlay);});
-      btnRow.appendChild(cancelBtn);btnRow.appendChild(confirmA);
-      box.appendChild(btnRow);overlay.appendChild(box);document.body.appendChild(overlay);
-    } else {
-      s.nextApproved=false;
-      nlBox.className=nlBoxClass();updNlLbl();renderLv();saveSoldier(s);
-    }
-  });
-  apRow.appendChild(apChk);apRow.appendChild(apLbl);
+      box.className='nl-box '+(pl.approved?'approved':'pending');
+      box.style.cssText='border-radius:12px;padding:12px 14px;border:2px solid;margin-bottom:8px;cursor:pointer;';
+      box.style.borderColor=pl.approved?'#86EFAC':'var(--blue)';
+      box.style.background=pl.approved?'var(--green-bg)':'var(--blue-bg)';
 
-  var nlNotesLbl=document.createElement('span');nlNotesLbl.className='flbl';nlNotesLbl.textContent='הערות לבקשה';nlNotesLbl.style.cssText='display:block;margin-top:12px';
-  var nlNotesTa=document.createElement('textarea');nlNotesTa.className='finp';nlNotesTa.placeholder='הערות לבקשת היציאה...';nlNotesTa.value=s.nextNotes||'';nlNotesTa.rows=2;
-  nlNotesTa.addEventListener('input',function(){s.nextNotes=nlNotesTa.value;saveSoldier(s);});
-  nlBox.appendChild(nlDatesLbl);nlBox.appendChild(nextTotEl);nlBox.appendChild(calRow);nlBox.appendChild(nxForm);nlBox.appendChild(nlNotesLbl);nlBox.appendChild(nlNotesTa);
-  wrapWithUndo(nlNotesTa);
-  nlBox.appendChild(apRow);
-  nlBody.appendChild(nlBox);nlSec.appendChild(nlHdr);nlSec.appendChild(nlBody);inner.appendChild(nlSec);
+      var hdr=document.createElement('div');
+      hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;';
+      var datesSpan=document.createElement('span');
+      datesSpan.style.fontWeight='700';
+      datesSpan.textContent=(pl.from?fmtDate(pl.from):'?')+' → '+(pl.to?fmtDate(pl.to):'?');
+      var badge=document.createElement('span');
+      badge.style.cssText='font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;'+(pl.approved?'background:#D1FAE5;color:#065F46':'background:#DBEAFE;color:#1E40AF');
+      badge.textContent=pl.approved?'✓ מאושר':'ממתין';
+      hdr.appendChild(datesSpan);hdr.appendChild(badge);
+      box.appendChild(hdr);
+
+      var body=document.createElement('div');
+      body.style.display='none';
+      body.style.marginTop='10px';
+
+      // Calendar for date selection
+      var calDiv=document.createElement('div');
+      var plCal=buildCal(s,'leave',function(from,to){pl.from=from;pl.to=to;saveSoldier(s);renderPendingLeaves();});
+      calDiv.appendChild(plCal.el);
+      body.appendChild(calDiv);
+
+      // Notes
+      var notesLabel=document.createElement('div');
+      notesLabel.style.cssText='font-size:13px;font-weight:600;color:var(--text2);margin:10px 0 4px';
+      notesLabel.textContent='הערות';
+      var notesTA=document.createElement('textarea');
+      notesTA.className='finp';notesTA.rows=2;notesTA.value=pl.notes||'';
+      notesTA.addEventListener('change',function(){pl.notes=notesTA.value;saveSoldier(s);});
+      body.appendChild(notesLabel);body.appendChild(notesTA);
+
+      // Approve row
+      var apRow=document.createElement('div');
+      apRow.style.cssText='display:flex;align-items:center;gap:10px;margin-top:10px;';
+      var chk=document.createElement('input');chk.type='checkbox';chk.className='ap-chk';chk.checked=!!pl.approved;
+      var apLbl=document.createElement('label');apLbl.className='ap-lbl';apLbl.textContent='אושרה';
+      chk.addEventListener('change',function(){pl.approved=chk.checked;saveSoldier(s);renderPendingLeaves();});
+      apRow.appendChild(chk);apRow.appendChild(apLbl);
+      body.appendChild(apRow);
+
+      // Delete button
+      var delBtn=document.createElement('button');
+      delBtn.className='btn btn-danger';delBtn.style.cssText='width:100%;margin-top:10px;';
+      delBtn.textContent='🗑 מחק בקשה';
+      delBtn.addEventListener('click',(function(capturedIdx){return function(e){
+        e.stopPropagation();
+        showConfirm('למחוק בקשה זו?',function(){
+          s.pendingLeaves.splice(capturedIdx,1);saveSoldier(s);renderPendingLeaves();
+        },{icon:'🗑',danger:true});
+      };})(idx));
+      body.appendChild(delBtn);
+
+      box.appendChild(body);
+      hdr.addEventListener('click',function(){body.style.display=body.style.display==='none'?'block':'none';});
+      container.appendChild(box);
+    });
+
+    // Add button
+    var addBtn=document.createElement('button');
+    addBtn.className='btn btn-ghost btn-full';
+    addBtn.style.marginTop='8px';
+    addBtn.textContent='+ הוסף בקשת יציאה';
+    addBtn.addEventListener('click',function(){
+      if(!s.pendingLeaves)s.pendingLeaves=[];
+      s.pendingLeaves.push({from:'',to:'',approved:false,notes:''});
+      saveSoldier(s);renderPendingLeaves();
+    });
+    container.appendChild(addBtn);
+  }
+  renderPendingLeaves();
+  nlBody.appendChild(container);nlSec.appendChild(nlHdr);nlSec.appendChild(nlBody);inner.appendChild(nlSec);
 
   renderLv();
   panel.appendChild(inner);
@@ -1618,8 +1657,9 @@ function renderRcal(){
 function showReportResult(ds){
   var pl=state.soldiers.filter(function(s){
     if(s.status!=='present')return false;
-    for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+    for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
     if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
+    if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<pl.to;}))return false;
     return true;
   });
   if(!pl.length){
@@ -1760,6 +1800,7 @@ function renderStats(){
     var days=0;
     (s.leaves||[]).forEach(function(lv){days+=calcDays(lv.from,lv.to);});
     if(s.nextApproved&&s.nextFrom&&s.nextTo)days+=calcDays(s.nextFrom,s.nextTo);
+    (s.pendingLeaves||[]).forEach(function(pl){if(pl.approved&&pl.from&&pl.to)days+=calcDays(pl.from,pl.to);});
     return{name:s.name||'ללא שם',days:days,id:s.id};
   }).sort(function(a,b){return b.days-a.days;});
 
@@ -2602,8 +2643,9 @@ function init(){
     var _mid3=getMissingIds();var total=state.soldiers.filter(function(s){return !s.isMissing&&!_mid3[s.id];});
     var present=total.filter(function(s){
       if(s.status!=='present')return false;
-      for(var i=0;i<s.leaves.length;i++){if(ds>=s.leaves[i].from&&ds<s.leaves[i].to)return false;}
+      for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
       if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
+      if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<pl.to;}))return false;
       return true;
     });
     var onLeave=total.filter(function(s){return present.indexOf(s)===-1;});
