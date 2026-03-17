@@ -65,6 +65,8 @@ if('serviceWorker' in navigator){
 
     window._firebaseReady = true;
     window.dispatchEvent(new Event('firebaseReady'));
+    // ודא שמסמך מחלקה 1 קיים תמיד — גם לפני כניסה ראשונה
+    db.collection('platoons').doc('3194').get().then(function(d){if(!d.exists)db.collection('platoons').doc('3194').set({name:'מחלקה 1',password:'3194',createdAt:Date.now(),legacy:true});}).catch(function(){});
   } catch(e) {
     console.error('Firebase init error:', e);
     setTimeout(function(){
