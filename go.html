@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>כניסה</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Rubik',Arial,sans-serif;background:#F0F2F5;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:340px;box-shadow:0 8px 40px rgba(0,0,0,.12)}
+h2{font-size:20px;font-weight:800;text-align:center;margin-bottom:4px}
+.sub{font-size:14px;color:#5A6070;text-align:center;margin-bottom:24px}
+input{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid #E2E6ED;background:#F8F9FB;font-size:16px;color:#1A1D23;outline:none;direction:rtl;text-align:right;margin-bottom:10px;font-family:inherit}
+input:focus{border-color:#2563EB;background:#fff}
+button{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;font-size:17px;font-weight:800;cursor:pointer;margin-top:4px;font-family:inherit}
+#err{color:#E8354A;font-size:14px;font-weight:700;text-align:center;min-height:20px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div style="text-align:center;font-size:48px;margin-bottom:16px">🪖</div>
+  <h2>כניסה למחלקה</h2>
+  <div class="sub">הכנס קוד וסיסמה</div>
+  <input id="c" type="text" placeholder="קוד מחלקה" autocomplete="off">
+  <input id="p" type="password" placeholder="סיסמה" autocomplete="off">
+  <div id="err"></div>
+  <button onclick="go()">כניסה</button>
+</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script>
+var cfg={apiKey:"AIzaSyDnNEMrqQyi4Al38APHL2QSZh5Cdx5EF9U",authDomain:"class-1-9b07a.firebaseapp.com",projectId:"class-1-9b07a"};
+var db;
+try{firebase.initializeApp(cfg);db=firebase.firestore();}catch(e){}
+
+function go(){
+  var code=(document.getElementById('c').value||'').trim();
+  var pass=(document.getElementById('p').value||'').trim();
+  var err=document.getElementById('err');
+  err.textContent='';
+  if(!code){err.textContent='הכנס קוד מחלקה';return;}
+  if(!pass){err.textContent='הכנס סיסמה';return;}
+
+  // מחלקה 1 — ישירה
+  if(code==='3194'&&pass==='3194'){
+    save('3194','מחלקה 1',null);
+    return;
+  }
+
+  if(!db){err.textContent='שגיאת חיבור';return;}
+  err.textContent='מתחבר...';
+  db.collection('platoons').doc(code).get().then(function(doc){
+    if(!doc.exists){err.textContent='קוד לא קיים';return;}
+    var d=doc.data();
+    if(d.password!==pass){err.textContent='סיסמה שגויה';return;}
+    save(code,d.name||('מחלקה '+code),d.logo||null);
+  }).catch(function(){err.textContent='שגיאת רשת — נסה שוב';});
+}
+
+function save(id,name,logo){
+  localStorage.setItem('platoonId',id);
+  localStorage.setItem('platoonName',name);
+  localStorage.setItem('platoonLastUnlock',Date.now().toString());
+  if(logo)localStorage.setItem('customLogoData',logo);
+  location.href='index.html';
+}
+
+document.getElementById('p').addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+document.getElementById('c').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('p').focus();});
+</script>
+</body>
+</html>
