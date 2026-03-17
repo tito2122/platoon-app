@@ -581,7 +581,7 @@ function startSync(){
       }
     });
     state.soldiers=incoming;
-    checkAllExpiries(); // בדוק יציאות שפגו
+    try{checkAllExpiries();}catch(e){console.error(e);} // בדוק יציאות שפגו
     if(document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')){
       renderMain();
     }
@@ -649,6 +649,7 @@ function checkAllExpiries(){
     migratePending(s);
     var expired=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<today();});
     if(!expired.length)return;
+    if(!s.leaves)s.leaves=[];
     expired.forEach(function(pl){s.leaves.push({from:pl.from,to:pl.to});});
     s.pendingLeaves=s.pendingLeaves.filter(function(pl){return !(pl.approved&&pl.from&&pl.to&&pl.to<today());});
     saveSoldier(s);
@@ -2777,6 +2778,7 @@ function _handleBack(){
   });
 })();
 startSync();
+if(typeof renderMain==='function')renderMain();
 scheduleMidnightCheck();
 // תיקון: כשמקלדת נסגרת viewport לא חוזר — גורם לנעלם של bottom bar
 if(window.visualViewport){
