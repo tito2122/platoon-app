@@ -769,6 +769,15 @@ function setFilter(f){
 }
 
 function showMain(){
+  // נקה בקשות יציאה ריקות של החייל הפעיל לפני חזרה
+  if(state.active!=null){
+    var as=find(state.active);
+    if(as&&as.pendingLeaves){
+      var before=as.pendingLeaves.length;
+      as.pendingLeaves=as.pendingLeaves.filter(function(pl){return pl.from&&pl.to;});
+      if(as.pendingLeaves.length!==before)saveSoldier(as);
+    }
+  }
   document.getElementById('scr-det').classList.add('hidden');
   document.getElementById('scr-det').classList.remove('slide-left');
   document.getElementById('scr-main').classList.remove('hidden','slide-left');
