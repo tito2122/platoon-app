@@ -2631,6 +2631,16 @@ init();
     return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
   }
 
+  // מחלקה 1 (3194) — כניסה ישירה ללא סיסמא
+  var pid=lsGetL('platoonId');
+  if(!pid||pid==='3194'){
+    lsSetL('platoonId','3194');
+    lsSetL('platoonName','מחלקה 1');
+    lsSetL('platoonLastUnlock',Date.now().toString());
+    loginScreen.style.display='none';
+    return;
+  }
+
   // Update platoon name in header after login
   function applyPlatoonName(){
     var n=lsGetL('platoonName');
