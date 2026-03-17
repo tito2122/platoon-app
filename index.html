@@ -525,7 +525,7 @@ function startSync(){
   });
   listenMissions();
 }
-function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',photoData:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:''};}
+function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',photoData:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:'',hofpa:false};}
 function find(id){return state.soldiers.find(function(s){return s.id===id;});}
 function initials(n){var p=(n||'').trim().split(/\s+/).filter(Boolean);if(!p.length)return'?';if(p.length===1)return p[0].slice(0,2);return p[0][0]+(p[p.length-1][0]||'');}
 function calcDays(a,b){if(!a||!b)return 0;var d=(new Date(b)-new Date(a))/864e5;return d>0?Math.round(d):0;}
@@ -886,7 +886,17 @@ function renderList(){
     if(tagsRow.children.length)info.appendChild(tagsRow);
 
     var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=st.label;
-    item.appendChild(av);item.appendChild(info);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
+
+    var hofpaWrap=document.createElement('div');
+    hofpaWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0';
+    var hofpaChk=document.createElement('input');hofpaChk.type='checkbox';hofpaChk.checked=!!s.hofpa;
+    hofpaChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
+    var hofpaLbl=document.createElement('span');hofpaLbl.style.cssText='font-size:9px;font-weight:700;color:var(--text3)';hofpaLbl.textContent='הופ"א';
+    hofpaChk.addEventListener('change',function(e){e.stopPropagation();s.hofpa=hofpaChk.checked;saveSoldier(s);});
+    hofpaChk.addEventListener('click',function(e){e.stopPropagation();});
+    hofpaWrap.appendChild(hofpaChk);hofpaWrap.appendChild(hofpaLbl);
+
+    item.appendChild(av);item.appendChild(info);item.appendChild(hofpaWrap);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
     item.addEventListener('click',function(){showDetail(s.id);});
     wrap.appendChild(item);
   });
