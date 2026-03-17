@@ -1508,7 +1508,7 @@ function renderRcal(){
   for(var d=1;d<=dim;d++){
     var ds=toDateStr(rcalYear,rcalMonth,d);
     var btn=document.createElement('button');btn.className='rcal-day'+(ds===rcalSel?' selected':'')+(ds===td?' today-mark':'');btn.textContent=d;
-    (function(ds2){btn.addEventListener('click',function(){rcalSel=ds2;renderRcal();showReportResult(ds2);});})(ds);
+    (function(ds2){btn.addEventListener('click',function(){if(rcalSel===ds2){rcalSel=null;renderRcal();document.getElementById('report-result').classList.remove('show');}else{rcalSel=ds2;renderRcal();showReportResult(ds2);}});})(ds);
     grid.appendChild(btn);
   }
 }
