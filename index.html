@@ -1159,14 +1159,15 @@ function buildInfoTab(s){
       moveMissBtn.textContent='🪦 העבר לנעדרים';
       moveMissBtn.addEventListener('click',function(){
         showPromptConfirm('להעביר את '+(s.name||s.firstName||'החייל')+' לנעדרים?','סיבת היעדרות (אופציונלי)...',function(reason){
-        var soldierSnapshot=JSON.parse(JSON.stringify(s)); // שמור עותק מלא
-        var miss={id:state.nmid++,name:s.name||(((s.firstName||'')+' '+(s.lastName||'')).trim()),reason:reason||'',soldierData:soldierSnapshot};
-        saveMissing(miss);
-        // מחק את החייל מרשימת החיילים לחלוטין
-        deleteSoldierRemote(s.id);
-        state.soldiers=state.soldiers.filter(function(x){return x.id!==s.id;});
-        toast('הועבר לנעדרים ✓');
-        showMain();
+          var soldierSnapshot=JSON.parse(JSON.stringify(s)); // שמור עותק מלא
+          var miss={id:state.nmid++,name:s.name||(((s.firstName||'')+' '+(s.lastName||'')).trim()),reason:reason||'',soldierData:soldierSnapshot};
+          saveMissing(miss);
+          // מחק את החייל מרשימת החיילים לחלוטין
+          deleteSoldierRemote(s.id);
+          state.soldiers=state.soldiers.filter(function(x){return x.id!==s.id;});
+          toast('הועבר לנעדרים ✓');
+          showMain();
+        });
       });
       inner.appendChild(moveMissBtn);
     }
