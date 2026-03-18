@@ -458,7 +458,9 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <label class="flbl" for="list-name-input">שם הרשימה</label>
     <input id="list-name-input" type="text" class="finp" placeholder="לדוגמה: כוננות שבת" style="margin-bottom:16px">
     <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px">בחר חיילים</div>
-    <div id="list-soldiers-container" style="max-height:42vh;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);padding:4px 0;margin-bottom:18px"></div>
+    <div id="list-soldiers-container" style="max-height:42vh;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);padding:4px 0;margin-bottom:14px"></div>
+    <label class="flbl" for="list-notes-input">הערות (אופציונלי)</label>
+    <textarea id="list-notes-input" class="finp" rows="3" placeholder="הערות לרשימה..." style="margin-bottom:16px;resize:none"></textarea>
     <div style="display:flex;gap:10px">
       <button class="btn btn-ghost" id="list-editor-cancel" style="flex:1">ביטול</button>
       <button class="btn" id="list-editor-save" style="flex:1;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;border:none">שמור</button>
@@ -2006,6 +2008,7 @@ function openListEditorModal(listId){
   var lst=listId?(state.lists||[]).find(function(l){return l.id===listId;}):null;
   document.getElementById('list-editor-title').textContent=lst?'✏️ עריכת רשימה':'📋 רשימה ידנית חדשה';
   document.getElementById('list-name-input').value=lst?lst.name:'';
+  document.getElementById('list-notes-input').value=lst?lst.notes||'':'';
   var container=document.getElementById('list-soldiers-container');
   container.innerHTML='';
   var soldiers=(state.soldiers||[]).filter(function(s){return !s.isMissing;}).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
@@ -2077,17 +2080,8 @@ function renderListsTab(){
     waBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
     waBtn.textContent='📲 שיתוף';
     (function(l,sols){waBtn.addEventListener('click',function(){
-      var msg='🪖 *'+l.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים';
+      var msg='🪖 *'+l.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים'+(l.notes?'\n\n📝 '+l.notes:'');
       window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
-    });})(lst,soldiers);
-
-    var xlBtn=document.createElement('button');
-    xlBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:none;background:#1D6F42;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
-    xlBtn.textContent='📥 Excel';
-    (function(l,sols){xlBtn.addEventListener('click',function(){
-      var rows=[['#','שם','טלפון']].concat(sols.map(function(s,i){return[i+1,s.name||'',s.phone||''];}));
-      var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
-      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='רשימה_'+l.name+'_.csv';a.click();toast('הקובץ הורד ✓');
     });})(lst,soldiers);
 
     var delBtn=document.createElement('button');
@@ -2099,7 +2093,6 @@ function renderListsTab(){
 
     btnRow.appendChild(editBtn);
     btnRow.appendChild(waBtn);
-    btnRow.appendChild(xlBtn);
     btnRow.appendChild(delBtn);
     card.appendChild(btnRow);
     wrap.appendChild(card);
@@ -2885,10 +2878,12 @@ function init(){
     var boxes=document.querySelectorAll('#list-soldiers-container input[type=checkbox]:checked');
     var ids=[];
     boxes.forEach(function(b){ids.push(Number(b.value));});
+    var notes=(document.getElementById('list-notes-input').value||'').trim();
     var lst={
       id:_editingListId||Date.now().toString(),
       name:name,
       soldierIds:ids,
+      notes:notes,
       createdAt:_editingListId?((state.lists||[]).find(function(l){return l.id===_editingListId;})||{}).createdAt||Date.now():Date.now()
     };
     saveList(lst);
