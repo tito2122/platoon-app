@@ -597,7 +597,17 @@ function startSync(){
     },8000);
     return;
   }
+  // fallback — אם snapshot לא מגיע תוך 10 שניות (iOS/רשת איטית), פתח בכל זאת
+  var _snapReceived=false;
+  setTimeout(function(){
+    if(!_snapReceived){
+      var lo=document.getElementById('loading-overlay');
+      if(lo)lo.style.display='none';
+      showMain();
+    }
+  },10000);
   window._onSnapshot(window._soldiersCol, function(snapshot){
+    _snapReceived=true;
     var incoming=[];
     snapshot.forEach(function(d){incoming.push(d.data());});
     incoming.forEach(function(s){migratePending(s);});
@@ -612,7 +622,7 @@ function startSync(){
       }
     });
     state.soldiers=incoming;
-    checkAllExpiries(); // בדוק יציאות שפגו
+    checkAllExpiries();
     if(document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')){
       renderMain();
     }
