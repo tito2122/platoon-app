@@ -2023,6 +2023,7 @@ function openListEditorModal(listId){
     container.appendChild(row);
   });
   document.getElementById('modal-list-editor').classList.add('show');
+  document.body.style.overscrollBehavior='none';
   setTimeout(function(){
     var sheet=document.querySelector('#modal-list-editor .modal-sheet');
     if(sheet)sheet.scrollTop=0;
@@ -2030,6 +2031,7 @@ function openListEditorModal(listId){
 }
 function closeListEditorModal(){
   document.getElementById('modal-list-editor').classList.remove('show');
+  document.body.style.overscrollBehavior='';
   _editingListId=null;
 }
 
