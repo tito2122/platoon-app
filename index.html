@@ -463,7 +463,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <textarea id="list-notes-input" class="finp" rows="3" placeholder="הערות לרשימה..." style="margin-bottom:16px;resize:none"></textarea>
     <div style="display:flex;gap:10px">
       <button class="btn btn-ghost" id="list-editor-cancel" style="flex:1">ביטול</button>
-      <button class="btn" id="list-editor-save" style="flex:1;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;border:none">שמור</button>
+      <button class="btn" id="list-editor-save" style="flex:1;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;border:none">📲 שמור ושתף</button>
     </div>
   </div>
 </div>
@@ -2895,7 +2895,9 @@ function init(){
     closeListEditorModal();
     var mt=document.getElementById('main-tab-lists');
     if(mt&&mt.style.display!=='none')renderListsTab();
-    toast('הרשימה נשמרה ✓');
+    var sols=lst.soldierIds.map(function(id){return(state.soldiers||[]).find(function(s){return s.id===id;});}).filter(Boolean);
+    var msg='🪖 *'+lst.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים'+(lst.notes?'\n\n📝 '+lst.notes:'');
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   });
 }
 init();
