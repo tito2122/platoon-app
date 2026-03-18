@@ -342,6 +342,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <button class="main-tab-btn" data-mtab="week" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📅 לוח שבועי</button>
     <button class="main-tab-btn" data-mtab="stats" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:19px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📊</button>
     <button class="main-tab-btn" data-mtab="missions" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">🎯 יזומות</button>
+    <button class="main-tab-btn" data-mtab="lists" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📋 רשימות</button>
   </div>
   <div class="dashboard">
     <div class="stats-row">
@@ -365,10 +366,12 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <div id="main-tab-week" class="scroll-area" style="display:none"><div class="list-pad" id="week-wrap"></div></div>
   <div id="main-tab-stats" class="scroll-area" style="display:none"><div class="list-pad" id="stats-wrap"></div></div>
   <div id="main-tab-missions" class="scroll-area" style="display:none"><div class="list-pad" id="missions-wrap"></div></div>
+  <div id="main-tab-lists" class="scroll-area" style="display:none"><div class="list-pad" id="lists-wrap"></div></div>
   <button class="fab" id="fab">+</button>
   <div id="fab-menu-popup" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:200;flex-direction:column;gap:10px;align-items:center;pointer-events:auto">
     <button id="fab-add-soldier" style="background:var(--blue);color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.35);white-space:nowrap">👥 הוסף חייל</button>
     <button id="fab-add-mission" style="background:#7C3AED;color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.35);white-space:nowrap">🎯 יזומה חדשה</button>
+    <button id="fab-add-list" style="background:#0F9454;color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(15,148,84,.35);white-space:nowrap">📋 רשימה ידנית</button>
   </div>
   <!-- inline mission name input -->
   <div id="mission-name-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);align-items:flex-start;justify-content:center;padding-top:80px">
@@ -447,6 +450,22 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   </div>
 </div>
 
+<!-- LIST EDITOR MODAL -->
+<div class="modal-overlay" id="modal-list-editor">
+  <div class="modal-sheet" style="max-height:88vh;overflow-y:auto">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="list-editor-title">📋 רשימה ידנית חדשה</div>
+    <label class="flbl" for="list-name-input">שם הרשימה</label>
+    <input id="list-name-input" type="text" class="finp" placeholder="לדוגמה: כוננות שבת" style="margin-bottom:16px">
+    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px">בחר חיילים</div>
+    <div id="list-soldiers-container" style="max-height:42vh;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);padding:4px 0;margin-bottom:18px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" id="list-editor-cancel" style="flex:1">ביטול</button>
+      <button class="btn" id="list-editor-save" style="flex:1;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;border:none">שמור</button>
+    </div>
+  </div>
+</div>
+
 <!-- PHOTO LIGHTBOX -->
 <div id="photo-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <img id="lightbox-img" style="max-width:92%;max-height:72%;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,.6)" onclick="document.getElementById('photo-lightbox').style.display='none'">
@@ -488,7 +507,7 @@ var KEY=[0,4,6];
 var MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 var DAYS_HE=['א','ב','ג','ד','ה','ו','ש'];
 
-var state={soldiers:[],missing:[],nid:1,nmid:1,active:null,filter:'all'};
+var state={soldiers:[],missing:[],lists:[],nid:1,nmid:1,active:null,filter:'all'};
 
 /* ── CUSTOM CONFIRM DIALOG ── */
 (function(){
@@ -638,6 +657,7 @@ function startSync(){
     document.getElementById('st-ms').textContent=state.missing.length;
   });
   listenMissions();
+  listenLists();
 }
 function mkSoldier(){return{id:state.nid++,name:'',firstName:'',lastName:'',personalId:'',photoData:'',status:'present',roles:[],phone:'',residence:'',leaves:[],nextFrom:'',nextTo:'',nextApproved:false,notes:'',hasWife:false,wifeName:'',wifePhone:'',hasKids:false,kids:[],nextNotes:'',hofpa:false,pendingLeaves:[]};}
 function find(id){return state.soldiers.find(function(s){return s.id===id;});}
@@ -1957,6 +1977,133 @@ function listenMissions(){
   });
 }
 
+/* ── CUSTOM LISTS ── */
+function getListsCol(){return window._collection(window._db,'lists');}
+function listenLists(){
+  if(!window._db)return;
+  window._onSnapshot(getListsCol(),function(snap){
+    var docs=[];
+    snap.forEach(function(d){docs.push(d.data());});
+    docs.sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0);});
+    state.lists=docs;
+    var mt=document.getElementById('main-tab-lists');
+    if(mt&&mt.style.display!=='none'){renderListsTab();}
+  });
+}
+function saveList(lst){
+  if(!window._db)return;
+  window._setDoc(window._doc(getListsCol(),String(lst.id)),lst);
+}
+function deleteList(id){
+  if(!window._db)return;
+  window._deleteDoc(window._doc(getListsCol(),String(id)));
+}
+
+var _editingListId=null;
+
+function openListEditorModal(listId){
+  _editingListId=listId||null;
+  var lst=listId?(state.lists||[]).find(function(l){return l.id===listId;}):null;
+  document.getElementById('list-editor-title').textContent=lst?'✏️ עריכת רשימה':'📋 רשימה ידנית חדשה';
+  document.getElementById('list-name-input').value=lst?lst.name:'';
+  var container=document.getElementById('list-soldiers-container');
+  container.innerHTML='';
+  var soldiers=(state.soldiers||[]).filter(function(s){return !s.isMissing;}).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
+  var checked=lst?(lst.soldierIds||[]):[];
+  soldiers.forEach(function(s){
+    var row=document.createElement('label');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:600;color:var(--text)';
+    var nameSpan=document.createElement('span');nameSpan.textContent=s.name||'';
+    var chk=document.createElement('input');
+    chk.type='checkbox';chk.value=s.id;
+    chk.style.cssText='width:20px;height:20px;accent-color:var(--blue);cursor:pointer;flex-shrink:0';
+    chk.checked=checked.indexOf(s.id)!==-1;
+    row.appendChild(nameSpan);
+    row.appendChild(chk);
+    container.appendChild(row);
+  });
+  document.getElementById('modal-list-editor').classList.add('show');
+  setTimeout(function(){
+    var sheet=document.querySelector('#modal-list-editor .modal-sheet');
+    if(sheet)sheet.scrollTop=0;
+  },50);
+}
+function closeListEditorModal(){
+  document.getElementById('modal-list-editor').classList.remove('show');
+  _editingListId=null;
+}
+
+function renderListsTab(){
+  var wrap=document.getElementById('lists-wrap');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  var lists=(state.lists||[]);
+  if(!lists.length){
+    var em=document.createElement('div');
+    em.style.cssText='text-align:center;padding:64px 24px;color:var(--text3)';
+    em.innerHTML='<div style="font-size:56px;margin-bottom:16px;opacity:.5">📋</div><div style="font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px">אין רשימות עדיין</div><div style="font-size:14px">לחץ + ליצירת רשימה ראשונה</div>';
+    wrap.appendChild(em);
+    return;
+  }
+  lists.forEach(function(lst){
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)';
+    var ids=(lst.soldierIds||[]);
+    var soldiers=ids.map(function(id){return (state.soldiers||[]).find(function(s){return s.id===id;});}).filter(Boolean);
+
+    var topRow=document.createElement('div');
+    topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
+    var nameEl=document.createElement('div');
+    nameEl.style.cssText='font-size:16px;font-weight:800;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    nameEl.textContent=lst.name||'רשימה ללא שם';
+    var badge=document.createElement('span');
+    badge.style.cssText='background:var(--blue-bg);color:var(--blue);border:1.5px solid #BFDBFE;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;flex-shrink:0;margin-right:8px';
+    badge.textContent=soldiers.length+' חיילים';
+    topRow.appendChild(nameEl);
+    topRow.appendChild(badge);
+    card.appendChild(topRow);
+
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:8px;align-items:center';
+
+    var editBtn=document.createElement('button');
+    editBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
+    editBtn.textContent='✏️ עריכה';
+    (function(id){editBtn.addEventListener('click',function(){openListEditorModal(id);});})(lst.id);
+
+    var waBtn=document.createElement('button');
+    waBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
+    waBtn.textContent='📲 שיתוף';
+    (function(l,sols){waBtn.addEventListener('click',function(){
+      var msg='🪖 *'+l.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים';
+      window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    });})(lst,soldiers);
+
+    var xlBtn=document.createElement('button');
+    xlBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:none;background:#1D6F42;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
+    xlBtn.textContent='📥 Excel';
+    (function(l,sols){xlBtn.addEventListener('click',function(){
+      var rows=[['#','שם','טלפון']].concat(sols.map(function(s,i){return[i+1,s.name||'',s.phone||''];}));
+      var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='רשימה_'+l.name+'_.csv';a.click();toast('הקובץ הורד ✓');
+    });})(lst,soldiers);
+
+    var delBtn=document.createElement('button');
+    delBtn.style.cssText='width:36px;height:36px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0';
+    delBtn.textContent='🗑';
+    (function(l){delBtn.addEventListener('click',function(){
+      showConfirm('למחוק את הרשימה "'+l.name+'"?',function(){deleteList(l.id);state.lists=(state.lists||[]).filter(function(x){return x.id!==l.id;});renderListsTab();toast('הרשימה נמחקה ✓');},{icon:'🗑',danger:true,sub:'פעולה זו אינה ניתנת לביטול'});
+    });})(lst);
+
+    btnRow.appendChild(editBtn);
+    btnRow.appendChild(waBtn);
+    btnRow.appendChild(xlBtn);
+    btnRow.appendChild(delBtn);
+    card.appendChild(btnRow);
+    wrap.appendChild(card);
+  });
+}
+
 function mkMission(name){
   return{id:missionsState.nmid++,name:name,date:new Date().toISOString(),commander:'',teams:[],ironNum:missionsState.missions.length+1};
 }
@@ -2516,6 +2663,7 @@ function switchToMissionsTab(){
   document.getElementById('main-tab-week').style.display='none';
   document.getElementById('main-tab-stats').style.display='none';
   document.getElementById('main-tab-missions').style.display='';
+  document.getElementById('main-tab-lists').style.display='none';
   document.getElementById('fab').style.display='';
   document.querySelector('.dashboard').style.display='none';
   document.getElementById('filter-banner').style.display='none';
@@ -2574,6 +2722,10 @@ function init(){
   document.getElementById('fab-add-mission').addEventListener('click',function(){
     closeFabMenu();
     openNewMissionModal();
+  });
+  document.getElementById('fab-add-list').addEventListener('click',function(){
+    closeFabMenu();
+    openListEditorModal(null);
   });
 
   // mission name overlay
@@ -2687,13 +2839,15 @@ function init(){
       document.getElementById('main-tab-week').style.display=t==='week'?'':'none';
       document.getElementById('main-tab-stats').style.display=t==='stats'?'':'none';
       document.getElementById('main-tab-missions').style.display=t==='missions'?'':'none';
-      document.getElementById('fab').style.display=(t==='list'||t==='missions')?'':'none';
+      document.getElementById('main-tab-lists').style.display=t==='lists'?'':'none';
+      document.getElementById('fab').style.display=(t==='list'||t==='missions'||t==='lists')?'':'none';
       document.querySelector('.dashboard').style.display=t==='list'?'':'none';
       document.getElementById('filter-banner').style.display=t!=='list'?'none':'';
-      document.querySelector('.bottom-bar').style.display=t==='missions'?'none':'';
+      document.querySelector('.bottom-bar').style.display=(t==='missions'||t==='lists')?'none':'';
       if(t==='week')renderWeek();
       if(t==='stats')renderStats();
       if(t==='missions')renderMissions();
+      if(t==='lists')renderListsTab();
     });
   });
   document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
@@ -2719,6 +2873,33 @@ function init(){
   document.getElementById('modal-report').addEventListener('click',function(e){if(e.target===this)closeReportModal();});
   document.getElementById('rcal-prev').addEventListener('click',function(){rcalMonth--;if(rcalMonth<0){rcalMonth=11;rcalYear--;}renderRcal();});
   document.getElementById('rcal-next').addEventListener('click',function(){rcalMonth++;if(rcalMonth>11){rcalMonth=0;rcalYear++;}renderRcal();});
+
+  // List editor modal
+  document.getElementById('list-editor-cancel').addEventListener('click',closeListEditorModal);
+  document.getElementById('modal-list-editor').addEventListener('click',function(e){if(e.target===this)closeListEditorModal();});
+  document.getElementById('list-editor-save').addEventListener('click',function(){
+    var name=(document.getElementById('list-name-input').value||'').trim();
+    if(!name){toast('⚠️ יש להזין שם לרשימה');return;}
+    var boxes=document.querySelectorAll('#list-soldiers-container input[type=checkbox]:checked');
+    var ids=[];
+    boxes.forEach(function(b){ids.push(Number(b.value));});
+    var lst={
+      id:_editingListId||Date.now().toString(),
+      name:name,
+      soldierIds:ids,
+      createdAt:_editingListId?((state.lists||[]).find(function(l){return l.id===_editingListId;})||{}).createdAt||Date.now():Date.now()
+    };
+    saveList(lst);
+    if(_editingListId){
+      state.lists=(state.lists||[]).map(function(l){return l.id===_editingListId?lst:l;});
+    } else {
+      state.lists=(state.lists||[]).concat([lst]);
+    }
+    closeListEditorModal();
+    var mt=document.getElementById('main-tab-lists');
+    if(mt&&mt.style.display!=='none')renderListsTab();
+    toast('הרשימה נשמרה ✓');
+  });
 }
 init();
 // אבטחה — PIN פעם ביום
@@ -2844,6 +3025,10 @@ function _handleBack(){
   if(document.getElementById('modal-report').classList.contains('show')){
     closeReportModal();return;
   }
+  // מודל עורך רשימה פתוח
+  if(document.getElementById('modal-list-editor').classList.contains('show')){
+    closeListEditorModal();return;
+  }
   // במסך פרטי חייל
   var scrDet=document.getElementById('scr-det');
   var isInDetail=state.active!==null&&!scrDet.classList.contains('hidden');
@@ -2911,6 +3096,17 @@ function _handleBack(){
     weekTab.style.display='none';
     document.getElementById('fab').style.display='';
     document.querySelector('.dashboard').style.display='';
+    return;
+  }
+  // רשימות פתוח → חזור לחיילים
+  var listsTab=document.getElementById('main-tab-lists');
+  if(listsTab&&listsTab.style.display!=='none'){
+    document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='list');});
+    document.getElementById('main-tab-list').style.display='';
+    listsTab.style.display='none';
+    document.getElementById('fab').style.display='';
+    document.querySelector('.dashboard').style.display='';
+    document.querySelector('.bottom-bar').style.display='';
     return;
   }
   // דשבורד — נשאר
