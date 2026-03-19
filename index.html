@@ -1036,7 +1036,7 @@ function updateStats(){
         info.appendChild(nm);info.appendChild(sub);
         var arr=document.createElement('span');arr.style.cssText='color:var(--text3);font-size:16px';arr.textContent='‹';
         row.appendChild(av);row.appendChild(info);row.appendChild(arr);
-        row.addEventListener('click',function(){modal.style.display='none';showDetail(sol.id);});
+        row.addEventListener('click',(function(sid){return function(){modal.style.display='none';state._openPendingLeave=true;showDetail(sid);};})(sol.id));
         list.appendChild(row);
       });
       modal.style.display='flex';
@@ -1779,6 +1779,16 @@ function buildLeavesTab(s){
     container.appendChild(addBtn);
   }
   renderPendingLeaves();
+  if(state._openPendingLeave){
+    state._openPendingLeave=false;
+    setTimeout(function(){
+      var firstPending=container.querySelector('.nl-box.pending');
+      if(firstPending&&firstPending.children[1]){
+        firstPending.children[1].style.display='block';
+        firstPending.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    },80);
+  }
   nlBody.appendChild(container);nlSec.appendChild(nlHdr);nlSec.appendChild(nlBody);inner.appendChild(nlSec);
 
   renderLv();
