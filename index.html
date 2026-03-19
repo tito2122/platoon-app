@@ -1545,6 +1545,25 @@ function buildLeavesTab(s){
               s.leaves.splice(idx,1);saveSoldier(s);renderLv();
             },{icon:'🗑',danger:true});
           };})(ds));
+        } else {
+          var _td=today();
+          var _pls=s.pendingLeaves||[];
+          for(var _pi=0;_pi<_pls.length;_pi++){
+            var _pl=_pls[_pi];
+            if(!_pl.from||!_pl.to)continue;
+            if(ds>=_pl.from&&ds<=_pl.to){
+              if(_pl.approved){
+                if(_pl.to<_td){
+                  btn.style.cssText='background:#FCE7F3;color:#9D174D;font-weight:700;border-radius:8px';
+                } else {
+                  btn.style.cssText='background:#D1FAE5;color:#065F46;font-weight:700;border-radius:8px';
+                }
+              } else {
+                btn.style.cssText='background:#DBEAFE;color:#1E40AF;font-weight:700;border-radius:8px';
+              }
+              break;
+            }
+          }
         }
         calGrid.appendChild(btn);
       }
@@ -1561,6 +1580,14 @@ function buildLeavesTab(s){
     var calWrap=document.createElement('div');calWrap.className='cal-wrap';
     calWrap.appendChild(calNav);calWrap.appendChild(calGrid);
     lvList.appendChild(calWrap);
+
+    var legend=document.createElement('div');
+    legend.style.cssText='display:flex;flex-wrap:wrap;gap:8px;padding:6px 10px 10px;';
+    legend.innerHTML='<span style="background:#FCE7F3;color:#9D174D;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">🏖 יציאה</span>'
+      +'<span style="background:#D1FAE5;color:#065F46;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">✅ אושר</span>'
+      +'<span style="background:#DBEAFE;color:#1E40AF;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">⏳ ממתין</span>'
+      +'<span style="background:#FCE7F3;color:#9D174D;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">🕰 עבר</span>';
+    lvList.appendChild(legend);
 
     if(nextTotEl){
       var nd=s.nextApproved&&s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo):0;
