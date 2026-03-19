@@ -1089,20 +1089,7 @@ function renderList(){
 
     var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=st.label;
 
-    var hofpaWrap=document.createElement('div');
-    hofpaWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0';
-    var hofpaChk=document.createElement('input');hofpaChk.type='checkbox';hofpaChk.checked=!!s.hofpa;
-    hofpaChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
-    var hofpaLbl=document.createElement('span');hofpaLbl.style.cssText='font-size:9px;font-weight:700;color:var(--text3)';hofpaLbl.textContent='הופ"א';
-    hofpaChk.addEventListener('click',function(e){
-      e.stopPropagation();e.preventDefault();
-      var newVal=!s.hofpa;
-      var msg=newVal?'החייל עבר מבחן הוראות פתיחה באש?':'לבטל סימון הופ"א של '+(s.name||'החייל')+'?';
-      showConfirm(msg,function(){s.hofpa=newVal;hofpaChk.checked=newVal;saveSoldier(s);},{icon:newVal?'✅':'↩️'});
-    });
-    hofpaWrap.appendChild(hofpaChk);hofpaWrap.appendChild(hofpaLbl);
-
-    item.appendChild(av);item.appendChild(info);item.appendChild(hofpaWrap);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
+    item.appendChild(av);item.appendChild(info);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
     item.addEventListener('click',function(){showDetail(s.id);});
     wrap.appendChild(item);
   });
@@ -1182,6 +1169,11 @@ function buildInfoTab(s){
     } else {
       var rv=document.createElement('div');rv.className='field-val empty-val';rv.textContent='ללא תפקיד';rf.appendChild(rv);
     }
+    var hofpaStatusRow=document.createElement('div');hofpaStatusRow.style.cssText='margin-top:8px';
+    var hofpaStatusBadge=document.createElement('span');
+    hofpaStatusBadge.style.cssText=s.hofpa?'background:#D1FAE5;color:#065F46;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:700':'background:#FEF3C7;color:#92400E;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:700';
+    hofpaStatusBadge.textContent=s.hofpa?'✅ עבר הופ"א':'⏳ לא עבר הופ"א';
+    hofpaStatusRow.appendChild(hofpaStatusBadge);rf.appendChild(hofpaStatusRow);
     inner.appendChild(rf);
 
     var hasFamData=(s.hasWife||s.wifeName||s.wifePhone)||((s.hasKids||(s.kids&&s.kids.filter(Boolean).length)));
@@ -1385,7 +1377,13 @@ function buildInfoTab(s){
       c.addEventListener('click',function(){var i=s.roles.indexOf(r);if(i===-1){s.roles.push(r);c.className='chip sel';}else{s.roles.splice(i,1);c.className='chip';}saveSoldier(s);updateStats();});
       chips.appendChild(c);
     });
-    sec2.body.appendChild(chips);inner.appendChild(sec2.el);
+    sec2.body.appendChild(chips);
+    var hofpaChkWrap=document.createElement('div');hofpaChkWrap.style.cssText='display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-sm)';
+    var hofpaChkEdit=document.createElement('input');hofpaChkEdit.type='checkbox';hofpaChkEdit.className='ap-chk';hofpaChkEdit.checked=!!s.hofpa;
+    hofpaChkEdit.addEventListener('change',function(){s.hofpa=hofpaChkEdit.checked;saveSoldier(s);});
+    hofpaChkWrap.appendChild(hofpaChkEdit);
+    sec2.body.appendChild(hofpaChkWrap);
+    inner.appendChild(sec2.el);
 
     // ── PHONE ──
     var sec3=mkSec('טלפון');
