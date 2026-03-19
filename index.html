@@ -1285,9 +1285,10 @@ function buildLeavesTab(s){
   var nextTotEl=null;
 
   function calcTotal(){
+    var today=new Date().toISOString().slice(0,10);
     var t=0;
     (s.leaves||[]).forEach(function(lv){t+=calcDays(lv.from,lv.to);});
-    (s.pendingLeaves||[]).forEach(function(pl){if(pl.approved&&pl.from&&pl.to)t+=calcDays(pl.from,pl.to);});
+    (s.pendingLeaves||[]).forEach(function(pl){if(pl.approved&&pl.from&&pl.to&&pl.to<=today)t+=calcDays(pl.from,pl.to);});
     return t;
   }
   var lvCalYear,lvCalMonth;
@@ -1298,8 +1299,9 @@ function buildLeavesTab(s){
     totNum.textContent=calcTotal()+' ימים';
 
     function isOnLeave(ds){
+      var today=new Date().toISOString().slice(0,10);
       if((s.leaves||[]).some(function(lv){return ds>=lv.from&&ds<=lv.to;}))return true;
-      if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<=pl.to;}))return true;
+      if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<=today&&ds>=pl.from&&ds<=pl.to;}))return true;
       return false;
     }
     function getLeaveAt(ds){return (s.leaves||[]).find(function(lv){return ds>=lv.from&&ds<=lv.to;});}
