@@ -623,16 +623,8 @@ function startSync(){
     },8000);
     return;
   }
-  // fallback — אם snapshot לא מגיע תוך 10 שניות (iOS/רשת איטית), פתח בכל זאת
   var _snapReceived=false;
-  setTimeout(function(){
-    if(!_snapReceived){
-      var lo=document.getElementById('loading-overlay');
-      if(lo)lo.style.display='none';
-      showMain();
-    }
-  },6000);
-  window._onSnapshot(window._soldiersCol, function(snapshot){
+  function _processSoldiersSnapshot(snapshot){
     _snapReceived=true;
     var incoming=[];
     snapshot.forEach(function(d){incoming.push(d.data());});
@@ -640,7 +632,6 @@ function startSync(){
     var maxId=0;
     incoming.forEach(function(s){if(s.id>maxId)maxId=s.id;});
     if(maxId>=state.nid)state.nid=maxId+1;
-    // תקן חיילים שמסומנים כנעדרים אך אינם ברשימת הנעדרים (מצב לא תקין)
     incoming.forEach(function(s){
       if(s.isMissing){
         var stillMissing=state.missing.some(function(m){return m.id===s._missingId;});
@@ -649,11 +640,38 @@ function startSync(){
     });
     state.soldiers=incoming;
     checkAllExpiries();
-    if(document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')){
-      renderMain();
-    }
     var lo=document.getElementById('loading-overlay');
     if(lo)lo.style.display='none';
+    if(document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')){
+      renderMain();
+    } else {
+      showMain();
+    }
+  }
+  // iOS/Safari: נסה .get() ראשון — חד פעמי ומהיר — ואחר כך onSnapshot לעדכונים
+  var _isIOSSync=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  if(_isIOSSync){
+    window._soldiersCol.get().then(function(snapshot){
+      if(!_snapReceived) _processSoldiersSnapshot({forEach:function(fn){snapshot.docs.forEach(function(d){fn({data:function(){return d.data();},id:d.id});});}});
+    }).catch(function(e){console.error('iOS get error:',e);});
+  }
+  // fallback — אם snapshot לא מגיע תוך 6 שניות, פתח בכל זאת
+  setTimeout(function(){
+    if(!_snapReceived){
+      var lo=document.getElementById('loading-overlay');
+      if(lo)lo.style.display='none';
+      showMain();
+      toast('⚠️ לא ניתן לטעון נתונים');
+    }
+  },6000);
+  window._onSnapshot(window._soldiersCol, _processSoldiersSnapshot, function(err){
+    console.error('onSnapshot error:',err);
+    if(!_snapReceived){
+      var lo=document.getElementById('loading-overlay');
+      if(lo)lo.style.display='none';
+      showMain();
+      toast('⚠️ שגיאת חיבור: '+err.message);
+    }
   });
   var missingCol=window._collection(window._db,'missing');
   window._onSnapshot(missingCol, function(snapshot){
