@@ -1089,7 +1089,11 @@ function renderList(){
 
     var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=st.label;
 
-    item.appendChild(av);item.appendChild(info);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
+    var futureChkWrap=document.createElement('div');futureChkWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0';
+    var futureChk=document.createElement('input');futureChk.type='checkbox';futureChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
+    futureChk.addEventListener('click',function(e){e.stopPropagation();e.preventDefault();});
+    futureChkWrap.appendChild(futureChk);
+    item.appendChild(av);item.appendChild(info);item.appendChild(futureChkWrap);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
     item.addEventListener('click',function(){showDetail(s.id);});
     wrap.appendChild(item);
   });
@@ -1378,10 +1382,12 @@ function buildInfoTab(s){
       chips.appendChild(c);
     });
     sec2.body.appendChild(chips);
-    var hofpaChkWrap=document.createElement('div');hofpaChkWrap.style.cssText='display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-sm)';
+    var hofpaChkWrap=document.createElement('div');hofpaChkWrap.style.cssText='display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer';
     var hofpaChkEdit=document.createElement('input');hofpaChkEdit.type='checkbox';hofpaChkEdit.className='ap-chk';hofpaChkEdit.checked=!!s.hofpa;
+    var hofpaChkEditId='hofpachk'+s.id;hofpaChkEdit.id=hofpaChkEditId;
+    var hofpaChkEditLbl=document.createElement('label');hofpaChkEditLbl.htmlFor=hofpaChkEditId;hofpaChkEditLbl.style.cssText='font-size:14px;font-weight:700;cursor:pointer;color:var(--text)';hofpaChkEditLbl.textContent='עבר הופ"א?';
     hofpaChkEdit.addEventListener('change',function(){s.hofpa=hofpaChkEdit.checked;saveSoldier(s);});
-    hofpaChkWrap.appendChild(hofpaChkEdit);
+    hofpaChkWrap.appendChild(hofpaChkEdit);hofpaChkWrap.appendChild(hofpaChkEditLbl);
     sec2.body.appendChild(hofpaChkWrap);
     inner.appendChild(sec2.el);
 
