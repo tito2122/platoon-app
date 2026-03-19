@@ -39,8 +39,10 @@ if('serviceWorker' in navigator){
     var _isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
     var _isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if(_isIOS||_isSafari){db.settings({experimentalForceLongPolling:true,merge:true});}
-    // Cache מקומי — מציג נתונים מיד בפתיחה חוזרת
-    db.enablePersistence({synchronizeTabs:false}).catch(function(){});
+    // Cache מקומי — מציג נתונים מיד בפתיחה חוזרת (לא על iOS/Safari — גורם להקפאה)
+    if(!_isIOS&&!_isSafari){
+      db.enablePersistence({synchronizeTabs:false}).catch(function(){});
+    }
 
     window._db = db;
     window._collection = function(db, path){ return db.collection(path); };
@@ -629,7 +631,7 @@ function startSync(){
       if(lo)lo.style.display='none';
       showMain();
     }
-  },10000);
+  },6000);
   window._onSnapshot(window._soldiersCol, function(snapshot){
     _snapReceived=true;
     var incoming=[];
