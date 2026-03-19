@@ -1502,6 +1502,8 @@ function buildLeavesTab(s){
 
   var lvList=document.createElement('div');
   var nextTotEl=null;
+  var lvCalYear,lvCalMonth;
+  (function(){var n=new Date();lvCalYear=n.getFullYear();lvCalMonth=n.getMonth();}());
 
   function calcTotal(){
     var t=0;(s.leaves||[]).forEach(function(lv){t+=calcDays(lv.from,lv.to);});return t;
@@ -1509,25 +1511,57 @@ function buildLeavesTab(s){
   function renderLv(){
     lvList.innerHTML='';
     totNum.textContent=calcTotal()+' ימים';
-    var sorted=(s.leaves||[]).slice().sort(function(a,b){return a.from<b.from?-1:a.from>b.from?1:0;});
-    if(!sorted.length){
-      var empty=document.createElement('div');empty.style.cssText='color:var(--text3);font-size:14px;padding:8px 0;text-align:center';empty.textContent='אין יציאות רשומות';
-      lvList.appendChild(empty);
-    } else {
-      sorted.forEach(function(lv){
-        var li=(s.leaves||[]).indexOf(lv);
-        var rec=document.createElement('div');rec.className='lv-rec';
-        var inf=document.createElement('div');inf.className='lv-info';
-        inf.innerHTML='<div class="lv-dates">'+fmtDate(lv.to)+' ← '+fmtDate(lv.from)+'</div><div class="lv-days">'+calcDays(lv.from,lv.to)+' ימים</div>';
-        var del=document.createElement('button');del.className='lv-del';del.textContent='×';
-        del.addEventListener('click',(function(i,lv){return function(){
-          showConfirm('למחוק את היציאה '+fmtDate(lv.from)+' → '+fmtDate(lv.to)+'?',function(){
-            s.leaves.splice(i,1);saveSoldier(s);renderLv();
-          },{icon:'🗑',danger:true});
-        };})(li,lv));
-        rec.appendChild(inf);rec.appendChild(del);lvList.appendChild(rec);
-      });
+
+    function isOnLeave(ds){return (s.leaves||[]).some(function(lv){return ds>=lv.from&&ds<=lv.to;});}
+    function getLeaveAt(ds){return (s.leaves||[]).find(function(lv){return ds>=lv.from&&ds<=lv.to;});}
+
+    var calNav=document.createElement('div');calNav.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px 10px 4px';
+    var prevBtn=document.createElement('button');prevBtn.className='cal-nav-btn';prevBtn.textContent='›';
+    var nextBtn=document.createElement('button');nextBtn.className='cal-nav-btn';nextBtn.textContent='‹';
+    var monthLbl=document.createElement('span');monthLbl.className='cal-month-lbl';
+    calNav.appendChild(prevBtn);calNav.appendChild(monthLbl);calNav.appendChild(nextBtn);
+
+    var calGrid=document.createElement('div');calGrid.className='cal-grid';
+
+    function renderMonth(){
+      calGrid.innerHTML='';
+      monthLbl.textContent=MONTHS_HE[lvCalMonth]+' '+lvCalYear;
+      DAYS_HE.forEach(function(d){var h=document.createElement('div');h.className='cal-day-hdr';h.textContent=d;calGrid.appendChild(h);});
+      var firstDay=new Date(lvCalYear,lvCalMonth,1).getDay();
+      for(var i=0;i<firstDay;i++){calGrid.appendChild(document.createElement('div'));}
+      var daysInMonth=new Date(lvCalYear,lvCalMonth+1,0).getDate();
+      var todayStr=today();
+      for(var d=1;d<=daysInMonth;d++){
+        var ds=toDateStr(lvCalYear,lvCalMonth,d);
+        var btn=document.createElement('button');btn.className='cal-day';btn.textContent=d;
+        if(ds===todayStr)btn.classList.add('cal-today');
+        if(isOnLeave(ds)){
+          btn.style.cssText='background:#FCE7F3;color:#9D174D;font-weight:700;border-radius:8px;cursor:pointer';
+          btn.title='לחץ למחיקת היציאה';
+          btn.addEventListener('click',(function(dateStr){return function(){
+            var lv=getLeaveAt(dateStr);if(!lv)return;
+            var idx=(s.leaves||[]).indexOf(lv);
+            showConfirm('למחוק את היציאה '+fmtDate(lv.from)+' → '+fmtDate(lv.to)+'?',function(){
+              s.leaves.splice(idx,1);saveSoldier(s);renderLv();
+            },{icon:'🗑',danger:true});
+          };})(ds));
+        }
+        calGrid.appendChild(btn);
+      }
     }
+
+    prevBtn.addEventListener('click',function(){lvCalMonth--;if(lvCalMonth<0){lvCalMonth=11;lvCalYear--;}renderMonth();});
+    nextBtn.addEventListener('click',function(){lvCalMonth++;if(lvCalMonth>11){lvCalMonth=0;lvCalYear++;}renderMonth();});
+    renderMonth();
+
+    if(!s.leaves||!s.leaves.length){
+      var emptyLbl=document.createElement('div');emptyLbl.style.cssText='color:var(--text3);font-size:14px;padding:4px 0 8px;text-align:center';emptyLbl.textContent='אין יציאות רשומות';
+      lvList.appendChild(emptyLbl);
+    }
+    var calWrap=document.createElement('div');calWrap.className='cal-wrap';
+    calWrap.appendChild(calNav);calWrap.appendChild(calGrid);
+    lvList.appendChild(calWrap);
+
     if(nextTotEl){
       var nd=s.nextApproved&&s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo):0;
       nextTotEl.textContent=nd>0?'✅ אושר — '+nd+' ימים (יתווספו ליציאות)':(s.nextFrom&&s.nextTo?calcDays(s.nextFrom,s.nextTo)+' ימים':'');
