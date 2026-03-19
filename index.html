@@ -457,8 +457,11 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <div class="modal-title" id="list-editor-title">📋 רשימה ידנית חדשה</div>
     <label class="flbl" for="list-name-input">שם הרשימה</label>
     <input id="list-name-input" type="text" class="finp" placeholder="לדוגמה: כוננות שבת" style="margin-bottom:16px">
-    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px">בחר חיילים</div>
-    <div id="list-soldiers-container" style="max-height:42vh;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--bg);padding:4px 0;margin-bottom:14px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:var(--text2)">בחר חיילים</div>
+      <div id="list-selection-counter" style="font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:20px">נבחרו 0 מתוך 0</div>
+    </div>
+    <div id="list-soldiers-container" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
     <label class="flbl" for="list-notes-input">הערות (אופציונלי)</label>
     <textarea id="list-notes-input" class="finp" rows="3" placeholder="הערות לרשימה..." style="margin-bottom:16px;resize:none"></textarea>
     <div style="display:flex;gap:10px">
@@ -2012,19 +2015,30 @@ function openListEditorModal(listId){
   var container=document.getElementById('list-soldiers-container');
   container.innerHTML='';
   var soldiers=(state.soldiers||[]).filter(function(s){return !s.isMissing;}).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
-  var checked=lst?(lst.soldierIds||[]):[];
+  var checked=lst?(lst.soldierIds||[]).slice():[];
+  var counter=document.getElementById('list-selection-counter');
+  function updateCounter(){counter.textContent='נבחרו '+checked.length+' מתוך '+soldiers.length;}
   soldiers.forEach(function(s){
-    var row=document.createElement('label');
-    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;font-weight:600;color:var(--text)';
-    var nameSpan=document.createElement('span');nameSpan.textContent=s.name||'';
-    var chk=document.createElement('input');
-    chk.type='checkbox';chk.value=s.id;
-    chk.style.cssText='width:20px;height:20px;accent-color:var(--blue);cursor:pointer;flex-shrink:0';
-    chk.checked=checked.indexOf(s.id)!==-1;
-    row.appendChild(nameSpan);
-    row.appendChild(chk);
-    container.appendChild(row);
+    var isSelected=checked.indexOf(s.id)!==-1;
+    var chip=document.createElement('button');
+    chip.type='button';
+    chip.dataset.sid=s.id;
+    function applyChipStyle(){
+      var sel=checked.indexOf(s.id)!==-1;
+      chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;'+(sel?'background:var(--blue);color:#fff;border:2px solid var(--blue)':'background:var(--card);color:var(--text);border:2px solid var(--border)');
+    }
+    applyChipStyle();
+    chip.textContent=s.name||'';
+    chip.dataset.selected=isSelected?'1':'0';
+    chip.addEventListener('click',function(){
+      var idx=checked.indexOf(s.id);
+      if(idx===-1){checked.push(s.id);chip.dataset.selected='1';}else{checked.splice(idx,1);chip.dataset.selected='0';}
+      applyChipStyle();
+      updateCounter();
+    });
+    container.appendChild(chip);
   });
+  updateCounter();
   document.getElementById('modal-list-editor').classList.add('show');
   document.body.style.overscrollBehavior='none';
   setTimeout(function(){
@@ -2875,9 +2889,9 @@ function init(){
   document.getElementById('list-editor-save').addEventListener('click',function(){
     var name=(document.getElementById('list-name-input').value||'').trim();
     if(!name){toast('⚠️ יש להזין שם לרשימה');return;}
-    var boxes=document.querySelectorAll('#list-soldiers-container input[type=checkbox]:checked');
+    var chips=document.querySelectorAll('#list-soldiers-container button[data-sid]');
     var ids=[];
-    boxes.forEach(function(b){ids.push(Number(b.value));});
+    chips.forEach(function(c){if(c.dataset.selected==='1')ids.push(Number(c.dataset.sid));});
     var notes=(document.getElementById('list-notes-input').value||'').trim();
     var lst={
       id:_editingListId||Date.now().toString(),
