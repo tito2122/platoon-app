@@ -3214,9 +3214,16 @@ function _handleBack(){
         document.getElementById('tab-info').classList.remove('active');
       }
     } else {
-      // מיציאות → דשבורד
+      // מיציאות → דשבורד (או מודל ממתינות אם הגענו משם)
       if(isNew){state.soldiers=state.soldiers.filter(function(x){return x.id!==state.active;});deleteSoldierRemote(state.active);}
-      showMain();
+      if(state._fromPending){
+        state._fromPending=false;
+        showMain();
+        var pm=document.getElementById('pending-leaves-modal');
+        if(pm)pm.style.display='flex';
+      } else {
+        showMain();
+      }
     }
     return;
   }
