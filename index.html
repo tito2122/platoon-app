@@ -1054,7 +1054,7 @@ function renderList(){
       var dayNum=approvedFrom.split('-')[2].replace(/^0/,'');
       var tTag=document.createElement('span');
       tTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
-      tTag.textContent='✈️ '+(approvedFrom===tomorrowStr()?'יוצא מחר':'יוצא ב-'+dayNum);
+      tTag.textContent='✈️ '+(approvedFrom===today()?'יוצא היום':approvedFrom===tomorrowStr()?'יוצא מחר':'יוצא ב-'+dayNum);
       tagsRow.appendChild(tTag);
     }
     // ממתין לאישור — יש בקשת יציאה שלא אושרה
