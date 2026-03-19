@@ -342,7 +342,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <div id="main-tabs-bar" style="display:flex;background:var(--card);border-bottom:1.5px solid var(--border);flex-shrink:0">
     <button class="main-tab-btn active" data-mtab="list" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">👥 חיילים</button>
     <button class="main-tab-btn" data-mtab="week" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📅 לוח שבועי</button>
-    <button class="main-tab-btn" data-mtab="stats" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:19px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📊</button>
+    <button class="main-tab-btn" data-mtab="pending" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:19px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">⏳</button>
     <button class="main-tab-btn" data-mtab="missions" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">🎯 יזומות</button>
     <button class="main-tab-btn" data-mtab="lists" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📋 רשימות</button>
   </div>
@@ -2987,10 +2987,38 @@ function init(){
   document.querySelectorAll('.main-tab-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
       var t=btn.dataset.mtab;
+      if(t==='pending'){
+        var pm=document.getElementById('pending-leaves-modal');
+        if(pm){
+          var list=document.getElementById('pending-leaves-list');
+          var _mid=getMissingIds();
+          var pendingSoldiers=state.soldiers.filter(function(s){return !s.isMissing&&!_mid[s.id]&&(s.pendingLeaves||[]).some(function(pl){return !pl.approved;});});
+          list.innerHTML='';
+          pendingSoldiers.forEach(function(sol){
+            var row=document.createElement('div');
+            row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card2);border-radius:12px;cursor:pointer';
+            var av=document.createElement('div');av.style.cssText='width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;background:linear-gradient(135deg,#60A5FA,#2563EB)';
+            if(sol.photoData){var img=document.createElement('img');img.src=sol.photoData;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';av.appendChild(img);}
+            else{av.textContent=initials(sol.name||'?');}
+            var info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
+            var nm=document.createElement('div');nm.style.cssText='font-size:15px;font-weight:700;color:var(--text)';nm.textContent=sol.name||'חייל';
+            var cnt=(sol.pendingLeaves||[]).filter(function(pl){return !pl.approved;}).length;
+            var sub=document.createElement('div');sub.style.cssText='font-size:12px;color:var(--blue);margin-top:2px';sub.textContent=cnt+' בקשה ממתינה';
+            info.appendChild(nm);info.appendChild(sub);
+            var arr=document.createElement('span');arr.style.cssText='color:var(--text3);font-size:16px';arr.textContent='‹';
+            row.appendChild(av);row.appendChild(info);row.appendChild(arr);
+            row.addEventListener('click',(function(sid){return function(){pm.style.display='none';state._openPendingLeave=true;showDetail(sid);};})(sol.id));
+            list.appendChild(row);
+          });
+          if(!pendingSoldiers.length){list.innerHTML='<div style="text-align:center;color:var(--text3);padding:20px;font-size:14px">אין בקשות ממתינות</div>';}
+          pm.style.display='flex';
+        }
+        return;
+      }
       document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab===t);});
       document.getElementById('main-tab-list').style.display=t==='list'?'':'none';
       document.getElementById('main-tab-week').style.display=t==='week'?'':'none';
-      document.getElementById('main-tab-stats').style.display=t==='stats'?'':'none';
+      document.getElementById('main-tab-stats').style.display='none';
       document.getElementById('main-tab-missions').style.display=t==='missions'?'':'none';
       document.getElementById('main-tab-lists').style.display=t==='lists'?'':'none';
       document.getElementById('fab').style.display=(t==='list'||t==='missions'||t==='lists')?'':'none';
@@ -2998,7 +3026,6 @@ function init(){
       document.getElementById('filter-banner').style.display=t!=='list'?'none':'';
       document.querySelector('.bottom-bar').style.display=(t==='missions'||t==='lists')?'none':'';
       if(t==='week')renderWeek();
-      if(t==='stats')renderStats();
       if(t==='missions')renderMissions();
       if(t==='lists')renderListsTab();
     });
