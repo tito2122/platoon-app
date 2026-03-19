@@ -1007,43 +1007,6 @@ function updateStats(){
   });
   rs.appendChild(roleWrap);
 
-  // ── באנר בקשות ממתינות ──
-  var pendingSoldiers=activeSoldiers.filter(function(s){
-    return (s.pendingLeaves||[]).some(function(pl){return !pl.approved;});
-  });
-  var existingPendingBtn=document.getElementById('pending-leaves-btn');
-  if(existingPendingBtn)existingPendingBtn.remove();
-  if(pendingSoldiers.length>0){
-    var pendingBtn=document.createElement('div');
-    pendingBtn.id='pending-leaves-btn';
-    pendingBtn.style.cssText='margin-top:7px;display:flex;align-items:center;gap:7px;background:var(--blue-bg);border:1.5px solid #BFDBFE;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;width:fit-content';
-    pendingBtn.innerHTML='<span>⏳ ממתינות לאישור</span><span style="background:var(--blue);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700">'+pendingSoldiers.length+'</span>';
-    pendingBtn.addEventListener('click',function(){
-      var modal=document.getElementById('pending-leaves-modal');
-      var list=document.getElementById('pending-leaves-list');
-      list.innerHTML='';
-      pendingSoldiers.forEach(function(sol){
-        var row=document.createElement('div');
-        row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card2);border-radius:12px;cursor:pointer';
-        var av=document.createElement('div');
-        av.style.cssText='width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;background:linear-gradient(135deg,#60A5FA,#2563EB)';
-        if(sol.photoData){var img=document.createElement('img');img.src=sol.photoData;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';av.appendChild(img);}
-        else{av.textContent=initials(sol.name||'?');}
-        var info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
-        var nm=document.createElement('div');nm.style.cssText='font-size:15px;font-weight:700;color:var(--text)';nm.textContent=sol.name||'חייל';
-        var cnt=(sol.pendingLeaves||[]).filter(function(pl){return !pl.approved;}).length;
-        var sub=document.createElement('div');sub.style.cssText='font-size:12px;color:var(--blue);margin-top:2px';sub.textContent=cnt+' בקשה ממתינה'+(cnt>1?'':'');
-        info.appendChild(nm);info.appendChild(sub);
-        var arr=document.createElement('span');arr.style.cssText='color:var(--text3);font-size:16px';arr.textContent='‹';
-        row.appendChild(av);row.appendChild(info);row.appendChild(arr);
-        row.addEventListener('click',(function(sid){return function(){modal.style.display='none';state._openPendingLeave=true;state._fromPending=true;showDetail(sid);};})(sol.id));
-        list.appendChild(row);
-      });
-      modal.style.display='flex';
-    });
-    rs.appendChild(pendingBtn);
-  }
-
   // מודל ממתינות לאישור (נוצר פעם אחת)
   if(!document.getElementById('pending-leaves-modal')){
     var plModal=document.createElement('div');
