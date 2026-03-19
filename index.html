@@ -1090,8 +1090,8 @@ function renderList(){
     var badge=document.createElement('div');badge.className='s-badge '+(s.status==='present'?'bp':'ba');badge.textContent=st.label;
 
     var futureChkWrap=document.createElement('div');futureChkWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0';
-    var futureChk=document.createElement('input');futureChk.type='checkbox';futureChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
-    futureChk.addEventListener('click',function(e){e.stopPropagation();e.preventDefault();});
+    var futureChk=document.createElement('input');futureChk.type='checkbox';futureChk.checked=!!s.hofpa;futureChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
+    futureChk.addEventListener('click',function(e){e.stopPropagation();s.hofpa=futureChk.checked;saveSoldier(s);});
     futureChkWrap.appendChild(futureChk);
     item.appendChild(av);item.appendChild(info);item.appendChild(futureChkWrap);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
     item.addEventListener('click',function(){showDetail(s.id);});
