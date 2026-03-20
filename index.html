@@ -1564,8 +1564,18 @@ function buildLeavesTab(s){
       var todayStr=today();
       for(var d=1;d<=daysInMonth;d++){
         var ds=toDateStr(lvCalYear,lvCalMonth,d);
-        var btn=document.createElement('button');btn.className='cal-day';btn.textContent=d;
+        var btn=document.createElement('button');btn.className='cal-day';
+        btn.style.cssText='position:relative';
+        btn.textContent=d;
         if(ds===todayStr)btn.classList.add('cal-today');
+        // סימון יום חזרה מיציאה
+        var isReturnDay=(s.leaves||[]).some(function(lv){return lv.to===ds;});
+        if(isReturnDay){
+          var retMark=document.createElement('span');
+          retMark.textContent='‹';
+          retMark.style.cssText='position:absolute;bottom:0px;left:50%;transform:translateX(-50%);font-size:9px;color:#9D174D;line-height:1;font-weight:900';
+          btn.appendChild(retMark);
+        }
         if(isOnLeave(ds)){
           btn.style.cssText='background:#FCE7F3;color:#9D174D;font-weight:700;border-radius:8px;cursor:pointer';
           btn.title='לחץ למחיקת היציאה';
