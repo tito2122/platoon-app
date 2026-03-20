@@ -1052,6 +1052,34 @@ function renderList(){
     es.innerHTML=logoHtml+'<h3>'+(state.filter==='all'?'אין חיילים עדיין':'אין חיילים ברשימה זו')+'</h3><p>'+(state.filter==='all'?'לחץ + להוספת חייל ראשון':'')+'</p>';
     wrap.appendChild(es);return;
   }
+  // ── שורת סמן הכל + מונה ──
+  var selectAllRow=document.createElement('div');
+  selectAllRow.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px';
+  var saWrap=document.createElement('div');saWrap.style.cssText='display:flex;align-items:center;gap:8px;cursor:pointer';
+  var saChk=document.createElement('input');saChk.type='checkbox';saChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
+  var saLbl=document.createElement('span');saLbl.style.cssText='font-size:13px;font-weight:700;color:var(--text2)';saLbl.textContent='סמן הכל';
+  saWrap.appendChild(saChk);saWrap.appendChild(saLbl);
+  var cntEl=document.createElement('span');cntEl.style.cssText='font-size:13px;font-weight:700;color:var(--blue)';
+  selectAllRow.appendChild(saWrap);selectAllRow.appendChild(cntEl);
+  wrap.appendChild(selectAllRow);
+  function updateSelectAll(){
+    var cnt=list.filter(function(x){return !!x.extra1;}).length;
+    cntEl.textContent=cnt?cnt+' נבחרו':'';
+    saChk.checked=cnt===list.length;
+    saChk.indeterminate=cnt>0&&cnt<list.length;
+  }
+  updateSelectAll();
+  saChk.addEventListener('click',function(e){
+    e.stopPropagation();
+    var newVal=saChk.checked;
+    var msg=newVal?'לסמן את כל החיילים?':'לבטל סימון כל החיילים?';
+    showConfirm(msg,function(){
+      list.forEach(function(x){x.extra1=newVal;saveSoldier(x);});
+      renderList();
+    },{icon:newVal?'✅':'↩️'});
+    saChk.checked=!newVal;saChk.indeterminate=false;
+  });
+
   list.forEach(function(s){
     var st=getStatusInfo(s);
     var item=document.createElement('div');item.className='soldier-item';
@@ -1118,7 +1146,7 @@ function renderList(){
 
     var futureChkWrap=document.createElement('div');futureChkWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0';
     var futureChk=document.createElement('input');futureChk.type='checkbox';futureChk.checked=!!s.extra1;futureChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
-    futureChk.addEventListener('click',function(e){e.stopPropagation();s.extra1=futureChk.checked;saveSoldier(s);});
+    futureChk.addEventListener('click',function(e){e.stopPropagation();s.extra1=futureChk.checked;saveSoldier(s);updateSelectAll();});
     futureChkWrap.appendChild(futureChk);
     item.appendChild(av);item.appendChild(info);item.appendChild(futureChkWrap);item.appendChild(badge);item.appendChild((function(){var a=document.createElement('span');a.className='s-arrow';a.textContent='‹';return a;})());
     item.addEventListener('click',function(){showDetail(s.id);});
