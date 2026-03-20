@@ -1572,8 +1572,8 @@ function buildLeavesTab(s){
         var isReturnDay=(s.leaves||[]).some(function(lv){return lv.to===ds;});
         if(isReturnDay){
           var retMark=document.createElement('span');
-          retMark.textContent='‹';
-          retMark.style.cssText='position:absolute;top:50%;left:-8px;transform:translateY(-50%);font-size:16px;color:#9D174D;line-height:1;font-weight:900';
+          retMark.textContent='›';
+          retMark.style.cssText='position:absolute;top:50%;right:-11px;transform:translateY(-50%);font-size:22px;color:#9D174D;line-height:1;font-weight:900;z-index:2';
           btn.appendChild(retMark);
         }
         var _hasStatus=false;
