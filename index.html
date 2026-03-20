@@ -1567,7 +1567,7 @@ function buildLeavesTab(s){
         var btn=document.createElement('button');btn.className='cal-day';
         btn.style.cssText='position:relative';
         btn.textContent=d;
-        if(ds===todayStr)btn.classList.add('cal-today');
+        var isToday=(ds===todayStr);
         // סימון יום חזרה מיציאה
         var isReturnDay=(s.leaves||[]).some(function(lv){return lv.to===ds;});
         if(isReturnDay){
@@ -1576,8 +1576,10 @@ function buildLeavesTab(s){
           retMark.style.cssText='position:absolute;bottom:0px;left:50%;transform:translateX(-50%);font-size:9px;color:#9D174D;line-height:1;font-weight:900';
           btn.appendChild(retMark);
         }
+        var _hasStatus=false;
         if(isOnLeave(ds)){
-          btn.style.cssText='background:#FCE7F3;color:#9D174D;font-weight:700;border-radius:8px;cursor:pointer';
+          _hasStatus=true;
+          btn.style.cssText='position:relative;background:'+(isToday?'#F472B6':'#FCE7F3')+';color:'+(isToday?'#831843':'#9D174D')+';font-weight:700;border-radius:8px;cursor:pointer';
           btn.title='לחץ למחיקת היציאה';
           btn.addEventListener('click',(function(dateStr){return function(){
             var lv=getLeaveAt(dateStr);if(!lv)return;
@@ -1593,19 +1595,21 @@ function buildLeavesTab(s){
             var _pl=_pls[_pi];
             if(!_pl.from||!_pl.to)continue;
             if(ds>=_pl.from&&ds<=_pl.to){
+              _hasStatus=true;
               if(_pl.approved){
                 if(_pl.to<_td){
-                  btn.style.cssText='background:#FCE7F3;color:#9D174D;font-weight:700;border-radius:8px';
+                  btn.style.cssText='position:relative;background:'+(isToday?'#F472B6':'#FCE7F3')+';color:'+(isToday?'#831843':'#9D174D')+';font-weight:700;border-radius:8px';
                 } else {
-                  btn.style.cssText='background:#D1FAE5;color:#065F46;font-weight:700;border-radius:8px';
+                  btn.style.cssText='position:relative;background:'+(isToday?'#34D399':'#D1FAE5')+';color:'+(isToday?'#064E3B':'#065F46')+';font-weight:700;border-radius:8px';
                 }
               } else {
-                btn.style.cssText='background:#DBEAFE;color:#1E40AF;font-weight:700;border-radius:8px';
+                btn.style.cssText='position:relative;background:'+(isToday?'#93C5FD':'#DBEAFE')+';color:'+(isToday?'#1E3A8A':'#1E40AF')+';font-weight:700;border-radius:8px';
               }
               break;
             }
           }
         }
+        if(isToday&&!_hasStatus)btn.classList.add('cal-today');
         calGrid.appendChild(btn);
       }
     }
