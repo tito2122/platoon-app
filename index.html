@@ -329,7 +329,24 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 .pin-btn{width:72px;height:72px;border-radius:50%;border:1.5px solid #E2E6ED;background:#fff;font-family:'Rubik',sans-serif;font-size:22px;font-weight:700;color:#1A1D23;cursor:pointer;transition:all .12s;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .pin-btn:active{transform:scale(.92);background:#EFF6FF}
 @keyframes pinShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sb-nav-btn{width:100%;text-align:right;padding:14px 16px;border:none;background:transparent;font-family:var(--font);font-size:15px;font-weight:600;color:var(--text2);cursor:pointer;border-radius:12px;transition:all .15s;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.sb-nav-btn.active{background:var(--blue-bg);color:var(--blue);font-weight:700}
+.tasks-tab-btn{flex:1;padding:11px 6px;border:none;background:transparent;font-family:var(--font);font-size:13px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s}
+.tasks-tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
 </style>
+<!-- SIDEBAR -->
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500"></div>
+<div id="sidebar" style="position:fixed;top:0;right:0;bottom:0;width:270px;background:var(--card);z-index:501;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 32px rgba(0,0,0,.18);display:flex;flex-direction:column">
+  <div style="padding:20px 16px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px">
+    <div style="flex:1"><div style="font-size:16px;font-weight:800;color:var(--text)">תפריט</div><div style="font-size:12px;color:var(--text3)">ניהול סד"כ</div></div>
+    <button id="sidebar-close-btn" style="width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font)">✕</button>
+  </div>
+  <nav style="padding:12px;flex:1;display:flex;flex-direction:column;gap:4px">
+    <button id="sb-nav-main" class="sb-nav-btn active">🏠 דשבורד ראשי</button>
+    <button id="sb-nav-tasks" class="sb-nav-btn">📋 ניהול משימות יומיומיות</button>
+  </nav>
+</div>
 <div id="ptr-indicator" style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .2s;z-index:10;background:var(--bg)">
   <div id="ptr-spinner" style="width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;transition:transform .3s"></div>
 </div>
@@ -339,6 +356,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <div class="title-wrap"><h1>מערכת ניהול סד"כ</h1><div class="sub">מחלקה 1</div></div>
     <button id="pending-header-btn" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s">⏳</button>
     <button id="theme-toggle" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s">🌙</button>
+    <button id="menu-btn" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">☰</button>
   </div>
   <div id="main-tabs-bar" style="display:flex;background:var(--card);border-bottom:1.5px solid var(--border);flex-shrink:0">
     <button class="main-tab-btn active" data-mtab="list" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">👥 חיילים</button>
@@ -389,6 +407,52 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   </div>
   <div id="fab-overlay" style="display:none;position:fixed;inset:0;z-index:190;background:rgba(0,0,0,.3)"></div>
   <div class="bottom-bar"><button class="btn-report" id="btn-report">📋 דו"ח 1</button></div>
+</div>
+
+<!-- TASKS DASHBOARD SCREEN -->
+<div class="screen hidden" id="scr-tasks">
+  <div class="app-header">
+    <button id="menu-btn-tasks" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">☰</button>
+    <div class="title-wrap" style="margin:0 8px">
+      <h1>ניהול משימות</h1>
+      <div class="sub">סידור יומי</div>
+    </div>
+    <button id="tasks-settings-toggle" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">⚙️</button>
+  </div>
+  <div class="scroll-area" style="flex:1">
+    <div class="list-pad">
+      <!-- API Key Settings -->
+      <div id="tasks-settings-section" style="display:none;margin-bottom:16px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px">🔑 Anthropic API Key</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">המפתח נשמר רק במכשיר שלך (localStorage)</div>
+        <input id="tasks-api-key-input" type="password" class="finp" placeholder="sk-ant-api03-..." style="margin-bottom:10px">
+        <button id="tasks-api-key-save" class="btn" style="width:100%;background:var(--blue);color:#fff;border:none">שמור מפתח</button>
+      </div>
+      <!-- Upload Button -->
+      <div style="margin-bottom:20px">
+        <input type="file" id="tasks-image-input" accept="image/*" style="display:none">
+        <button id="tasks-upload-btn" style="width:100%;padding:22px;border-radius:18px;border:2.5px dashed var(--blue);background:var(--blue-bg);font-family:var(--font);font-size:16px;font-weight:700;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+          <span style="font-size:28px">📸</span>
+          <span>העלאת תמונת סידור יומי</span>
+        </button>
+        <div id="tasks-img-name" style="text-align:center;font-size:12px;color:var(--text3);margin-top:6px;min-height:16px"></div>
+      </div>
+      <!-- Loading -->
+      <div id="tasks-loading" style="display:none;flex-direction:column;align-items:center;gap:14px;padding:48px 0">
+        <div style="width:48px;height:48px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite"></div>
+        <div style="font-size:14px;color:var(--text2);font-weight:600">מנתח תמונה עם AI...</div>
+        <div style="font-size:12px;color:var(--text3)">עשוי לקחת מספר שניות</div>
+      </div>
+      <!-- Results -->
+      <div id="tasks-results" style="display:none">
+        <div style="display:flex;background:var(--card);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px">
+          <button class="tasks-tab-btn active" data-ttab="assigned">🪖 בתפקיד <span id="tasks-assigned-count" style="font-size:11px;background:var(--blue);color:#fff;border-radius:10px;padding:1px 6px;margin-right:2px"></span></button>
+          <button class="tasks-tab-btn" data-ttab="available">✅ פנויים <span id="tasks-available-count" style="font-size:11px;background:#059669;color:#fff;border-radius:10px;padding:1px 6px;margin-right:2px"></span></button>
+        </div>
+        <div id="tasks-list-container"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="screen hidden" id="scr-det">
@@ -837,6 +901,11 @@ function showMain(){
   }
   document.getElementById('scr-det').classList.add('hidden');
   document.getElementById('scr-det').classList.remove('slide-left');
+  if(state._fromTasks){
+    state._fromTasks=false;
+    document.getElementById('scr-tasks').classList.remove('hidden','slide-left');
+    return;
+  }
   document.getElementById('scr-main').classList.remove('hidden','slide-left');
   renderMain();
 }
@@ -3097,6 +3166,227 @@ function init(){
   });
 }
 init();
+
+// ==============================
+// SIDEBAR
+// ==============================
+function openSidebar(){
+  document.getElementById('sidebar').style.transform='translateX(0)';
+  document.getElementById('sidebar-overlay').style.display='block';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').style.transform='translateX(100%)';
+  document.getElementById('sidebar-overlay').style.display='none';
+}
+
+// ==============================
+// DASHBOARD SWITCHING
+// ==============================
+function showMainDash(){
+  document.getElementById('scr-main').classList.remove('hidden','slide-left');
+  document.getElementById('scr-tasks').classList.add('hidden');
+  document.getElementById('sb-nav-main').classList.add('active');
+  document.getElementById('sb-nav-tasks').classList.remove('active');
+  renderMain();
+}
+function showTasksDash(){
+  var k=localStorage.getItem('anthropic_api_key')||'';
+  var inp=document.getElementById('tasks-api-key-input');
+  if(inp)inp.value=k;
+  document.getElementById('scr-main').classList.add('hidden');
+  document.getElementById('scr-tasks').classList.remove('hidden','slide-left');
+  document.getElementById('sb-nav-main').classList.remove('active');
+  document.getElementById('sb-nav-tasks').classList.add('active');
+}
+
+// ==============================
+// TASKS: IMAGE ANALYSIS
+// ==============================
+var _taskData=null;
+
+function _getLastName(n){
+  return((n||'').trim().split(/\s+/)[0]||'').replace(/['"״]/g,'').toLowerCase();
+}
+
+async function analyzeTaskImage(file){
+  var apiKey=localStorage.getItem('anthropic_api_key')||'';
+  if(!apiKey){
+    document.getElementById('tasks-settings-section').style.display='block';
+    var inp=document.getElementById('tasks-api-key-input');
+    if(inp)inp.focus();
+    toast('⚠️ יש להזין Anthropic API Key תחילה');
+    return;
+  }
+  document.getElementById('tasks-img-name').textContent='📎 '+file.name;
+  var reader=new FileReader();
+  reader.onload=async function(e){
+    var base64=e.target.result.split(',')[1];
+    var mimeType=file.type||'image/jpeg';
+    document.getElementById('tasks-loading').style.display='flex';
+    document.getElementById('tasks-results').style.display='none';
+    try{
+      var resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'x-api-key':apiKey,
+          'anthropic-version':'2023-06-01',
+          'content-type':'application/json',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-opus-4-6',
+          max_tokens:4096,
+          messages:[{
+            role:'user',
+            content:[
+              {type:'image',source:{type:'base64',media_type:mimeType,data:base64}},
+              {type:'text',text:'נתח את טבלת הסידור היומי הזו. עבור כל שם שמופיע בטבלה, חלץ:\n1. שם מלא (ללא מספר טלפון - הסר את מה שבסוגריים מרובעים [])\n2. שם העמדה/תפקיד (כותרת העמודה)\n3. שעה (כותרת השורה)\n\nהחזר JSON תקני בלבד, ללא כל טקסט נוסף, בפורמט:\n{"assignments":[{"name":"שם מלא","role":"שם תפקיד","time":"HH:MM"}]}'}
+            ]
+          }]
+        })
+      });
+      var data=await resp.json();
+      if(!resp.ok)throw new Error((data.error&&data.error.message)||'שגיאה '+resp.status);
+      var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+      var jsonMatch=text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch)throw new Error('לא ניתן לפרסר את התשובה');
+      var parsed=JSON.parse(jsonMatch[0]);
+      _processTaskData(parsed.assignments||[]);
+    }catch(err){
+      document.getElementById('tasks-loading').style.display='none';
+      toast('❌ שגיאה בניתוח: '+err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function _processTaskData(assignments){
+  var td=today();
+  var presentSols=(state.soldiers||[]).filter(function(s){return presentOnDate(s,td);});
+  var assignedMap={};
+  var assigned=[];
+  // De-duplicate: keep only first assignment per soldier
+  assignments.forEach(function(a){
+    var aLast=_getLastName(a.name);
+    if(!aLast)return;
+    var match=presentSols.find(function(s){return _getLastName(s.name)===aLast;});
+    if(match&&!assignedMap[match.id]){
+      assignedMap[match.id]=true;
+      assigned.push({soldier:match,role:a.role||'',time:a.time||''});
+    }
+  });
+  var available=presentSols.filter(function(s){return !assignedMap[s.id];});
+  _taskData={assigned:assigned,available:available};
+  document.getElementById('tasks-loading').style.display='none';
+  document.getElementById('tasks-results').style.display='block';
+  document.getElementById('tasks-assigned-count').textContent=assigned.length;
+  document.getElementById('tasks-available-count').textContent=available.length;
+  // Show assigned tab by default
+  var btn=document.querySelector('.tasks-tab-btn[data-ttab="assigned"]');
+  if(btn)renderTasksTab(btn);
+}
+
+function renderTasksTab(btn){
+  document.querySelectorAll('.tasks-tab-btn').forEach(function(b){b.classList.toggle('active',b===btn);});
+  var isAssigned=(btn.dataset.ttab==='assigned');
+  var list=isAssigned?(_taskData&&_taskData.assigned||[]):(_taskData&&_taskData.available||[]);
+  var container=document.getElementById('tasks-list-container');
+  container.innerHTML='';
+  if(!list.length){
+    var empty=document.createElement('div');
+    empty.style.cssText='text-align:center;color:var(--text3);padding:48px 0;font-size:14px';
+    empty.textContent=isAssigned?'אין חיילים בתפקיד כרגע':'כל החיילים הנוכחים שובצו למשימה';
+    container.appendChild(empty);
+    return;
+  }
+  list.forEach(function(item){
+    var s=isAssigned?item.soldier:item;
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .12s';
+    card.addEventListener('click',function(){_showTasksSoldierDetail(s.id);});
+    var av=document.createElement('div');
+    av.style.cssText='width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1E40AF,#3B82F6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:17px;flex-shrink:0';
+    av.textContent=(s.name||'?').charAt(0);
+    card.appendChild(av);
+    var info=document.createElement('div');
+    info.style.cssText='flex:1;min-width:0';
+    var nm=document.createElement('div');
+    nm.style.cssText='font-weight:700;font-size:15px;color:var(--text)';
+    nm.textContent=s.name||'חייל';
+    info.appendChild(nm);
+    var sub=document.createElement('div');
+    sub.style.cssText='font-size:12px;margin-top:3px';
+    if(isAssigned){
+      sub.style.color='var(--text2)';
+      sub.textContent=(item.role||'')+(item.time?' | '+item.time:'');
+    } else {
+      sub.style.color='#059669';
+      sub.textContent='✅ פנוי למשימה';
+    }
+    info.appendChild(sub);
+    card.appendChild(info);
+    var arr=document.createElement('div');
+    arr.style.cssText='color:var(--text3);font-size:22px;font-weight:300;line-height:1';
+    arr.textContent='‹';
+    card.appendChild(arr);
+    container.appendChild(card);
+  });
+}
+
+function _showTasksSoldierDetail(id){
+  state._fromTasks=true;
+  state.active=id;
+  document.getElementById('scr-tasks').classList.add('slide-left');
+  document.getElementById('scr-det').classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='leaves');});
+  document.getElementById('tab-leaves').classList.add('active');
+  document.getElementById('tab-info').classList.remove('active');
+  document.querySelector('.tabs-bar').style.display='flex';
+  renderDetail(id);
+}
+
+// ==============================
+// TASKS: EVENT LISTENERS
+// ==============================
+document.getElementById('menu-btn').addEventListener('click',openSidebar);
+document.getElementById('menu-btn-tasks').addEventListener('click',openSidebar);
+document.getElementById('sidebar-close-btn').addEventListener('click',closeSidebar);
+document.getElementById('sidebar-overlay').addEventListener('click',closeSidebar);
+document.getElementById('sb-nav-main').addEventListener('click',function(){closeSidebar();showMainDash();});
+document.getElementById('sb-nav-tasks').addEventListener('click',function(){closeSidebar();showTasksDash();});
+
+document.getElementById('tasks-settings-toggle').addEventListener('click',function(){
+  var sec=document.getElementById('tasks-settings-section');
+  var hidden=sec.style.display==='none'||!sec.style.display;
+  sec.style.display=hidden?'block':'none';
+  if(hidden){
+    var k=localStorage.getItem('anthropic_api_key')||'';
+    document.getElementById('tasks-api-key-input').value=k;
+  }
+});
+
+document.getElementById('tasks-api-key-save').addEventListener('click',function(){
+  var k=(document.getElementById('tasks-api-key-input').value||'').trim();
+  if(!k){toast('⚠️ יש להזין API Key');return;}
+  localStorage.setItem('anthropic_api_key',k);
+  toast('✅ API Key נשמר בהצלחה');
+  document.getElementById('tasks-settings-section').style.display='none';
+});
+
+document.getElementById('tasks-upload-btn').addEventListener('click',function(){
+  document.getElementById('tasks-image-input').click();
+});
+
+document.getElementById('tasks-image-input').addEventListener('change',function(){
+  if(this.files[0]){analyzeTaskImage(this.files[0]);}
+  this.value='';
+});
+
+document.getElementById('tasks-results').addEventListener('click',function(e){
+  var btn=e.target.closest('.tasks-tab-btn');
+  if(btn)renderTasksTab(btn);
+});
+
 // אבטחה — PIN פעם ביום
 (function(){
   var PIN='3194';
