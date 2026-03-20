@@ -1075,19 +1075,34 @@ function renderList(){
     // תגיות מידע
     var tagsRow=document.createElement('div');tagsRow.style.cssText='display:flex;gap:5px;flex-wrap:wrap;margin-top:4px';
     var tom=tomorrowStr();
-    // יציאה מאושרת — הצג "יוצא ב-X"
-    var approvedFrom=null;
-    if(false){/* nextFrom legacy — ignored */}
-    if(!approvedFrom){
-      var firstApproved=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to;}).sort(function(a,b){return a.from<b.from?-1:1;})[0];
-      if(firstApproved)approvedFrom=firstApproved.from;
-    }
-    if(approvedFrom){
-      var dayNum=approvedFrom.split('-')[2].replace(/^0/,'');
+    // יציאה — בדוק אם כבר בחופשה או עתידית
+    var td=today();
+    var activeLv=null;
+    // בדוק leaves רגילות
+    for(var _li=0;_li<(s.leaves||[]).length;_li++){var _lv=s.leaves[_li];if(td>=_lv.from&&td<_lv.to){activeLv=_lv;break;}}
+    // בדוק pendingLeaves מאושרות
+    if(!activeLv){var _pl=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&td>=pl.from&&td<pl.to;})[0];if(_pl)activeLv=_pl;}
+    if(activeLv){
       var tTag=document.createElement('span');
       tTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
-      tTag.textContent='✈️ '+(approvedFrom===today()?'יוצא היום':approvedFrom===tomorrowStr()?'יוצא מחר':'יוצא ב-'+dayNum);
+      if(td===activeLv.from){
+        tTag.textContent='✈️ יוצא היום';
+      } else {
+        var retDay=activeLv.to.split('-')[2].replace(/^0/,'');
+        tTag.textContent='🏠 חוזר ב-'+retDay;
+      }
       tagsRow.appendChild(tTag);
+    } else {
+      // יציאה עתידית מאושרת
+      var firstApproved=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.from>td;}).sort(function(a,b){return a.from<b.from?-1:1;})[0];
+      var approvedFrom=firstApproved?firstApproved.from:null;
+      if(approvedFrom){
+        var dayNum=approvedFrom.split('-')[2].replace(/^0/,'');
+        var tTag2=document.createElement('span');
+        tTag2.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
+        tTag2.textContent='✈️ '+(approvedFrom===tomorrowStr()?'יוצא מחר':'יוצא ב-'+dayNum);
+        tagsRow.appendChild(tTag2);
+      }
     }
     // ממתין לאישור — יש בקשת יציאה שלא אושרה
     var hasPendingUnapproved=(s.pendingLeaves||[]).some(function(pl){return !pl.approved&&pl.from&&pl.to;});
