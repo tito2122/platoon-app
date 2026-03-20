@@ -1709,6 +1709,7 @@ function buildLeavesTab(s){
           if(overlap){toast('⚠️ תאריכים חופפים לבקשה אחרת');return;}
           pl.from=from;pl.to=to;saveSoldier(s);renderPendingLeaves();
         },{blockPast:true});
+        plCal.cancel.style.display='none';
         openBox.appendChild(plCal.el);
         var cancelBtn=document.createElement('button');
         cancelBtn.className='btn btn-ghost btn-full';cancelBtn.style.marginTop='6px';cancelBtn.textContent='ביטול';
