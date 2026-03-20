@@ -443,6 +443,12 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
         <div style="font-size:14px;color:var(--text2);font-weight:600">מנתח תמונה עם AI...</div>
         <div style="font-size:12px;color:var(--text3)">עשוי לקחת מספר שניות</div>
       </div>
+      <!-- Error -->
+      <div id="tasks-error" style="display:none;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:14px;padding:16px;margin-bottom:16px">
+        <div style="font-weight:700;color:#DC2626;margin-bottom:8px">❌ שגיאה בניתוח התמונה</div>
+        <div id="tasks-error-text" style="font-size:12px;color:#991B1B;word-break:break-all;line-height:1.6"></div>
+        <button onclick="document.getElementById('tasks-error').style.display='none'" style="margin-top:10px;font-size:12px;color:#DC2626;background:none;border:1px solid #FECACA;border-radius:8px;padding:4px 12px;cursor:pointer;font-family:var(--font)">סגור</button>
+      </div>
       <!-- Results -->
       <div id="tasks-results" style="display:none">
         <div style="display:flex;background:var(--card);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px">
@@ -3248,13 +3254,32 @@ async function analyzeTaskImage(file){
       var data=await resp.json();
       if(!resp.ok)throw new Error((data.error&&data.error.message)||'שגיאה '+resp.status);
       var text=(data.content&&data.content[0]&&data.content[0].text)||'';
-      var jsonMatch=text.match(/\{[\s\S]*\}/);
-      if(!jsonMatch)throw new Error('לא ניתן לפרסר את התשובה');
-      var parsed=JSON.parse(jsonMatch[0]);
+      // Try to extract JSON robustly
+      var parsed=null;
+      // 1. Try direct parse
+      try{parsed=JSON.parse(text);}catch(e){}
+      // 2. Try extracting JSON block
+      if(!parsed){
+        var jsonMatch=text.match(/\{[\s\S]*\}/);
+        if(jsonMatch){try{parsed=JSON.parse(jsonMatch[0]);}catch(e){}}
+      }
+      // 3. Try extracting from code block
+      if(!parsed){
+        var codeMatch=text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if(codeMatch){try{parsed=JSON.parse(codeMatch[1].trim());}catch(e){}}
+      }
+      if(!parsed){
+        document.getElementById('tasks-loading').style.display='none';
+        document.getElementById('tasks-error').style.display='block';
+        document.getElementById('tasks-error-text').textContent=text.slice(0,300);
+        return;
+      }
+      document.getElementById('tasks-error').style.display='none';
       _processTaskData(parsed.assignments||[]);
     }catch(err){
       document.getElementById('tasks-loading').style.display='none';
-      toast('❌ שגיאה בניתוח: '+err.message);
+      document.getElementById('tasks-error').style.display='block';
+      document.getElementById('tasks-error-text').textContent=err.message;
     }
   };
   reader.readAsDataURL(file);
