@@ -469,7 +469,8 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <textarea id="list-notes-input" class="finp" rows="3" placeholder="הערות לרשימה..." style="margin-bottom:16px;resize:none"></textarea>
     <div style="display:flex;gap:10px">
       <button class="btn btn-ghost" id="list-editor-cancel" style="flex:1">ביטול</button>
-      <button class="btn" id="list-editor-save" style="flex:1;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;border:none">📲 שמור ושתף</button>
+      <button class="btn" id="list-editor-save" style="flex:1;background:linear-gradient(135deg,#059669,#34D399);color:#fff;border:none">💾 שמור</button>
+      <button class="btn" id="list-editor-share" style="flex:1;background:linear-gradient(135deg,#1E40AF,#3B82F6);color:#fff;border:none">📲 שתף</button>
     </div>
   </div>
 </div>
@@ -3059,9 +3060,9 @@ function init(){
   // List editor modal
   document.getElementById('list-editor-cancel').addEventListener('click',closeListEditorModal);
   document.getElementById('modal-list-editor').addEventListener('click',function(e){if(e.target===this)closeListEditorModal();});
-  document.getElementById('list-editor-save').addEventListener('click',function(){
+  function _saveListFromEditor(){
     var name=(document.getElementById('list-name-input').value||'').trim();
-    if(!name){toast('⚠️ יש להזין שם לרשימה');return;}
+    if(!name){toast('⚠️ יש להזין שם לרשימה');return null;}
     var chips=document.querySelectorAll('#list-soldiers-container button[data-sid]');
     var ids=[];
     chips.forEach(function(c){if(c.dataset.selected==='1')ids.push(Number(c.dataset.sid));});
@@ -3082,6 +3083,14 @@ function init(){
     closeListEditorModal();
     var mt=document.getElementById('main-tab-lists');
     if(mt&&mt.style.display!=='none')renderListsTab();
+    return lst;
+  }
+  document.getElementById('list-editor-save').addEventListener('click',function(){
+    _saveListFromEditor();
+  });
+  document.getElementById('list-editor-share').addEventListener('click',function(){
+    var lst=_saveListFromEditor();
+    if(!lst)return;
     var sols=lst.soldierIds.map(function(id){return(state.soldiers||[]).find(function(s){return s.id===id;});}).filter(Boolean);
     var msg='🪖 *'+lst.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים'+(lst.notes?'\n\n📝 '+lst.notes:'');
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
