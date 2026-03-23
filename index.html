@@ -2567,6 +2567,7 @@ function renderMissionDetail(m,container){
     +'<div style="display:flex;gap:8px;align-items:center">'
     +'<input id="mcmd-'+m.id+'" type="text" placeholder="שם המפקד" value="'+(m.commander||'')+'" autocomplete="off" style="flex:1;min-width:0;box-sizing:border-box;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text)">'
     +'<button id="mdagashim-btn-'+m.id+'" type="button" style="flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">📌 דגשים</button>'
+    +'<button id="mlovaz-btn-'+m.id+'" type="button" style="flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">🗓 לו&quot;ז</button>'
     +'</div>';
   container.appendChild(cmdRow);
   document.getElementById('mcmd-'+m.id).addEventListener('change',function(){
@@ -2581,18 +2582,6 @@ function renderMissionDetail(m,container){
     saveMission(m);
   });
 
-  // לו"ז
-  var lovazRow=document.createElement('div');
-  lovazRow.style.cssText='margin-bottom:12px';
-  var lovazLbl=document.createElement('div');
-  lovazLbl.style.cssText='font-size:12px;font-weight:700;color:var(--text3);margin-bottom:4px';
-  lovazLbl.textContent='לו"ז';
-  var lovazTA=document.createElement('textarea');
-  lovazTA.className='finp';lovazTA.rows=3;lovazTA.placeholder='הזן לוח זמנים...';lovazTA.value=m.lovaz||'';
-  lovazTA.style.cssText='width:100%;box-sizing:border-box;resize:vertical;';
-  lovazTA.addEventListener('change',function(){m.lovaz=lovazTA.value.trim();saveMission(m);});
-  lovazRow.appendChild(lovazLbl);lovazRow.appendChild(lovazTA);
-  container.appendChild(lovazRow);
 
   // popup דגשים מבצעיים
   (function(mLocal){
@@ -2630,6 +2619,43 @@ function renderMissionDetail(m,container){
       btn.style.borderColor=mLocal.dagashim?'var(--green)':'var(--blue)';
     });
     if(mLocal.dagashim){btn.style.background='var(--green)';btn.style.color='#fff';btn.style.borderColor='var(--green)';}
+  })(m);
+
+  // popup לו"ז
+  (function(mLocal){
+    var lovazPopup=document.getElementById('lovaz-popup-'+mLocal.id);
+    if(!lovazPopup){
+      lovazPopup=document.createElement('div');
+      lovazPopup.id='lovaz-popup-'+mLocal.id;
+      lovazPopup.style.cssText='display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);align-items:flex-end;justify-content:center';
+      lovazPopup.innerHTML='<div style="background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:500px;padding:20px 18px 32px;max-height:80vh;display:flex;flex-direction:column;gap:12px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between">'
+        +'<div style="font-size:16px;font-weight:800;color:var(--text)">🗓 לו&quot;ז</div>'
+        +'<button id="lovaz-close-'+mLocal.id+'" type="button" style="background:none;border:none;font-size:26px;cursor:pointer;color:var(--text2)">×</button>'
+        +'</div>'
+        +'<textarea id="lovaz-ta-'+mLocal.id+'" placeholder="הזן לוח זמנים..." style="flex:1;min-height:220px;resize:vertical;width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);line-height:1.7;direction:rtl;outline:none"></textarea>'
+        +'<button id="lovaz-save-'+mLocal.id+'" type="button" style="width:100%;min-height:48px;border-radius:12px;border:none;background:var(--blue);color:#fff;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer">שמור לו&quot;ז ✓</button>'
+        +'</div>';
+      document.body.appendChild(lovazPopup);
+      lovazPopup.addEventListener('click',function(e){if(e.target===lovazPopup)lovazPopup.style.display='none';});
+    }
+    var lovazBtn=document.getElementById('mlovaz-btn-'+mLocal.id);
+    lovazBtn.addEventListener('click',function(){
+      document.getElementById('lovaz-ta-'+mLocal.id).value=mLocal.lovaz||'';
+      lovazPopup.style.display='flex';
+      setTimeout(function(){document.getElementById('lovaz-ta-'+mLocal.id).focus();},80);
+    });
+    document.getElementById('lovaz-close-'+mLocal.id).addEventListener('click',function(){lovazPopup.style.display='none';});
+    document.getElementById('lovaz-save-'+mLocal.id).addEventListener('click',function(){
+      mLocal.lovaz=document.getElementById('lovaz-ta-'+mLocal.id).value;
+      saveMission(mLocal);
+      lovazPopup.style.display='none';
+      toast('לו"ז נשמר ✓');
+      lovazBtn.style.background=mLocal.lovaz?'var(--green)':'var(--blue-bg)';
+      lovazBtn.style.color=mLocal.lovaz?'#fff':'var(--blue)';
+      lovazBtn.style.borderColor=mLocal.lovaz?'var(--green)':'var(--blue)';
+    });
+    if(mLocal.lovaz){lovazBtn.style.background='var(--green)';lovazBtn.style.color='#fff';lovazBtn.style.borderColor='var(--green)';}
   })(m);
 
   // חוליות
