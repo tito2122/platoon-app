@@ -2550,7 +2550,30 @@ function renderMissionDetail(m,container){
     +'<button id="mdagashim-btn-'+m.id+'" type="button" style="flex-shrink:0;padding:0 14px;height:40px;border-radius:10px;border:1.5px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">📌 דגשים</button>'
     +'</div>';
   container.appendChild(cmdRow);
-  document.getElementById('mcmd-'+m.id).addEventListener('change',function(){m.commander=this.value.trim();saveMission(m);});
+  document.getElementById('mcmd-'+m.id).addEventListener('change',function(){
+    m.commander=this.value.trim();
+    // auto-fill חוליה 1 commander name
+    if(m.teams&&m.teams[0]){
+      if(typeof m.teams[0].commander!=='object')m.teams[0].commander={name:'',pakl:''};
+      m.teams[0].commander.name=m.commander;
+      var t1inp=document.getElementById('tcmd-'+(m.teams[0].id));
+      if(t1inp)t1inp.value=m.commander;
+    }
+    saveMission(m);
+  });
+
+  // לו"ז
+  var lovazRow=document.createElement('div');
+  lovazRow.style.cssText='margin-bottom:12px';
+  var lovazLbl=document.createElement('div');
+  lovazLbl.style.cssText='font-size:12px;font-weight:700;color:var(--text3);margin-bottom:4px';
+  lovazLbl.textContent='לו"ז';
+  var lovazTA=document.createElement('textarea');
+  lovazTA.className='finp';lovazTA.rows=3;lovazTA.placeholder='הזן לוח זמנים...';lovazTA.value=m.lovaz||'';
+  lovazTA.style.cssText='width:100%;box-sizing:border-box;resize:vertical;';
+  lovazTA.addEventListener('change',function(){m.lovaz=lovazTA.value.trim();saveMission(m);});
+  lovazRow.appendChild(lovazLbl);lovazRow.appendChild(lovazTA);
+  container.appendChild(lovazRow);
 
   // popup דגשים מבצעיים
   (function(mLocal){
