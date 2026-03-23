@@ -2442,9 +2442,8 @@ function renderMissions(){
 
     var shareSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="white"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="white" stroke-width="2"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="white" stroke-width="2"/></svg>';
     card.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
-      +'<div style="width:28px;height:28px;min-width:28px;background:linear-gradient(135deg,#1E40AF,#3B82F6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0">'+m.ironNum+'</div>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:15px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+m.name+'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px"><div style="font-size:15px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+m.name+'</div><div style="font-size:11px;font-weight:700;color:var(--text3);background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:1px 7px;flex-shrink:0">#'+m.ironNum+'</div></div>'
       +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+dateStr+' · '+(m.commander||'ללא מפקד')+' · '+(m.teams||[]).length+' חוליות · '+total+' אנשים</div>'
       +'</div>'
       +'<button class="mission-share-btn" data-mid="'+m.id+'" style="border:none;background:#1a7a1a;border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0" title="שתף הרכב">'+shareSvg+'</button>'
@@ -2476,7 +2475,7 @@ function renderMissions(){
       lines.push('🎯 יזומה: '+m.name);
       var d2=new Date(m.date);
       lines.push('📅 '+(d2.getDate()+'').padStart(2,'0')+'/'+(d2.getMonth()+1+'').padStart(2,'0')+'/'+d2.getFullYear());
-      lines.push('מפקד המשימה: '+(m.commander||'ריק'));
+      lines.push(nums['cmd']+'. מפקד המשימה: '+(m.commander||'ריק'));
       (m.teams||[]).forEach(function(team,ti){
         lines.push('');
         lines.push('━━ חוליה '+(ti+1)+' ━━');
@@ -2534,12 +2533,13 @@ function renderMissions(){
   setupMissionDrag();
 }
 
-// חישוב מספרי ברזל: מפקד חוליה 1=1, גפרורים=2..., מפקד חוליה 2=N+1...
+// מספרי ברזל: מפקד המשימה=1, חוליה 1 גפרורים=2..., חוליה 2 מפקד+גפרורים...
 function calcMissionIronNums(m){
   var nums={};
   var n=1;
-  (m.teams||[]).forEach(function(team){
-    nums['tcmd-'+team.id]=n++;
+  nums['cmd']=n++;
+  (m.teams||[]).forEach(function(team,ti){
+    if(ti>0)nums['tcmd-'+team.id]=n++;
     (team.soldiers||[]).forEach(function(sol,si){
       nums['sol-'+team.id+'-'+si]=n++;
     });
@@ -2566,6 +2566,7 @@ function renderMissionDetail(m,container){
   var cmdRow=document.createElement('div');
   cmdRow.style.cssText='margin-bottom:12px';
   cmdRow.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+    +'<div style="width:22px;height:22px;min-width:22px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['cmd']+'</div>'
     +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד המשימה</div>'
     +'</div>'
     +'<div style="display:flex;gap:8px;align-items:center">'
@@ -2681,12 +2682,14 @@ function renderMissionDetail(m,container){
     hdr.appendChild(hdrTitle);hdr.appendChild(delBtn);
     teamDiv.appendChild(hdr);
 
-    // מפקד חוליה
-    var tcmdLblRow=document.createElement('div');
-    tcmdLblRow.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:4px';
-    tcmdLblRow.innerHTML='<div style="width:22px;height:22px;min-width:22px;background:#7C3AED;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['tcmd-'+team.id]+'</div>'
-      +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד החוליה</div>';
-    teamDiv.appendChild(tcmdLblRow);
+    // מפקד חוליה — רק מחוליה 2 ואילך
+    if(ti>0){
+      var tcmdLblRow=document.createElement('div');
+      tcmdLblRow.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:4px';
+      tcmdLblRow.innerHTML='<div style="width:22px;height:22px;min-width:22px;background:#7C3AED;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['tcmd-'+team.id]+'</div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד החוליה</div>';
+      teamDiv.appendChild(tcmdLblRow);
+    }
 
     var tcmdRow=document.createElement('div');
     tcmdRow.style.cssText='display:flex;gap:6px;margin-bottom:8px';
