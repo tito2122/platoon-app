@@ -2707,7 +2707,7 @@ function renderMissionDetail(m,container){
       teamDiv.appendChild(tcmdRow);
     }
     function saveTcmd(){
-      if(ti===0){team.commander={name:m.commander||'',pakl:tcmdPaklInp.value.trim()};}
+      if(ti===0){team.commander={name:m.commander||'',pakl:''};}
       else{team.commander={name:tcmdInp.value.trim(),pakl:tcmdPaklInp.value.trim()};}
       saveMission(m);
     }
