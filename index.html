@@ -2310,7 +2310,7 @@ function renderListsTab(){
   var wrap=document.getElementById('lists-wrap');
   if(!wrap)return;
   wrap.innerHTML='';
-  var lists=(state.lists||[]);
+  var lists=(state.lists||[]).slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
   if(!lists.length){
     var em=document.createElement('div');
     em.style.cssText='text-align:center;padding:64px 24px;color:var(--text3)';
