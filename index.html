@@ -2577,14 +2577,37 @@ function renderMissionDetail(m,container){
   container.appendChild(cmdRow);
   document.getElementById('mcmd-'+m.id).addEventListener('change',function(){
     m.commander=this.value.trim();
-    // auto-fill חוליה 1 commander name
     if(m.teams&&m.teams[0]){
       if(typeof m.teams[0].commander!=='object')m.teams[0].commander={name:'',pakl:''};
       m.teams[0].commander.name=m.commander;
-      var t1inp=document.getElementById('tcmd-'+(m.teams[0].id));
-      if(t1inp)t1inp.value=m.commander;
     }
     saveMission(m);
+  });
+  document.getElementById('mcmd-'+m.id).addEventListener('keydown',function(e){
+    if(e.key!=='Enter')return;
+    e.preventDefault();
+    m.commander=this.value.trim();
+    if(m.teams&&m.teams[0]){
+      if(typeof m.teams[0].commander!=='object')m.teams[0].commander={name:'',pakl:''};
+      m.teams[0].commander.name=m.commander;
+    }
+    saveMission(m);
+    // אם אין חוליות — הוסף חוליה ראשונה
+    if(!m.teams||m.teams.length===0){
+      var team={id:'t'+Date.now(),commander:{name:m.commander,pakl:''},soldiers:[{name:'',pakl:''}]};
+      m.teams.push(team);saveMission(m);
+      renderMissionDetail(m,container);
+      setTimeout(function(){
+        var solsDiv=document.getElementById('tsols-'+team.id);
+        var firstInp=solsDiv&&solsDiv.querySelector('input[placeholder="שם"]');
+        if(firstInp){firstInp.focus();firstInp.scrollIntoView({block:'center',behavior:'smooth'});}
+      },80);
+    } else {
+      // פוקוס על גפרור ראשון של חוליה 1
+      var solsDiv=document.getElementById('tsols-'+m.teams[0].id);
+      var firstInp=solsDiv&&solsDiv.querySelector('input[placeholder="שם"]');
+      if(firstInp){firstInp.focus();firstInp.scrollIntoView({block:'center',behavior:'smooth'});}
+    }
   });
 
 
