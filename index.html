@@ -1713,7 +1713,7 @@ function buildLeavesTab(s){
             if(ds>=_pl.from&&ds<=_pl.to){
               _hasStatus=true;
               if(_pl.approved){
-                if(_pl.to<_td){
+                if(ds<_td){
                   btn.style.cssText='position:relative;background:'+(isToday?'#F472B6':'#FCE7F3')+';color:'+(isToday?'#831843':'#9D174D')+';font-weight:700;border-radius:8px';
                 } else {
                   btn.style.cssText='position:relative;background:'+(isToday?'#34D399':'#D1FAE5')+';color:'+(isToday?'#064E3B':'#065F46')+';font-weight:700;border-radius:8px';
