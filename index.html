@@ -360,7 +360,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   </div>
   <div id="main-tabs-bar" style="display:flex;background:var(--card);border-bottom:1.5px solid var(--border);flex-shrink:0">
     <button class="main-tab-btn active" data-mtab="list" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">👥 חיילים</button>
-    <button class="main-tab-btn" data-mtab="week" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📅 לוח שבועי</button>
+    <button class="main-tab-btn" data-mtab="week" id="week-tab-btn" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s"><span id="week-cal-icon" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:#E53E3E;border-radius:4px;color:#fff;font-size:11px;font-weight:900;vertical-align:middle;margin-left:4px;line-height:1">?</span> לוח שבועי</button>
     <button class="main-tab-btn" data-mtab="stats" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:19px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📊</button>
     <button class="main-tab-btn" data-mtab="missions" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">🎯 יזומות</button>
     <button class="main-tab-btn" data-mtab="lists" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📋 רשימות</button>
@@ -587,6 +587,12 @@ var MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יו�
 var DAYS_HE=['א','ב','ג','ד','ה','ו','ש'];
 
 var state={soldiers:[],missing:[],lists:[],nid:1,nmid:1,active:null,filter:'all'};
+(function updateWeekIcon(){
+  var el=document.getElementById('week-cal-icon');
+  if(el)el.textContent=new Date().getDate();
+  var msToMidnight=new Date();msToMidnight.setHours(24,0,0,0);
+  setTimeout(updateWeekIcon,msToMidnight-new Date());
+})();
 
 /* ── CUSTOM CONFIRM DIALOG ── */
 (function(){
