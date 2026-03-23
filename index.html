@@ -1847,6 +1847,15 @@ function buildLeavesTab(s){
       apRow.appendChild(chk);apRow.appendChild(apLbl);
       body.appendChild(apRow);
 
+      // Notes textarea
+      var notesTA=document.createElement('textarea');
+      notesTA.placeholder='הערות...';
+      notesTA.value=pl.notes||'';
+      notesTA.style.cssText='width:100%;margin-top:10px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;resize:vertical;min-height:60px;box-sizing:border-box;direction:rtl;';
+      notesTA.addEventListener('input',function(){pl.notes=notesTA.value;});
+      notesTA.addEventListener('blur',function(){saveSoldier(s);});
+      body.appendChild(notesTA);
+
       // Delete button
       var delBtn=document.createElement('button');
       delBtn.className='btn btn-danger';delBtn.style.cssText='width:100%;margin-top:10px;';
