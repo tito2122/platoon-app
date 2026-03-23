@@ -1886,7 +1886,20 @@ function buildLeavesTab(s){
       }
     },80);
   }
-  nlBody.appendChild(container);nlSec.appendChild(nlHdr);nlSec.appendChild(nlBody);inner.appendChild(nlSec);
+  nlBody.appendChild(container);
+
+  // הערות כלליות ליציאות
+  var genNotesLbl=document.createElement('div');
+  genNotesLbl.style.cssText='font-size:13px;font-weight:700;color:var(--text3);margin-top:12px;margin-bottom:4px';
+  genNotesLbl.textContent='הערות';
+  var genNotesTA=document.createElement('textarea');
+  genNotesTA.className='finp';genNotesTA.rows=3;genNotesTA.placeholder='הערות כלליות...';
+  genNotesTA.value=s.leavesNotes||'';
+  genNotesTA.style.cssText='width:100%;box-sizing:border-box;resize:vertical;';
+  genNotesTA.addEventListener('change',function(){s.leavesNotes=genNotesTA.value;saveSoldier(s);});
+  nlBody.appendChild(genNotesLbl);nlBody.appendChild(genNotesTA);
+
+  nlSec.appendChild(nlHdr);nlSec.appendChild(nlBody);inner.appendChild(nlSec);
 
   renderLv();
   panel.appendChild(inner);
