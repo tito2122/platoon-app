@@ -1811,13 +1811,6 @@ function buildLeavesTab(s){
       hdr.appendChild(datesSpan);hdr.appendChild(badge);
       box.appendChild(hdr);
 
-      // Notes always visible
-      var notesTA=document.createElement('textarea');
-      notesTA.className='finp';notesTA.rows=2;notesTA.placeholder='הערות...';notesTA.value=pl.notes||'';
-      notesTA.style.cssText='width:100%;margin-top:8px;box-sizing:border-box;';
-      notesTA.addEventListener('change',function(){pl.notes=notesTA.value;saveSoldier(s);});
-      box.appendChild(notesTA);
-
       var body=document.createElement('div');
       body.style.display='none';
       body.style.marginTop='10px';
