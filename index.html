@@ -2322,16 +2322,40 @@ function renderListsTab(){
     var soldiers=ids.map(function(id){return (state.soldiers||[]).find(function(s){return s.id===id;});}).filter(Boolean);
 
     var topRow=document.createElement('div');
-    topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
+    topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none';
     var nameEl=document.createElement('div');
     nameEl.style.cssText='font-size:16px;font-weight:800;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
     nameEl.textContent=lst.name||'רשימה ללא שם';
     var badge=document.createElement('span');
     badge.style.cssText='background:var(--blue-bg);color:var(--blue);border:1.5px solid #BFDBFE;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;flex-shrink:0;margin-right:8px';
     badge.textContent=soldiers.length+' חיילים';
+    var arrow=document.createElement('span');
+    arrow.style.cssText='font-size:12px;color:var(--text3);flex-shrink:0;transition:transform .2s';
+    arrow.textContent='▼';
     topRow.appendChild(nameEl);
     topRow.appendChild(badge);
+    topRow.appendChild(arrow);
     card.appendChild(topRow);
+
+    // Collapsible names panel
+    var namesPanel=document.createElement('div');
+    namesPanel.style.cssText='display:none;margin-bottom:10px;background:var(--bg-secondary);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)';
+    if(soldiers.length){
+      soldiers.forEach(function(sol,i){
+        var row=document.createElement('div');
+        row.style.cssText='padding:5px 0;font-size:14px;font-weight:600;color:var(--text);border-bottom:'+(i<soldiers.length-1?'1px solid var(--border)':'none');
+        row.textContent=(i+1)+'. '+(sol.name||'חייל');
+        namesPanel.appendChild(row);
+      });
+    } else {
+      namesPanel.textContent='אין חיילים ברשימה';
+    }
+    card.appendChild(namesPanel);
+    topRow.addEventListener('click',function(){
+      var open=namesPanel.style.display==='block';
+      namesPanel.style.display=open?'none':'block';
+      arrow.style.transform=open?'':'rotate(180deg)';
+    });
 
     var btnRow=document.createElement('div');
     btnRow.style.cssText='display:flex;gap:8px;align-items:center';
