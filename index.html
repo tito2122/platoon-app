@@ -1764,6 +1764,7 @@ function buildLeavesTab(s){
   var nlBody=document.createElement('div');nlBody.className='edit-sec-body';
   var container=document.createElement('div');
   migratePending(s);
+  var _pendingOpenIdx=null;
   function renderPendingLeaves(){
     var pls=s.pendingLeaves||[];
     container.innerHTML='';
@@ -1783,7 +1784,7 @@ function buildLeavesTab(s){
             return from<other.to&&to>other.from;
           });
           if(overlap){toast('⚠️ תאריכים חופפים לבקשה אחרת');return;}
-          pl.from=from;pl.to=to;saveSoldier(s);renderPendingLeaves();
+          pl.from=from;pl.to=to;_pendingOpenIdx=idx;saveSoldier(s);renderPendingLeaves();
         },{blockPast:true});
         plCal.cancel.style.display='none';
         openBox.appendChild(plCal.el);
@@ -1812,8 +1813,9 @@ function buildLeavesTab(s){
       box.appendChild(hdr);
 
       var body=document.createElement('div');
-      body.style.display='none';
+      body.style.display=(_pendingOpenIdx===idx)?'block':'none';
       body.style.marginTop='10px';
+      if(_pendingOpenIdx===idx)_pendingOpenIdx=null;
 
       // Calendar for date selection
       var calDiv=document.createElement('div');
