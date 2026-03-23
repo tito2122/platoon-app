@@ -2599,14 +2599,14 @@ function renderMissionDetail(m,container){
       renderMissionDetail(m,container);
       setTimeout(function(){
         var solsDiv=document.getElementById('tsols-'+team.id);
-        var firstInp=solsDiv&&solsDiv.querySelector('input[placeholder="שם"]');
-        if(firstInp){firstInp.focus();firstInp.scrollIntoView({block:'center',behavior:'smooth'});}
-      },80);
+        var firstInp=solsDiv&&solsDiv.querySelector('input[placeholder="שם חייל"]');
+        if(firstInp){firstInp.focus();firstInp.click();firstInp.scrollIntoView({block:'center',behavior:'smooth'});}
+      },150);
     } else {
       // פוקוס על גפרור ראשון של חוליה 1
       var solsDiv=document.getElementById('tsols-'+m.teams[0].id);
-      var firstInp=solsDiv&&solsDiv.querySelector('input[placeholder="שם"]');
-      if(firstInp){firstInp.focus();firstInp.scrollIntoView({block:'center',behavior:'smooth'});}
+      var firstInp=solsDiv&&solsDiv.querySelector('input[placeholder="שם חייל"]');
+      if(firstInp){firstInp.focus();firstInp.click();firstInp.scrollIntoView({block:'center',behavior:'smooth'});}
     }
   });
 
