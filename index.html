@@ -1469,13 +1469,24 @@ function buildInfoTab(s){
       var file=photoInput.files[0];if(!file)return;
       var reader=new FileReader();
       reader.onload=function(ev){
-        s.photoData=ev.target.result;
-        saveSoldier(s);
-        photoPreview.innerHTML='';
-        var img=document.createElement('img');img.src=s.photoData;img.style.cssText='width:100%;height:100%;object-fit:cover';
-        photoPreview.appendChild(img);
-        photoDelBtn.style.display='block';
-        toast('התמונה נשמרה ✓');
+        var original=new Image();
+        original.onload=function(){
+          var MAX=800;
+          var w=original.width,h=original.height;
+          if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+          if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+          var canvas=document.createElement('canvas');
+          canvas.width=w;canvas.height=h;
+          canvas.getContext('2d').drawImage(original,0,0,w,h);
+          s.photoData=canvas.toDataURL('image/jpeg',0.7);
+          saveSoldier(s);
+          photoPreview.innerHTML='';
+          var img=document.createElement('img');img.src=s.photoData;img.style.cssText='width:100%;height:100%;object-fit:cover';
+          photoPreview.appendChild(img);
+          photoDelBtn.style.display='block';
+          toast('התמונה נשמרה ✓');
+        };
+        original.src=ev.target.result;
       };
       reader.readAsDataURL(file);
     });
