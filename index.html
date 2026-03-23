@@ -2476,7 +2476,7 @@ function renderMissions(){
       lines.push('🎯 יזומה: '+m.name);
       var d2=new Date(m.date);
       lines.push('📅 '+(d2.getDate()+'').padStart(2,'0')+'/'+(d2.getMonth()+1+'').padStart(2,'0')+'/'+d2.getFullYear());
-      lines.push(nums['cmd']+'. מפקד המשימה: '+(m.commander||'ריק'));
+      lines.push('מפקד המשימה: '+(m.commander||'ריק'));
       (m.teams||[]).forEach(function(team,ti){
         lines.push('');
         lines.push('━━ חוליה '+(ti+1)+' ━━');
@@ -2534,11 +2534,10 @@ function renderMissions(){
   setupMissionDrag();
 }
 
-// חישוב מספרי ברזל היררכיים: מפקד=1, מפקד חוליה 1=2, גפרורים=3..., מפקד חוליה 2=N+1...
+// חישוב מספרי ברזל: מפקד חוליה 1=1, גפרורים=2..., מפקד חוליה 2=N+1...
 function calcMissionIronNums(m){
   var nums={};
   var n=1;
-  nums['cmd']=n++;
   (m.teams||[]).forEach(function(team){
     nums['tcmd-'+team.id]=n++;
     (team.soldiers||[]).forEach(function(sol,si){
@@ -2567,7 +2566,6 @@ function renderMissionDetail(m,container){
   var cmdRow=document.createElement('div');
   cmdRow.style.cssText='margin-bottom:12px';
   cmdRow.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
-    +'<div style="width:22px;height:22px;min-width:22px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff">'+nums['cmd']+'</div>'
     +'<div style="font-size:12px;font-weight:700;color:var(--text3)">מפקד המשימה</div>'
     +'</div>'
     +'<div style="display:flex;gap:8px;align-items:center">'
@@ -2693,6 +2691,8 @@ function renderMissionDetail(m,container){
     var tcmdRow=document.createElement('div');
     tcmdRow.style.cssText='display:flex;gap:6px;margin-bottom:8px';
     var tcmdName=typeof team.commander==='object'?(team.commander.name||''):(team.commander||'');
+    // חוליה 1 — אם ריקה, מלא מפקד המשימה
+    if(ti===0&&!tcmdName&&m.commander)tcmdName=m.commander;
     var tcmdPakl=typeof team.commander==='object'?(team.commander.pakl||''):'';
     var tcmdInp=document.createElement('input');
     tcmdInp.id='tcmd-'+team.id;tcmdInp.type='text';tcmdInp.placeholder='שם מפקד החוליה';
