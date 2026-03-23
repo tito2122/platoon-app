@@ -2691,22 +2691,26 @@ function renderMissionDetail(m,container){
       teamDiv.appendChild(tcmdLblRow);
     }
 
-    var tcmdRow=document.createElement('div');
-    tcmdRow.style.cssText='display:flex;gap:6px;margin-bottom:8px';
     var tcmdName=typeof team.commander==='object'?(team.commander.name||''):(team.commander||'');
-    // חוליה 1 — אם ריקה, מלא מפקד המשימה
-    if(ti===0&&!tcmdName&&m.commander)tcmdName=m.commander;
     var tcmdPakl=typeof team.commander==='object'?(team.commander.pakl||''):'';
     var tcmdInp=document.createElement('input');
-    tcmdInp.id='tcmd-'+team.id;tcmdInp.type='text';tcmdInp.placeholder='שם מפקד החוליה';
-    tcmdInp.value=tcmdName;tcmdInp.autocomplete='off';
-    tcmdInp.style.cssText='width:90px;flex-shrink:0;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text)';
+    tcmdInp.id='tcmd-'+team.id;tcmdInp.type='hidden';tcmdInp.value=ti===0?(m.commander||''):tcmdName;
     var tcmdPaklInp=document.createElement('input');
     tcmdPaklInp.type='text';tcmdPaklInp.placeholder='פק"ל';tcmdPaklInp.value=tcmdPakl;tcmdPaklInp.autocomplete='off';
-    tcmdPaklInp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
-    tcmdRow.appendChild(tcmdInp);tcmdRow.appendChild(tcmdPaklInp);
-    teamDiv.appendChild(tcmdRow);
-    function saveTcmd(){team.commander={name:tcmdInp.value.trim(),pakl:tcmdPaklInp.value.trim()};saveMission(m);}
+    if(ti>0){
+      var tcmdRow=document.createElement('div');
+      tcmdRow.style.cssText='display:flex;gap:6px;margin-bottom:8px';
+      tcmdInp.type='text';tcmdInp.placeholder='שם מפקד החוליה';
+      tcmdInp.style.cssText='width:90px;flex-shrink:0;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text)';
+      tcmdPaklInp.style.cssText='flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--text)';
+      tcmdRow.appendChild(tcmdInp);tcmdRow.appendChild(tcmdPaklInp);
+      teamDiv.appendChild(tcmdRow);
+    }
+    function saveTcmd(){
+      if(ti===0){team.commander={name:m.commander||'',pakl:tcmdPaklInp.value.trim()};}
+      else{team.commander={name:tcmdInp.value.trim(),pakl:tcmdPaklInp.value.trim()};}
+      saveMission(m);
+    }
     tcmdInp.addEventListener('blur',saveTcmd);
     tcmdPaklInp.addEventListener('blur',saveTcmd);
     tcmdInp.addEventListener('keydown',function(e){
