@@ -10,7 +10,11 @@ var PRECACHE=[
 self.addEventListener('install',function(e){
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE).then(function(cache){return cache.addAll(PRECACHE);})
+    caches.open(CACHE).then(function(cache){
+      return Promise.all(PRECACHE.map(function(url){
+        return cache.add(url).catch(function(err){console.warn('SW precache skip:',url,err);});
+      }));
+    })
   );
 });
 
