@@ -1662,7 +1662,11 @@ function buildLeavesTab(s){
   (function(){var n=new Date();lvCalYear=n.getFullYear();lvCalMonth=n.getMonth();}());
 
   function calcTotal(){
-    var t=0;(s.leaves||[]).forEach(function(lv){t+=calcDays(lv.from,lv.to);});return t;
+    var td=today();
+    var t=0;
+    (s.leaves||[]).forEach(function(lv){t+=calcDays(lv.from,lv.to);});
+    (s.pendingLeaves||[]).forEach(function(pl){if(pl.approved&&pl.from&&pl.to&&pl.to<=td)t+=calcDays(pl.from,pl.to);});
+    return t;
   }
   function renderLv(){
     lvList.innerHTML='';
