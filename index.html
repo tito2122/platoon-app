@@ -1043,7 +1043,6 @@ function renderWeek(){
     em.innerHTML='<div class="ei">📅</div><h3>אין תנועות השבוע</h3><p>לא נמצאו יציאות או חזרות בשבעת הימים הקרובים</p>';
     wrap.appendChild(em);
   }
-  wrap.appendChild(toggleBtn);
 }
 function updateStats(){
   var _mid=getMissingIds();var activeSoldiers=state.soldiers.filter(function(s){return !s.isMissing&&!_mid[s.id];});

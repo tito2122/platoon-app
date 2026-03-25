@@ -4,9 +4,7 @@ var PRECACHE=[
   '/index.html',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png',
-  'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js',
-  'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js'
+  '/icon-512.png'
 ];
 
 self.addEventListener('install',function(e){
