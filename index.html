@@ -1816,6 +1816,12 @@ function buildLeavesTab(s){
         },{blockPast:true});
         plCal.cancel.style.display='none';
         openBox.appendChild(plCal.el);
+        var openNotesTA=document.createElement('textarea');
+        openNotesTA.rows=2;openNotesTA.placeholder='הערות...';
+        openNotesTA.style.cssText='width:100%;box-sizing:border-box;margin-top:10px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;resize:none;direction:rtl;outline:none;';
+        openNotesTA.value=pl.notes||'';
+        openNotesTA.addEventListener('input',function(){pl.notes=openNotesTA.value;});
+        openBox.appendChild(openNotesTA);
         var cancelBtn=document.createElement('button');
         cancelBtn.className='btn btn-ghost btn-full';cancelBtn.style.marginTop='6px';cancelBtn.textContent='ביטול';
         cancelBtn.addEventListener('click',function(){s.pendingLeaves.splice(idx,1);renderPendingLeaves();});
