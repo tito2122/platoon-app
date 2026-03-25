@@ -2236,7 +2236,32 @@ function renderStats(){
   subtitle.textContent='כולל יציאות שהיו ובקשות מאושרות';
   wrap.appendChild(subtitle);
 
-  data.forEach(function(d,i){
+  // תיבת חיפוש
+  var searchWrap=document.createElement('div');
+  searchWrap.style.cssText='padding:0 16px 14px;position:relative';
+  var searchInp=document.createElement('input');
+  searchInp.type='text';searchInp.placeholder='חיפוש חייל...';
+  searchInp.setAttribute('autocomplete','off');
+  searchInp.style.cssText='width:100%;box-sizing:border-box;padding:8px 36px 8px 12px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:14px;outline:none;direction:rtl';
+  var searchIcon=document.createElement('span');
+  searchIcon.textContent='🔍';
+  searchIcon.style.cssText='position:absolute;right:26px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none';
+  searchWrap.appendChild(searchInp);searchWrap.appendChild(searchIcon);
+  wrap.appendChild(searchWrap);
+
+  var listWrap=document.createElement('div');
+  wrap.appendChild(listWrap);
+
+  function renderRows(filter){
+    listWrap.innerHTML='';
+    var filtered=filter?data.filter(function(d){return d.name.includes(filter);}):data;
+    if(!filtered.length){
+      var noRes=document.createElement('div');
+      noRes.style.cssText='text-align:center;padding:24px;color:var(--text3);font-size:14px';
+      noRes.textContent='לא נמצאו תוצאות';
+      listWrap.appendChild(noRes);return;
+    }
+    filtered.forEach(function(d,i){
     var row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border)';
 
@@ -2265,9 +2290,12 @@ function renderStats(){
     daysEl.style.cssText='font-size:13px;font-weight:800;color:var(--text);width:50px;text-align:left;flex-shrink:0';
     daysEl.textContent=d.days+' ימים';
 
-    row.appendChild(rank);row.appendChild(name);row.appendChild(barWrap);row.appendChild(daysEl);
-    wrap.appendChild(row);
-  });
+      row.appendChild(rank);row.appendChild(name);row.appendChild(barWrap);row.appendChild(daysEl);
+      listWrap.appendChild(row);
+    });
+  }
+  renderRows('');
+  searchInp.addEventListener('input',function(){renderRows(searchInp.value.trim());});
 
   // סיכום
   var total=data.reduce(function(s,d){return s+d.days;},0);
