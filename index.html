@@ -2497,6 +2497,7 @@ function renderMissions(){
       var total2=1+(m.teams||[]).reduce(function(acc,t,ti){return acc+(t.soldiers||[]).length+(ti>0&&t.commander?1:0);},0);
       lines.push('סה"כ: '+total2+' עמדות');
       if(m.dagashim&&m.dagashim.trim()){lines.push('');lines.push('📌 דגשים:');lines.push(m.dagashim.trim());}
+      if(m.lovaz&&m.lovaz.trim()){lines.push('');lines.push('🗓 לו"ז:');lines.push(m.lovaz.trim());}
       var text=lines.join('\n');
       var url='https://wa.me/?text='+encodeURIComponent(text);
       window.open(url,'_blank');
