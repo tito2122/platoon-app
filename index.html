@@ -297,8 +297,8 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 .week-toggle{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;color:var(--text3);font-size:13px;font-weight:600;border-top:1.5px solid var(--border);justify-content:center}
 .week-toggle:active{background:var(--bg)}
 </style>
-  <!-- Google Maps Places API — replace YOUR_API_KEY -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCthZ8d-029orCo1XEWimrOCTQ_CFHSyAw&libraries=places&language=he&region=IL" async defer></script>
+  <!-- Google Maps Places API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCthZ8d-029orCo1XEWimrOCTQ_CFHSyAw&libraries=places&v=weekly&language=he&region=IL" async defer></script>
 </head>
 <body>
 
@@ -1569,7 +1569,7 @@ function buildInfoTab(s){
     // שמירה ידנית (fallback אם Places לא זמין)
     ri.addEventListener('input',function(){s.residence=ri.value;delete s.residenceLat;delete s.residenceLng;saveSoldier(s);});
     sec4.body.appendChild(ri);inner.appendChild(sec4.el);
-    // אתחול Google Places Autocomplete — עם retry
+    // אתחול Google Places — PlaceAutocompleteElement (API החדש)
     var _acTries=0;
     function initResidenceAutocomplete(){
       try{
@@ -1577,25 +1577,34 @@ function buildInfoTab(s){
           if(_acTries++<20)setTimeout(initResidenceAutocomplete,300);
           return;
         }
-        var ac=new google.maps.places.Autocomplete(ri,{
+        // החלף את ה-input הרגיל ב-PlaceAutocompleteElement
+        var pac=new google.maps.places.PlaceAutocompleteElement({
           componentRestrictions:{country:'il'},
-          fields:['formatted_address','geometry'],
           types:['geocode','establishment']
         });
-        ac.addListener('place_changed',function(){
-          var place=ac.getPlace();
-          if(!place||!place.formatted_address)return;
-          s.residence=place.formatted_address;
-          ri.value=place.formatted_address;
-          if(place.geometry&&place.geometry.location){
-            s.residenceLat=place.geometry.location.lat();
-            s.residenceLng=place.geometry.location.lng();
-          }
-          saveSoldier(s);
+        pac.style.cssText='width:100%;display:block;--gmp-mat-color-on-surface:var(--text);font-family:var(--font);font-size:15px;';
+        // הצב את ה-PlaceAutocompleteElement במקום ה-input הרגיל
+        if(ri.parentNode){ri.parentNode.replaceChild(pac,ri);}
+        // הצג ערך קיים
+        try{pac.value=s.residence||'';}catch(e){}
+        pac.addEventListener('gmp-select',async function(ev){
+          try{
+            var place=ev.placePrediction.toPlace();
+            await place.fetchFields({fields:['formattedAddress','location']});
+            s.residence=place.formattedAddress||'';
+            if(place.location){
+              s.residenceLat=place.location.lat();
+              s.residenceLng=place.location.lng();
+            }
+            saveSoldier(s);
+          }catch(e){console.warn('Place fetch error:',e);}
         });
-      }catch(e){console.warn('Places Autocomplete error:',e);}
+      }catch(e){
+        console.warn('PlaceAutocompleteElement error:',e);
+        // Fallback — שמור input רגיל
+      }
     }
-    setTimeout(initResidenceAutocomplete,100);
+    setTimeout(initResidenceAutocomplete,300);
 
     // ── FAMILY ──
     var sec5=mkSec('משפחה');
