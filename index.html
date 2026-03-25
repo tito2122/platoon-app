@@ -1665,7 +1665,11 @@ function buildLeavesTab(s){
     var td=today();
     var t=0;
     (s.leaves||[]).forEach(function(lv){t+=calcDays(lv.from,lv.to);});
-    (s.pendingLeaves||[]).forEach(function(pl){if(pl.approved&&pl.from&&pl.to&&pl.to<=td)t+=calcDays(pl.from,pl.to);});
+    (s.pendingLeaves||[]).forEach(function(pl){
+      if(!pl.approved||!pl.from||!pl.to)return;
+      if(pl.to<=td){t+=calcDays(pl.from,pl.to);}
+      else if(pl.from<=td){t+=calcDays(pl.from,td);}
+    });
     return t;
   }
   function renderLv(){
