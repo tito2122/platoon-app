@@ -1569,29 +1569,33 @@ function buildInfoTab(s){
     // שמירה ידנית (fallback אם Places לא זמין)
     ri.addEventListener('input',function(){s.residence=ri.value;delete s.residenceLat;delete s.residenceLng;saveSoldier(s);});
     sec4.body.appendChild(ri);inner.appendChild(sec4.el);
-    // אתחול Google Places Autocomplete
-    (function initResidenceAutocomplete(){
-      if(typeof google==='undefined'||!google.maps||!google.maps.places){
-        // נסה שוב כשה-API יטען
-        window.addEventListener('load',initResidenceAutocomplete,{once:true});
-        return;
-      }
-      var ac=new google.maps.places.Autocomplete(ri,{
-        componentRestrictions:{country:'il'},
-        fields:['formatted_address','geometry'],
-        types:['geocode','establishment']
-      });
-      ac.addListener('place_changed',function(){
-        var place=ac.getPlace();
-        if(!place.formatted_address)return;
-        s.residence=place.formatted_address;
-        if(place.geometry&&place.geometry.location){
-          s.residenceLat=place.geometry.location.lat();
-          s.residenceLng=place.geometry.location.lng();
+    // אתחול Google Places Autocomplete — עם retry
+    var _acTries=0;
+    function initResidenceAutocomplete(){
+      try{
+        if(typeof google==='undefined'||!google.maps||!google.maps.places){
+          if(_acTries++<20)setTimeout(initResidenceAutocomplete,300);
+          return;
         }
-        saveSoldier(s);
-      });
-    }());
+        var ac=new google.maps.places.Autocomplete(ri,{
+          componentRestrictions:{country:'il'},
+          fields:['formatted_address','geometry'],
+          types:['geocode','establishment']
+        });
+        ac.addListener('place_changed',function(){
+          var place=ac.getPlace();
+          if(!place||!place.formatted_address)return;
+          s.residence=place.formatted_address;
+          ri.value=place.formatted_address;
+          if(place.geometry&&place.geometry.location){
+            s.residenceLat=place.geometry.location.lat();
+            s.residenceLng=place.geometry.location.lng();
+          }
+          saveSoldier(s);
+        });
+      }catch(e){console.warn('Places Autocomplete error:',e);}
+    }
+    setTimeout(initResidenceAutocomplete,100);
 
     // ── FAMILY ──
     var sec5=mkSec('משפחה');
