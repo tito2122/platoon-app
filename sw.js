@@ -1,21 +1,7 @@
 var CACHE='pwa-v3';
-var PRECACHE=[
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
-];
 
 self.addEventListener('install',function(e){
   self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(function(cache){
-      return Promise.all(PRECACHE.map(function(url){
-        return cache.add(url).catch(function(err){console.warn('SW precache skip:',url,err);});
-      }));
-    })
-  );
 });
 
 self.addEventListener('activate',function(e){
