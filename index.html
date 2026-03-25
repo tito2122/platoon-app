@@ -2197,8 +2197,9 @@ function renderStats(){
 
     // שם
     var name=document.createElement('div');
-    name.style.cssText='font-size:14px;font-weight:700;color:var(--text);width:90px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    name.style.cssText='font-size:14px;font-weight:700;color:var(--blue);width:90px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;text-decoration:underline';
     name.textContent=d.name;
+    name.addEventListener('click',(function(sid){return function(e){e.stopPropagation();showDetail(sid);};})(d.id));
 
     // בר
     var barWrap=document.createElement('div');
