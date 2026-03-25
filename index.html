@@ -759,7 +759,7 @@ function startSync(){
     var mx=0;inc.forEach(function(m){if(m.id>mx)mx=m.id;});
     if(mx>=state.nmid)state.nmid=mx+1;
     state.missing=inc;
-    document.getElementById('st-ms').textContent=state.missing.length;
+    if(document.getElementById('st-tot'))updateStats();
   });
   listenMissions();
   listenLists();
