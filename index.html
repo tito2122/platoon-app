@@ -2438,7 +2438,7 @@ function renderMissions(){
 
     var d=new Date(m.date);
     var dateStr=(d.getDate()+'').padStart(2,'0')+'/'+(d.getMonth()+1+'').padStart(2,'0');
-    var total=0;(m.teams||[]).forEach(function(t){total+=(t.soldiers||[]).length+(t.commander?1:0);});
+    var total=1;(m.teams||[]).forEach(function(t,ti){total+=(t.soldiers||[]).length+(ti>0&&t.commander?1:0);});
 
     var shareSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="white"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="white" stroke-width="2"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="white" stroke-width="2"/></svg>';
     card.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
@@ -2479,9 +2479,11 @@ function renderMissions(){
       (m.teams||[]).forEach(function(team,ti){
         lines.push('');
         lines.push('━━ חוליה '+(ti+1)+' ━━');
-        var cn=typeof team.commander==='object'?team.commander.name||'':team.commander||'';
-        var cp=typeof team.commander==='object'?team.commander.pakl||'':'';
-        lines.push(nums['tcmd-'+team.id]+'. '+(cn||'ריק')+(cn&&cp?' - '+cp:''));
+        if(ti>0){
+          var cn=typeof team.commander==='object'?team.commander.name||'':team.commander||'';
+          var cp=typeof team.commander==='object'?team.commander.pakl||'':'';
+          if(cn)lines.push(nums['tcmd-'+team.id]+'. '+cn+(cp?' - '+cp:''));
+        }
         (team.soldiers||[]).forEach(function(sol,si){
           var sn=typeof sol==='object'?sol.name||'':sol||'';
           var sp=typeof sol==='object'?sol.pakl||'':'';
@@ -2489,7 +2491,7 @@ function renderMissions(){
         });
       });
       lines.push('');
-      var total2=1+(m.teams||[]).reduce(function(acc,t){return acc+1+(t.soldiers||[]).length;},0);
+      var total2=1+(m.teams||[]).reduce(function(acc,t,ti){return acc+(t.soldiers||[]).length+(ti>0&&t.commander?1:0);},0);
       lines.push('סה"כ: '+total2+' עמדות');
       if(m.dagashim&&m.dagashim.trim()){lines.push('');lines.push('📌 דגשים:');lines.push(m.dagashim.trim());}
       var text=lines.join('\n');
