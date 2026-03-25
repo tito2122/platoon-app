@@ -1137,13 +1137,16 @@ function renderList(){
   }
   // ── שורת סמן הכל + מונה ──
   var selectAllRow=document.createElement('div');
-  selectAllRow.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px';
-  var saWrap=document.createElement('div');saWrap.style.cssText='display:flex;align-items:center;gap:8px;cursor:pointer';
+  selectAllRow.style.cssText='display:flex;align-items:center;gap:10px;padding:0 14px 8px';
+  var saAvSpacer=document.createElement('div');saAvSpacer.style.cssText='width:42px;flex-shrink:0';
+  var saInfoSpacer=document.createElement('div');saInfoSpacer.style.cssText='flex:1';
+  var saWrap=document.createElement('div');saWrap.style.cssText='display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0';
   var saChk=document.createElement('input');saChk.type='checkbox';saChk.style.cssText='width:18px;height:18px;accent-color:var(--green);cursor:pointer';
   var saLbl=document.createElement('span');saLbl.style.cssText='font-size:13px;font-weight:700;color:var(--text2)';saLbl.textContent='סמן הכל';
   saWrap.appendChild(saChk);saWrap.appendChild(saLbl);
-  var cntEl=document.createElement('span');cntEl.style.cssText='font-size:13px;font-weight:700;color:var(--blue)';
-  selectAllRow.appendChild(saWrap);selectAllRow.appendChild(cntEl);
+  var cntEl=document.createElement('span');cntEl.style.cssText='font-size:13px;font-weight:700;color:var(--blue);flex-shrink:0';
+  var saArrowSpacer=document.createElement('div');saArrowSpacer.style.cssText='width:16px;flex-shrink:0';
+  selectAllRow.appendChild(saAvSpacer);selectAllRow.appendChild(saInfoSpacer);selectAllRow.appendChild(saWrap);selectAllRow.appendChild(cntEl);selectAllRow.appendChild(saArrowSpacer);
   wrap.appendChild(selectAllRow);
   function updateSelectAll(){
     var cnt=list.filter(function(x){return !!x.extra1;}).length;
