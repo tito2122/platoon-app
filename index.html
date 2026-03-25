@@ -298,7 +298,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 .week-toggle:active{background:var(--bg)}
 </style>
   <!-- Google Maps Places API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCthZ8d-029orCo1XEWimrOCTQ_CFHSyAw&libraries=places&v=weekly&language=he&region=IL" async defer></script>
+  <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key:"AIzaSyCthZ8d-029orCo1XEWimrOCTQ_CFHSyAw",v:"weekly",language:"he",region:"IL"});</script>
 </head>
 <body>
 <!-- honeypot: absorbs Chrome autofill before real inputs -->
@@ -1572,22 +1572,15 @@ function buildInfoTab(s){
     ri.addEventListener('input',function(){s.residence=ri.value;delete s.residenceLat;delete s.residenceLng;saveSoldier(s);});
     sec4.body.appendChild(ri);inner.appendChild(sec4.el);
     // אתחול Google Places — PlaceAutocompleteElement (API החדש)
-    var _acTries=0;
     function initResidenceAutocomplete(){
-      try{
-        if(typeof google==='undefined'||!google.maps||!google.maps.places){
-          if(_acTries++<20)setTimeout(initResidenceAutocomplete,300);
-          return;
-        }
-        // החלף את ה-input הרגיל ב-PlaceAutocompleteElement
-        var pac=new google.maps.places.PlaceAutocompleteElement({
+      google.maps.importLibrary('places').then(function(places){
+        try{
+        var pac=new places.PlaceAutocompleteElement({
           componentRestrictions:{country:'il'},
           types:['geocode','establishment']
         });
         pac.style.cssText='width:100%;display:block;--gmp-mat-color-on-surface:var(--text);font-family:var(--font);font-size:15px;';
-        // הצב את ה-PlaceAutocompleteElement במקום ה-input הרגיל
         if(ri.parentNode){ri.parentNode.replaceChild(pac,ri);}
-        // הצג ערך קיים
         try{pac.value=s.residence||'';}catch(e){}
         pac.addEventListener('gmp-select',async function(ev){
           try{
@@ -1601,12 +1594,14 @@ function buildInfoTab(s){
             saveSoldier(s);
           }catch(e){console.warn('Place fetch error:',e);}
         });
-      }catch(e){
-        console.warn('PlaceAutocompleteElement error:',e);
-        // Fallback — שמור input רגיל
-      }
+        }catch(e){console.warn('PlaceAutocompleteElement error:',e);}
+      }).catch(function(e){console.warn('importLibrary places error:',e);});
     }
-    setTimeout(initResidenceAutocomplete,300);
+    if(typeof google!=='undefined'&&google.maps&&google.maps.importLibrary){
+      initResidenceAutocomplete();
+    } else {
+      window.addEventListener('load',initResidenceAutocomplete,{once:true});
+    }
 
     // ── FAMILY ──
     var sec5=mkSec('משפחה');
