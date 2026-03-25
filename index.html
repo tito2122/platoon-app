@@ -2426,8 +2426,15 @@ function renderListsTab(){
     if(soldiers.length){
       soldiers.forEach(function(sol,i){
         var row=document.createElement('div');
-        row.style.cssText='padding:5px 0;font-size:14px;font-weight:600;color:var(--text);border-bottom:'+(i<soldiers.length-1?'1px solid var(--border)':'none');
-        row.textContent=(i+1)+'. '+(sol.name||'חייל');
+        row.style.cssText='padding:5px 0;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:4px;border-bottom:'+(i<soldiers.length-1?'1px solid var(--border)':'none');
+        var numSpan=document.createElement('span');
+        numSpan.textContent=(i+1)+'. ';
+        var nameLink=document.createElement('span');
+        nameLink.textContent=sol.name||'חייל';
+        nameLink.style.cssText='cursor:pointer;color:var(--text);text-decoration:underline;text-decoration-color:var(--text3)';
+        (function(sid){nameLink.addEventListener('click',function(e){e.stopPropagation();showDetail(sid);});})(sol.id);
+        row.appendChild(numSpan);
+        row.appendChild(nameLink);
         namesPanel.appendChild(row);
       });
     } else {
