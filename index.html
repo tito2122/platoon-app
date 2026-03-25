@@ -816,11 +816,11 @@ function checkNextExpiry(s){
     s.nextFrom='';s.nextTo='';s.nextApproved=false;
     saveSoldier(s);
   }
-  var expired=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<today();});
+  var expired=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<=today();});
   if(expired.length){
     if(!s.leaves)s.leaves=[];
     expired.forEach(function(pl){s.leaves.push({from:pl.from,to:pl.to});});
-    s.pendingLeaves=s.pendingLeaves.filter(function(pl){return !(pl.approved&&pl.from&&pl.to&&pl.to<today());});
+    s.pendingLeaves=s.pendingLeaves.filter(function(pl){return !(pl.approved&&pl.from&&pl.to&&pl.to<=today());});
     saveSoldier(s);
   }
 }
@@ -834,11 +834,11 @@ function checkAllExpiries(){
       s.nextFrom='';s.nextTo='';s.nextApproved=false;
       saveSoldier(s);changed=true;
     }
-    var expired=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<today();});
+    var expired=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to<=today();});
     if(expired.length){
       if(!s.leaves)s.leaves=[];
       expired.forEach(function(pl){s.leaves.push({from:pl.from,to:pl.to});});
-      s.pendingLeaves=s.pendingLeaves.filter(function(pl){return !(pl.approved&&pl.from&&pl.to&&pl.to<today());});
+      s.pendingLeaves=s.pendingLeaves.filter(function(pl){return !(pl.approved&&pl.from&&pl.to&&pl.to<=today());});
       saveSoldier(s);changed=true;
     }
   });
@@ -1160,7 +1160,7 @@ function renderList(){
       list.forEach(function(x){x.extra1=newVal;saveSoldier(x);});
       renderList();
     },{icon:newVal?'✅':'↩️'});
-    saChk.checked=!newVal;saChk.indeterminate=false;
+    saChk.checked=newVal;saChk.indeterminate=false;
   });
 
   list.forEach(function(s){
@@ -1716,7 +1716,7 @@ function buildLeavesTab(s){
           for(var _pi=0;_pi<_pls.length;_pi++){
             var _pl=_pls[_pi];
             if(!_pl.from||!_pl.to)continue;
-            if(ds>=_pl.from&&ds<=_pl.to){
+            if(ds>=_pl.from&&ds<_pl.to){
               _hasStatus=true;
               if(_pl.approved){
                 if(ds<_td){
@@ -2524,7 +2524,7 @@ function renderMissions(){
     });
 
     // שמור יזומה פתוחה אחרי renderMissions
-    if(_openMissionId&&_openMissionId==m.id){
+    if(_openMissionId&&_openMissionId===m.id){
       setTimeout(function(){
         var det=document.getElementById('mdet-'+m.id);
         if(det&&det.style.display==='none'){det.style.display='block';renderMissionDetail(m,det);}
@@ -2902,7 +2902,7 @@ function renderTeamSoldiers(team,m,detContainer){
       row.style.borderTop='';row.style.borderBottom='';
       try{
         var data=JSON.parse(e.dataTransfer.getData('text/plain'));
-        var fromTeamObj=m.teams.find(function(x){return x.id==data.fromTeam;});
+        var fromTeamObj=m.teams.find(function(x){return x.id===data.fromTeam;});
         var toTeamObj=team;
         if(!fromTeamObj||!toTeamObj)return;
         var soldier=fromTeamObj.soldiers.splice(data.fromIdx,1)[0];
@@ -2914,7 +2914,7 @@ function renderTeamSoldiers(team,m,detContainer){
         toTeamObj.soldiers.splice(toIdx,0,soldier);
         if(m)saveMission(m);
         m.teams.forEach(function(t){renderTeamSoldiers(t,m,detContainer);});
-      }catch(ex){}
+      }catch(ex){console.error('שגיאה בגרירת חייל:',ex);}
     });
 
     function saveRow(){team.soldiers[si]={name:inp.value.trim(),pakl:paklInp.value.trim()};if(m)saveMission(m);}
@@ -2953,20 +2953,20 @@ function renderTeamSoldiers(team,m,detContainer){
     e.preventDefault();e.stopPropagation();
     try{
       var data=JSON.parse(e.dataTransfer.getData('text/plain'));
-      var fromTeamObj=m.teams.find(function(x){return x.id==data.fromTeam;});
+      var fromTeamObj=m.teams.find(function(x){return x.id===data.fromTeam;});
       if(!fromTeamObj)return;
       var soldier=fromTeamObj.soldiers.splice(data.fromIdx,1)[0];
       if(fromTeamObj.soldiers.length<1)fromTeamObj.soldiers.push({name:'',pakl:''});
       team.soldiers.push(soldier);
       if(m)saveMission(m);
       m.teams.forEach(function(t){renderTeamSoldiers(t,m,detContainer);});
-    }catch(ex){}
+    }catch(ex){console.error('שגיאה בגרירת חייל לחוליה:',ex);}
   });
 }
 
 
 window.addSoldierToTeam=function(mid,tid){
-  var m=missionsState.missions.find(function(x){return x.id==mid;});
+  var m=missionsState.missions.find(function(x){return x.id===mid;});
   if(!m)return;
   var t=m.teams.find(function(x){return x.id==tid;});
   if(!t)return;
@@ -2976,7 +2976,7 @@ window.addSoldierToTeam=function(mid,tid){
   if(det&&det.style.display!=='none')renderMissionDetail(m,det);
 };
 window.removeTeam=function(mid,tid){
-  var m=missionsState.missions.find(function(x){return x.id==mid;});
+  var m=missionsState.missions.find(function(x){return x.id===mid;});
   if(!m)return;
   m.teams=m.teams.filter(function(x){return x.id!==tid;});
   saveMission(m);
@@ -3064,7 +3064,7 @@ function openMissionDetail(mid){
   // פתח את הכרטיס
   setTimeout(function(){
     var det=document.getElementById('mdet-'+mid);
-    if(det){det.style.display='block';renderMissionDetail(missionsState.missions.find(function(x){return x.id==mid;}),det);}
+    if(det){det.style.display='block';renderMissionDetail(missionsState.missions.find(function(x){return x.id===mid;}),det);}
     // focus על שם מפקד המשימה
     setTimeout(function(){
       var det2=document.getElementById('mdet-'+mid);
