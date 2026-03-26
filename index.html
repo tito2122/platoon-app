@@ -1759,11 +1759,10 @@ function buildLeavesTab(s){
           btn.appendChild(retMark);
         }
         // סימון יום חזרה מבקשה מאושרת (ירוק)
-        var isApprovedReturnDay=(s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.to===ds;});
+        var isApprovedReturnDay=(s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&pl.to===ds;});
         if(isApprovedReturnDay){
           var retMarkGreen=document.createElement('span');
-          retMarkGreen.textContent='›';
-          retMarkGreen.style.cssText='position:absolute;top:50%;right:-11px;transform:translateY(-50%);font-size:22px;color:#065F46;line-height:1;font-weight:900;z-index:2';
+          retMarkGreen.style.cssText='position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#065F46;z-index:2;pointer-events:none';
           btn.appendChild(retMarkGreen);
         }
         var _hasStatus=false;
