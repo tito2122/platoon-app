@@ -1998,6 +1998,7 @@ function buildLeavesTab(s){
   shamsBody.style.display='none';shamsBody.style.marginTop='12px';
   var shamsCalYear,shamsCalMonth;
   (function(){var n=new Date();shamsCalYear=n.getFullYear();shamsCalMonth=n.getMonth();}());
+  var shamsFrom=null;
   function renderShamsCalendar(){
     shamsBody.innerHTML='';
     if(!s.shams)s.shams=[];
@@ -2007,6 +2008,8 @@ function buildLeavesTab(s){
     var lbl=document.createElement('span');lbl.className='cal-month-lbl';
     lbl.textContent=MONTHS_HE[shamsCalMonth]+' '+shamsCalYear;
     nav.appendChild(prev);nav.appendChild(lbl);nav.appendChild(nxt);
+    var hint=document.createElement('div');hint.className='cal-hint';
+    hint.textContent=shamsFrom?'עכשיו בחר יום סיום':'בחר יום התחלה';
     var grid=document.createElement('div');grid.className='cal-grid';
     DAYS_HE.forEach(function(d){var h=document.createElement('div');h.className='cal-day-hdr';h.textContent=d;grid.appendChild(h);});
     var firstDay=new Date(shamsCalYear,shamsCalMonth,1).getDay();
@@ -2016,18 +2019,29 @@ function buildLeavesTab(s){
       var ds=toDateStr(shamsCalYear,shamsCalMonth,d);
       var btn=document.createElement('button');btn.className='cal-day';btn.textContent=d;btn.style.cssText='position:relative';
       var isSel=s.shams.indexOf(ds)!==-1;
-      if(isSel){btn.style.cssText='position:relative;background:#1F2937;color:#F9FAFB;font-weight:700;border-radius:8px';}
+      var isStart=shamsFrom&&ds===shamsFrom;
+      if(isStart){btn.style.cssText='position:relative;background:#F59E0B;color:#fff;font-weight:700;border-radius:8px';}
+      else if(isSel){btn.style.cssText='position:relative;background:#1F2937;color:#F9FAFB;font-weight:700;border-radius:8px';}
       btn.addEventListener('click',(function(dateStr){return function(){
         if(!s.shams)s.shams=[];
-        var ix=s.shams.indexOf(dateStr);
-        if(ix===-1)s.shams.push(dateStr);else s.shams.splice(ix,1);
+        if(!shamsFrom){shamsFrom=dateStr;renderShamsCalendar();return;}
+        var from=shamsFrom<dateStr?shamsFrom:dateStr;
+        var to=shamsFrom<dateStr?dateStr:shamsFrom;
+        shamsFrom=null;
+        // בנה רשימת כל הימים בטווח
+        var days=[];var cur=new Date(from);var end=new Date(to);
+        while(cur<=end){days.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
+        // אם כולם כבר מסומנים — הסר, אחרת הוסף
+        var allIn=days.every(function(dd){return s.shams.indexOf(dd)!==-1;});
+        if(allIn){s.shams=s.shams.filter(function(dd){return days.indexOf(dd)===-1;});}
+        else{days.forEach(function(dd){if(s.shams.indexOf(dd)===-1)s.shams.push(dd);});}
         saveSoldier(s);renderShamsCalendar();renderLv();
       };})(ds));
       grid.appendChild(btn);
     }
     prev.addEventListener('click',function(){shamsCalMonth--;if(shamsCalMonth<0){shamsCalMonth=11;shamsCalYear--;}renderShamsCalendar();});
     nxt.addEventListener('click',function(){shamsCalMonth++;if(shamsCalMonth>11){shamsCalMonth=0;shamsCalYear++;}renderShamsCalendar();});
-    var cw=document.createElement('div');cw.className='cal-wrap';cw.appendChild(nav);cw.appendChild(grid);
+    var cw=document.createElement('div');cw.className='cal-wrap';cw.appendChild(nav);cw.appendChild(hint);cw.appendChild(grid);
     shamsBody.appendChild(cw);
     if(s.shams.length>0){var cnt=document.createElement('div');cnt.style.cssText='text-align:center;font-size:12px;color:var(--text3);padding:4px 0 6px';cnt.textContent=s.shams.length+' ימי שמ"ס מסומנים';shamsBody.appendChild(cnt);}
   }
