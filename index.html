@@ -2034,7 +2034,9 @@ function buildLeavesTab(s){
         var allIn=days.every(function(dd){return s.shams.indexOf(dd)!==-1;});
         if(allIn){s.shams=s.shams.filter(function(dd){return days.indexOf(dd)===-1;});}
         else{days.forEach(function(dd){if(s.shams.indexOf(dd)===-1)s.shams.push(dd);});}
+        var fd=new Date(from);lvCalYear=fd.getFullYear();lvCalMonth=fd.getMonth();
         saveSoldier(s);renderShamsCalendar();renderLv();
+        setTimeout(function(){lvList.scrollIntoView({behavior:'smooth',block:'start'});},80);
       };})(ds));
       grid.appendChild(btn);
     }
@@ -2044,7 +2046,7 @@ function buildLeavesTab(s){
     shamsBody.appendChild(cw);
     if(s.shams.length>0){var cnt=document.createElement('div');cnt.style.cssText='text-align:center;font-size:12px;color:var(--text3);padding:4px 0 6px';cnt.textContent=s.shams.length+' ימי שמ"ס מסומנים';shamsBody.appendChild(cnt);}
   }
-  shamsBtn.addEventListener('click',function(){var open=shamsBody.style.display!=='none';shamsBody.style.display=open?'none':'block';if(!open)renderShamsCalendar();});
+  shamsBtn.addEventListener('click',function(){var open=shamsBody.style.display!=='none';shamsBody.style.display=open?'none':'block';if(!open){renderShamsCalendar();setTimeout(function(){shamsBody.scrollIntoView({behavior:'smooth',block:'start'});},80);}});
   inner.appendChild(shamsBtn);inner.appendChild(shamsBody);
 
   renderLv();
