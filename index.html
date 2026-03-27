@@ -1130,8 +1130,8 @@ function renderList(){
   var wrap=document.getElementById('list-wrap');wrap.innerHTML='';
   state.soldiers.forEach(function(s){checkNextExpiry(s);});
   var searchQ=(document.getElementById('soldier-search')?document.getElementById('soldier-search').value.trim().toLowerCase():'');
-  var _mid2=getMissingIds();var list=state.soldiers.filter(function(s){
-    if(s.isMissing||_mid2[s.id])return false;
+  var _td2=today();var _mid2=getMissingIds();var list=state.soldiers.filter(function(s){
+    if(s.isMissing||_mid2[s.id]||(s.shams||[]).indexOf(_td2)!==-1)return false;
     if(state.filter==='present')return s.status==='present'&&getStatusInfo(s).cls!=='sp-leave';
     if(state.filter==='absent')return s.status==='absent'||getStatusInfo(s).cls==='sp-leave';
     if(searchQ){var nm=((s.firstName||'')+' '+(s.lastName||'')+(s.name||'')).toLowerCase();if(nm.indexOf(searchQ)<0)return false;}
@@ -2052,11 +2052,15 @@ function buildLeavesTab(s){
           });
           if(hasOverlap){toast('⚠️ חפיפה עם יציאה קיימת');return;}
         }
-        if(allIn){s.shams=s.shams.filter(function(dd){return days.indexOf(dd)===-1;});}
-        else{days.forEach(function(dd){if(s.shams.indexOf(dd)===-1)s.shams.push(dd);});}
-        var fd=new Date(from);lvCalYear=fd.getFullYear();lvCalMonth=fd.getMonth();
-        saveSoldier(s);renderShamsCalendar();renderLv();
-        setTimeout(function(){lvList.scrollIntoView({behavior:'smooth',block:'start'});},80);
+        function _doShams(){
+          if(allIn){s.shams=s.shams.filter(function(dd){return days.indexOf(dd)===-1;});}
+          else{days.forEach(function(dd){if(s.shams.indexOf(dd)===-1)s.shams.push(dd);});}
+          var fd=new Date(from);lvCalYear=fd.getFullYear();lvCalMonth=fd.getMonth();
+          saveSoldier(s);renderShamsCalendar();renderLv();
+          setTimeout(function(){lvList.scrollIntoView({behavior:'smooth',block:'start'});},80);
+        }
+        if(allIn){_doShams();}
+        else{showConfirm('לסמן '+days.length+' ימי שמ"ס?',_doShams,{icon:'🔒'});}
       };})(ds));
       grid.appendChild(btn);
     }
@@ -2215,11 +2219,30 @@ function closeMissingModal(){document.getElementById('modal-missing').classList.
 function renderMissingList(){
   var wrap=document.getElementById('missing-list');wrap.innerHTML='';
   var q=(document.getElementById('missing-search').value||'').trim().toLowerCase();
+  // שמ"ס היום
+  var _tdM=today();
+  var shamsSoldiers=state.soldiers.filter(function(s){return !s.isMissing&&(s.shams||[]).indexOf(_tdM)!==-1&&(!q||(s.name||'').toLowerCase().includes(q));});
+  shamsSoldiers.forEach(function(s){
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--bg);border:1.5px solid #374151;border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px';
+    var nameEl=document.createElement('div');nameEl.style.cssText='font-size:16px;font-weight:700;margin-bottom:2px;color:var(--text);display:flex;align-items:center;gap:8px';
+    var badge=document.createElement('span');badge.style.cssText='font-size:11px;background:#1F2937;color:#F9FAFB;border-radius:6px;padding:2px 7px;font-weight:700';badge.textContent='🔒 שמ"ס';
+    var nameSpan=document.createElement('span');nameSpan.textContent=s.name||'ללא שם';
+    nameEl.appendChild(nameSpan);nameEl.appendChild(badge);
+    var infoEl=document.createElement('div');infoEl.style.cssText='font-size:12px;color:var(--text3);margin-bottom:8px';infoEl.textContent='שרות מילואים סגור — לא נספרים ימי יציאה';
+    var openBtn=document.createElement('button');
+    openBtn.style.cssText='min-height:34px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
+    openBtn.textContent='📋 פרטי חייל';
+    openBtn.addEventListener('click',(function(sid){return function(){closeMissingModal();showDetailNewSoldier(sid);};})(s.id));
+    card.appendChild(nameEl);card.appendChild(infoEl);card.appendChild(openBtn);
+    wrap.appendChild(card);
+  });
   var list=state.missing.filter(function(m){return !q||(m.name||'').toLowerCase().includes(q);});
-  if(!list.length){
+  if(!list.length&&!shamsSoldiers.length){
     var em=document.createElement('div');em.style.cssText='text-align:center;padding:24px;color:var(--text3);font-size:14px';em.textContent=q?'לא נמצאו תוצאות':'אין נעדרים רשומים';
     wrap.appendChild(em);return;
   }
+  if(!list.length)return;
   list.forEach(function(m){
     var card=document.createElement('div');
     card.style.cssText='background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px';
