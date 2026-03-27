@@ -1929,7 +1929,7 @@ function buildLeavesTab(s){
       apRow.style.cssText='display:flex;align-items:center;gap:10px;margin-top:10px;';
       var chk=document.createElement('input');chk.type='checkbox';chk.className='ap-chk';chk.checked=!!pl.approved;
       var apLbl=document.createElement('label');apLbl.className='ap-lbl';apLbl.textContent='אושרה';
-      chk.addEventListener('change',function(){pl.approved=chk.checked;saveSoldier(s);if(pl.approved)body.style.display='none';renderLv();});
+      chk.addEventListener('change',function(){pl.approved=chk.checked;saveSoldier(s);renderPendingLeaves();renderLv();});
       apRow.appendChild(chk);apRow.appendChild(apLbl);
       body.appendChild(apRow);
 
