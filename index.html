@@ -941,20 +941,21 @@ function showDetail(id){
   document.querySelector('.tabs-bar').style.display='flex';
   renderDetail(id);
 }
-function showDetailNewSoldier(id){
+function showDetailNewSoldier(id,openTab){
   try{
     state.active=id;
     document.getElementById('scr-main').classList.add('slide-left');
     document.getElementById('scr-det').classList.remove('hidden');
     var s=state.soldiers.find(function(x){return x.id===id;});
+    var tab=openTab||'info';
     if(s&&s.isMissing){
       document.querySelector('.tabs-bar').style.display='none';
       document.getElementById('tab-info').classList.add('active');
       document.getElementById('tab-leaves').classList.remove('active');
     } else {
-      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab==='info');});
-      document.getElementById('tab-info').classList.add('active');
-      document.getElementById('tab-leaves').classList.remove('active');
+      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
+      document.getElementById('tab-'+tab).classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(function(p){if(p.id!=='tab-'+tab)p.classList.remove('active');});
     }
     renderDetail(id);
   }catch(e){
@@ -2233,8 +2234,8 @@ function renderMissingList(){
     var btnRowS=document.createElement('div');btnRowS.style.cssText='display:flex;gap:8px';
     var openBtn=document.createElement('button');
     openBtn.style.cssText='flex:1;min-height:34px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
-    openBtn.textContent='📋 פרטי חייל';
-    openBtn.addEventListener('click',(function(sid){return function(){closeMissingModal();showDetailNewSoldier(sid);};})(s.id));
+    openBtn.textContent='📅 יומן חייל';
+    openBtn.addEventListener('click',(function(sid){return function(){closeMissingModal();showDetailNewSoldier(sid,'leaves');};})(s.id));
     var cancelShamsBtn=document.createElement('button');
     cancelShamsBtn.style.cssText='min-height:34px;padding:0 12px;border-radius:var(--r-sm);border:none;background:var(--red-bg);border:1.5px solid #FECDD3;color:var(--red);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap';
     cancelShamsBtn.textContent='❌ ביטול שמ"ס';
