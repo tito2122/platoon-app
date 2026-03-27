@@ -2081,7 +2081,9 @@ function renderRcal(){
   }
 }
 function showReportResult(ds){
+  var _midR=getMissingIds();
   var pl=state.soldiers.filter(function(s){
+    if(s.isMissing||_midR[s.id])return false;
     if(s.status!=='present')return false;
     for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
     if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
