@@ -863,7 +863,8 @@ function scheduleMidnightCheck(){
 function getMissingIds(){
   var ids={};
   state.missing.forEach(function(m){
-    if(m.soldierData&&m.soldierData.id!=null)ids[m.soldierData.id]=true;
+    if(m.soldierDataId!=null)ids[m.soldierDataId]=true;
+    else if(m.soldierData&&m.soldierData.id!=null)ids[m.soldierData.id]=true;
   });
   return ids;
 }
@@ -1411,12 +1412,10 @@ function buildInfoTab(s){
       moveMissBtn.textContent='🪦 העבר לנעדרים';
       moveMissBtn.addEventListener('click',function(){
         showPromptConfirm('להעביר את '+(s.name||s.firstName||'החייל')+' לנעדרים?','סיבת היעדרות (אופציונלי)...',function(reason){
-          var soldierSnapshot=JSON.parse(JSON.stringify(s)); // שמור עותק מלא
-          var miss={id:state.nmid++,name:s.name||(((s.firstName||'')+' '+(s.lastName||'')).trim()),reason:reason||'',soldierData:soldierSnapshot};
+          var miss={id:state.nmid++,name:s.name||(((s.firstName||'')+' '+(s.lastName||'')).trim()),reason:reason||'',soldierDataId:s.id};
+          s.isMissing=true;s._missingId=miss.id;
+          saveSoldier(s);
           saveMissing(miss);
-          // מחק את החייל מרשימת החיילים לחלוטין
-          deleteSoldierRemote(s.id);
-          state.soldiers=state.soldiers.filter(function(x){return x.id!==s.id;});
           toast('הועבר לנעדרים ✓');
           showMain();
         });
@@ -2231,23 +2230,26 @@ function renderMissingList(){
     returnBtn.textContent='✅ חזר';
     returnBtn.addEventListener('click',(function(mid, missData){return function(){
       showConfirm('להחזיר את '+(missData.name||'החייל')+' לסד"כ?',function(){
-      var newSol;
-      if(missData.soldierData){
-        // שחזר את הנתונים המקוריים המלאים
-        newSol=JSON.parse(JSON.stringify(missData.soldierData));
-        newSol.isMissing=false;
-        newSol._missingId=null;
+      var soldierDataId=missData.soldierDataId!=null?missData.soldierDataId:(missData.soldierData&&missData.soldierData.id!=null?missData.soldierData.id:null);
+      var existingSol=soldierDataId!=null?state.soldiers.find(function(x){return x.id===soldierDataId;}):null;
+      if(existingSol){
+        // החייל עדיין ב-Firestore — רק נסיר את הסימון
+        existingSol.isMissing=false;existingSol._missingId=null;
+        saveSoldier(existingSol);
+      } else if(missData.soldierData){
+        // רשומה ישנה עם soldierData מלא — שחזר
+        var newSol=JSON.parse(JSON.stringify(missData.soldierData));
+        newSol.isMissing=false;newSol._missingId=null;
+        state.soldiers.push(newSol);saveSoldier(newSol);
       } else {
         // נוסף ידנית — צור חדש עם השם בלבד
-        newSol=mkSoldier();
+        var newSol=mkSoldier();
         var parts=(missData.name||'').trim().split(/\s+/);
         if(parts.length>=2){newSol.lastName=parts[0];newSol.firstName=parts.slice(1).join(' ');}
         else{newSol.lastName=parts[0]||'';newSol.firstName='';}
         newSol.name=missData.name||'';
-        newSol.isMissing=false;
+        state.soldiers.push(newSol);saveSoldier(newSol);
       }
-      state.soldiers.push(newSol);
-      saveSoldier(newSol);
       // מחק מרשימת הנעדרים
       deleteMissing(mid);
       state.missing=state.missing.filter(function(x){return x.id!==mid;});
