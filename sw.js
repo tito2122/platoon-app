@@ -1,4 +1,4 @@
-var CACHE='pwa-v6';
+var CACHE='pwa-v7';
 
 self.addEventListener('install',function(e){
   self.skipWaiting();
