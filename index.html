@@ -432,7 +432,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
       <!-- API Key Settings -->
       <div id="tasks-settings-section" style="display:none;margin-bottom:16px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px">
         <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px">🔑 Anthropic API Key</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">המפתח נשמר רק במכשיר שלך (localStorage)</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">המפתח נשמר לסשן הנוכחי בלבד</div>
         <input id="tasks-api-key-input" type="password" class="finp" placeholder="sk-ant-api03-..." style="margin-bottom:10px">
         <button id="tasks-api-key-save" class="btn" style="width:100%;background:var(--blue);color:#fff;border:none">שמור מפתח</button>
       </div>
@@ -3558,7 +3558,7 @@ function showMainDash(){
   renderMain();
 }
 function showTasksDash(){
-  var k=localStorage.getItem('anthropic_api_key')||'';
+  var k=sessionStorage.getItem('anthropic_api_key')||'';
   var inp=document.getElementById('tasks-api-key-input');
   if(inp)inp.value=k;
   document.getElementById('scr-main').classList.add('hidden');
@@ -3577,7 +3577,7 @@ function _getLastName(n){
 }
 
 async function analyzeTaskImage(file){
-  var apiKey=localStorage.getItem('anthropic_api_key')||'';
+  var apiKey=sessionStorage.getItem('anthropic_api_key')||'';
   if(!apiKey){
     document.getElementById('tasks-settings-section').style.display='block';
     var inp=document.getElementById('tasks-api-key-input');
@@ -3622,8 +3622,13 @@ async function analyzeTaskImage(file){
       try{parsed=JSON.parse(text);}catch(e){}
       // 2. Try extracting JSON block
       if(!parsed){
-        var jsonMatch=text.match(/\{[\s\S]*\}/);
-        if(jsonMatch){try{parsed=JSON.parse(jsonMatch[0]);}catch(e){}}
+        var start=text.indexOf('{');
+        if(start!==-1){
+          var end=text.lastIndexOf('}');
+          while(end>start){
+            try{parsed=JSON.parse(text.slice(start,end+1));break;}catch(e){end=text.lastIndexOf('}',end-1);}
+          }
+        }
       }
       // 3. Try extracting from code block
       if(!parsed){
@@ -3641,7 +3646,7 @@ async function analyzeTaskImage(file){
     }catch(err){
       document.getElementById('tasks-loading').style.display='none';
       document.getElementById('tasks-error').style.display='block';
-      document.getElementById('tasks-error-text').textContent=err.message;
+      document.getElementById('tasks-error-text').textContent=err.message||'שגיאה לא ידועה — נסה שוב';
     }
   };
   reader.readAsDataURL(file);
@@ -3747,7 +3752,7 @@ document.getElementById('tasks-settings-toggle').addEventListener('click',functi
   var hidden=sec.style.display==='none'||!sec.style.display;
   sec.style.display=hidden?'block':'none';
   if(hidden){
-    var k=localStorage.getItem('anthropic_api_key')||'';
+    var k=sessionStorage.getItem('anthropic_api_key')||'';
     document.getElementById('tasks-api-key-input').value=k;
   }
 });
@@ -3755,8 +3760,8 @@ document.getElementById('tasks-settings-toggle').addEventListener('click',functi
 document.getElementById('tasks-api-key-save').addEventListener('click',function(){
   var k=(document.getElementById('tasks-api-key-input').value||'').trim();
   if(!k){toast('⚠️ יש להזין API Key');return;}
-  localStorage.setItem('anthropic_api_key',k);
-  toast('✅ API Key נשמר בהצלחה');
+  sessionStorage.setItem('anthropic_api_key',k);
+  toast('✅ API Key נשמר לסשן הנוכחי');
   document.getElementById('tasks-settings-section').style.display='none';
 });
 
