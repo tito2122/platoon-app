@@ -1285,7 +1285,8 @@ function buildInfoTab(s){
     var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;gap:14px;margin-bottom:16px';
     var avatarWrap=document.createElement('div');avatarWrap.style.cssText='flex-shrink:0';
     if(s.photoData){
-      var photoImg=document.createElement('img');photoImg.src=s.photoData;photoImg.style.cssText='width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border)';
+      var photoImg=document.createElement('img');photoImg.src=s.photoData;photoImg.style.cssText='width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border);cursor:pointer';
+      photoImg.addEventListener('click',function(){document.getElementById('lightbox-img').src=s.photoData;document.getElementById('photo-lightbox').style.display='flex';});
       avatarWrap.appendChild(photoImg);
     } else {
       var bigAv=document.createElement('div');bigAv.style.cssText='width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#34D399,var(--green-dark))';
