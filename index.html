@@ -3478,7 +3478,7 @@ function init(){
   document.getElementById('modal-close').addEventListener('click',closeReportModal);
   document.getElementById('rr-total').addEventListener('click',function(){
     var ds=rcalSel||today();
-    var _mid3=getMissingIds();var total=state.soldiers.filter(function(s){return !s.isMissing&&!_mid3[s.id];});
+    var _mid3=getMissingIds();var total=state.soldiers.filter(function(s){return !s.isMissing&&!_mid3[s.id]&&(s.shams||[]).indexOf(ds)===-1;});
     var present=total.filter(function(s){
       if(s.status!=='present')return false;
       for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
