@@ -3439,6 +3439,8 @@ function init(){
       renderList();
     }
     setFilter('all');
+    var listEl=document.getElementById('main-tab-list');
+    if(listEl)listEl.scrollTo({top:0,behavior:'smooth'});
   });
   document.getElementById('sb-pr').addEventListener('click',function(){setFilter(state.filter==='present'?'all':'present');});
   document.getElementById('sb-ab').addEventListener('click',function(){setFilter(state.filter==='absent'?'all':'absent');});
