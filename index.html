@@ -2177,6 +2177,7 @@ function showReportResult(ds){
     for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
     if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
     if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<pl.to;}))return false;
+    if((s.shams||[]).indexOf(ds)!==-1)return false;
     return true;
   });
   if(!pl.length){
