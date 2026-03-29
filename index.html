@@ -1217,6 +1217,8 @@ function renderList(){
       tTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
       if(td===activeLv.from){
         tTag.textContent='✈️ יוצא היום';
+      } else if(activeLv.to===tom){
+        tTag.textContent='🏠 חוזר מחר';
       } else {
         var retDay=activeLv.to.split('-')[2].replace(/^0/,'');
         tTag.textContent='🏠 חוזר ב-'+retDay;
@@ -1232,6 +1234,17 @@ function renderList(){
         tTag2.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
         tTag2.textContent='✈️ '+(approvedFrom===tomorrowStr()?'יוצא מחר':'יוצא ב-'+dayNum);
         tagsRow.appendChild(tTag2);
+      }
+    }
+    // חוזר היום — חופשה שמסתיימת היום
+    if(!activeLv){
+      var returningToday=(s.leaves||[]).some(function(lv){return lv.to===td;})
+        ||(s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.to===td;});
+      if(returningToday){
+        var retTodayTag=document.createElement('span');
+        retTodayTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
+        retTodayTag.textContent='🏠 חוזר היום';
+        tagsRow.appendChild(retTodayTag);
       }
     }
     // ממתין לאישור — יש בקשת יציאה שלא אושרה
