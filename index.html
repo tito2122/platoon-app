@@ -2619,7 +2619,7 @@ function renderListsTab(){
         row.style.cssText='padding:5px 0;font-size:14px;font-weight:'+(isCmd?'800':'600')+';color:'+(isCmd?'#B45309':'var(--text)')+';display:flex;align-items:center;gap:4px'+(isCmd?';background:rgba(180,83,9,.06);border-radius:6px;padding-right:4px':'');
         var numSpan=document.createElement('span');numSpan.textContent=(i+1)+'. ';
         var nameLink=document.createElement('span');
-        nameLink.textContent=sol.name||'חייל';
+        nameLink.textContent=((sol.roles||[]).indexOf('מפקד מחלקה')!==-1?'👑 ':'')+(sol.name||'חייל');
         nameLink.style.cssText='cursor:pointer;color:'+(isCmd?'#B45309':'var(--text)')+';text-decoration:underline;text-decoration-color:var(--text3)';
         (function(sid){nameLink.addEventListener('click',function(e){e.stopPropagation();showDetail(sid);});})(sol.id);
         row.appendChild(numSpan);row.appendChild(nameLink);
@@ -2651,7 +2651,7 @@ function renderListsTab(){
       var sorted=sols.slice().sort(function(a,b){return _r(a)-_r(b);});
       var cmds=sorted.filter(function(s){return _r(s)<3;});
       var regular=sorted.filter(function(s){return _r(s)===3;});
-      var lines=cmds.map(function(s,i){return'*'+(i+1)+'. '+(s.name||'חייל').trim()+' — '+(s.phone||'ללא טלפון')+'*';});
+      var lines=cmds.map(function(s,i){var crown=(s.roles||[]).indexOf('מפקד מחלקה')!==-1?'👑 ':'';return'*'+(i+1)+'. '+crown+(s.name||'חייל').trim()+' — '+(s.phone||'ללא טלפון')+'*';});
       if(cmds.length&&regular.length)lines.push('—————');
       regular.forEach(function(s,i){lines.push((cmds.length+i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון'));});
       var msg='🪖 *'+l.name+'*\n\n'+lines.join('\n')+'\n\nסה"כ: '+sorted.length+' חיילים'+(l.notes?'\n\n📝 '+l.notes:'');
@@ -3573,7 +3573,7 @@ function init(){
     var solsSorted=sols.slice().sort(function(a,b){return _r2(a)-_r2(b);});
     var cmds2=solsSorted.filter(function(s){return _r2(s)<3;});
     var reg2=solsSorted.filter(function(s){return _r2(s)===3;});
-    var lines2=cmds2.map(function(s,i){return'*'+(i+1)+'. '+(s.name||'חייל').trim()+' — '+(s.phone||'ללא טלפון')+'*';});
+    var lines2=cmds2.map(function(s,i){var crown=(s.roles||[]).indexOf('מפקד מחלקה')!==-1?'👑 ':'';return'*'+(i+1)+'. '+crown+(s.name||'חייל').trim()+' — '+(s.phone||'ללא טלפון')+'*';});
     if(cmds2.length&&reg2.length)lines2.push('—————');
     reg2.forEach(function(s,i){lines2.push((cmds2.length+i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון'));});
     var msg='🪖 *'+lst.name+'*\n\n'+lines2.join('\n')+'\n\nסה"כ: '+solsSorted.length+' חיילים'+(lst.notes?'\n\n📝 '+lst.notes:'');
