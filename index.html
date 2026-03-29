@@ -2581,32 +2581,25 @@ function renderListsTab(){
     var ids=(lst.soldierIds||[]);
     var soldiers=ids.map(function(id){return (state.soldiers||[]).find(function(s){return s.id===id;});}).filter(Boolean);
 
-    // פריסה: תוכן מימין, כפתורים משמאל
-    var cardInner=document.createElement('div');
-    cardInner.style.cssText='display:flex;gap:10px;align-items:flex-start';
-
-    var contentArea=document.createElement('div');
-    contentArea.style.cssText='flex:1;min-width:0;cursor:pointer;user-select:none';
-
     var topRow=document.createElement('div');
-    topRow.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:8px';
-    var arrow=document.createElement('span');
-    arrow.style.cssText='font-size:11px;color:var(--text3);flex-shrink:0;transition:transform .2s';
-    arrow.textContent='▼';
+    topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none';
     var nameEl=document.createElement('div');
     nameEl.style.cssText='font-size:16px;font-weight:800;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
     nameEl.textContent=lst.name||'רשימה ללא שם';
     var badge=document.createElement('span');
-    badge.style.cssText='background:var(--blue-bg);color:var(--blue);border:1.5px solid #BFDBFE;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;flex-shrink:0';
+    badge.style.cssText='background:var(--blue-bg);color:var(--blue);border:1.5px solid #BFDBFE;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;flex-shrink:0;margin-right:8px';
     badge.textContent=soldiers.length+' חיילים';
+    var arrow=document.createElement('span');
+    arrow.style.cssText='font-size:12px;color:var(--text3);flex-shrink:0;transition:transform .2s';
+    arrow.textContent='▼';
     topRow.appendChild(nameEl);
     topRow.appendChild(badge);
     topRow.appendChild(arrow);
-    contentArea.appendChild(topRow);
+    card.appendChild(topRow);
 
     // Collapsible names panel
     var namesPanel=document.createElement('div');
-    namesPanel.style.cssText='display:none;margin-bottom:6px;background:var(--bg-secondary);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)';
+    namesPanel.style.cssText='display:none;margin-bottom:10px;background:var(--bg-secondary);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)';
     if(soldiers.length){
       function _sRank(s){var r=s.roles||[];if(r.indexOf('מפקד מחלקה')!==-1)return 0;if(r.indexOf('סמ"ל')!==-1)return 1;if(r.indexOf('מ"כ')!==-1)return 2;return 3;}
       var sortedSols=soldiers.slice().sort(function(a,b){return _sRank(a)-_sRank(b);});
@@ -2614,7 +2607,6 @@ function renderListsTab(){
       sortedSols.forEach(function(sol,i){
         var rank=_sRank(sol);
         var isCmd=rank<3;
-        // קו הפרדה לפני החייל הרגיל הראשון
         if(i===cmdCount&&cmdCount>0&&cmdCount<sortedSols.length){
           var sep=document.createElement('div');
           sep.style.cssText='height:1px;background:var(--border);margin:4px 0';
@@ -2633,25 +2625,23 @@ function renderListsTab(){
     } else {
       namesPanel.textContent='אין חיילים ברשימה';
     }
-    contentArea.appendChild(namesPanel);
-    contentArea.addEventListener('click',function(){
+    card.appendChild(namesPanel);
+    topRow.addEventListener('click',function(){
       var open=namesPanel.style.display==='block';
       namesPanel.style.display=open?'none':'block';
       arrow.style.transform=open?'':'rotate(180deg)';
     });
-    cardInner.appendChild(contentArea);
 
-    // עמודת כפתורים קטנה משמאל
-    var btnCol=document.createElement('div');
-    btnCol.style.cssText='display:flex;flex-direction:column;gap:6px;flex-shrink:0';
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:6px;align-items:center';
 
     var editBtn=document.createElement('button');
-    editBtn.style.cssText='min-height:32px;padding:0 10px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap';
+    editBtn.style.cssText='flex:1;min-height:30px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
     editBtn.textContent='✏️ עריכה';
-    (function(id){editBtn.addEventListener('click',function(e){e.stopPropagation();openListEditorModal(id);});})(lst.id);
+    (function(id){editBtn.addEventListener('click',function(){openListEditorModal(id);});})(lst.id);
 
     var waBtn=document.createElement('button');
-    waBtn.style.cssText='min-height:32px;padding:0 10px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap';
+    waBtn.style.cssText='flex:1;min-height:30px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
     waBtn.textContent='📲 שיתוף';
     (function(l,sols){waBtn.addEventListener('click',function(){
       function _r(s){var r=s.roles||[];if(r.indexOf('מפקד מחלקה')!==-1)return 0;if(r.indexOf('סמ"ל')!==-1)return 1;if(r.indexOf('מ"כ')!==-1)return 2;return 3;}
@@ -2666,18 +2656,16 @@ function renderListsTab(){
     });})(lst,soldiers);
 
     var delBtn=document.createElement('button');
-    delBtn.style.cssText='min-height:32px;padding:0 10px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:14px;font-family:var(--font);font-weight:700;cursor:pointer;white-space:nowrap';
-    delBtn.textContent='🗑 מחק';
-    (function(l){delBtn.addEventListener('click',function(e){
-      e.stopPropagation();
+    delBtn.style.cssText='width:30px;height:30px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0';
+    delBtn.textContent='🗑';
+    (function(l){delBtn.addEventListener('click',function(){
       showConfirm('למחוק את הרשימה "'+l.name+'"?',function(){deleteList(l.id);state.lists=(state.lists||[]).filter(function(x){return x.id!==l.id;});renderListsTab();toast('הרשימה נמחקה ✓');},{icon:'🗑',danger:true,sub:'פעולה זו אינה ניתנת לביטול'});
     });})(lst);
 
-    btnCol.appendChild(editBtn);
-    btnCol.appendChild(waBtn);
-    btnCol.appendChild(delBtn);
-    cardInner.appendChild(btnCol);
-    card.appendChild(cardInner);
+    btnRow.appendChild(editBtn);
+    btnRow.appendChild(waBtn);
+    btnRow.appendChild(delBtn);
+    card.appendChild(btnRow);
     wrap.appendChild(card);
   });
 }
