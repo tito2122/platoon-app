@@ -2607,6 +2607,7 @@ function renderListsTab(){
       sortedSols.forEach(function(sol,i){
         var rank=_sRank(sol);
         var isCmd=rank<3;
+        // קו הפרדה לפני החייל הרגיל הראשון
         if(i===cmdCount&&cmdCount>0&&cmdCount<sortedSols.length){
           var sep=document.createElement('div');
           sep.style.cssText='height:1px;background:var(--border);margin:4px 0';
@@ -2633,15 +2634,15 @@ function renderListsTab(){
     });
 
     var btnRow=document.createElement('div');
-    btnRow.style.cssText='display:flex;gap:6px;align-items:center';
+    btnRow.style.cssText='display:flex;gap:8px;align-items:center';
 
     var editBtn=document.createElement('button');
-    editBtn.style.cssText='flex:1;min-height:30px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
+    editBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
     editBtn.textContent='✏️ עריכה';
     (function(id){editBtn.addEventListener('click',function(){openListEditorModal(id);});})(lst.id);
 
     var waBtn=document.createElement('button');
-    waBtn.style.cssText='flex:1;min-height:30px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
+    waBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
     waBtn.textContent='📲 שיתוף';
     (function(l,sols){waBtn.addEventListener('click',function(){
       function _r(s){var r=s.roles||[];if(r.indexOf('מפקד מחלקה')!==-1)return 0;if(r.indexOf('סמ"ל')!==-1)return 1;if(r.indexOf('מ"כ')!==-1)return 2;return 3;}
@@ -2656,7 +2657,7 @@ function renderListsTab(){
     });})(lst,soldiers);
 
     var delBtn=document.createElement('button');
-    delBtn.style.cssText='width:30px;height:30px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0';
+    delBtn.style.cssText='width:36px;height:36px;border-radius:var(--r-sm);border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0';
     delBtn.textContent='🗑';
     (function(l){delBtn.addEventListener('click',function(){
       showConfirm('למחוק את הרשימה "'+l.name+'"?',function(){deleteList(l.id);state.lists=(state.lists||[]).filter(function(x){return x.id!==l.id;});renderListsTab();toast('הרשימה נמחקה ✓');},{icon:'🗑',danger:true,sub:'פעולה זו אינה ניתנת לביטול'});
