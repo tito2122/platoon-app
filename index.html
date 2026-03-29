@@ -2522,7 +2522,7 @@ function openListEditorModal(listId){
   document.getElementById('list-notes-input').value=lst?lst.notes||'':'';
   var container=document.getElementById('list-soldiers-container');
   container.innerHTML='';
-  var soldiers=(state.soldiers||[]).filter(function(s){return !s.isMissing;}).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
+  var soldiers=(state.soldiers||[]).filter(function(s){return !s.isMissing;}).slice().sort(function(a,b){var aM=(a.roles||[]).indexOf('מ"כ')!==-1?0:1;var bM=(b.roles||[]).indexOf('מ"כ')!==-1?0:1;if(aM!==bM)return aM-bM;return (a.name||'').localeCompare(b.name||'','he');});
   var checked=lst?(lst.soldierIds||[]).slice():[];
   var counter=document.getElementById('list-selection-counter');
   function updateCounter(){counter.textContent='נבחרו '+checked.length+' מתוך '+soldiers.length;}
@@ -2531,12 +2531,16 @@ function openListEditorModal(listId){
     var chip=document.createElement('button');
     chip.type='button';
     chip.dataset.sid=s.id;
+    var isMaka=(s.roles||[]).indexOf('מ"כ')!==-1;
     function applyChipStyle(){
       var sel=checked.indexOf(s.id)!==-1;
-      chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;'+(sel?'background:var(--blue);color:#fff;border:2px solid var(--blue)':'background:var(--card);color:var(--text);border:2px solid var(--border)');
+      if(sel&&isMaka){chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;background:#B45309;color:#fff;border:2px solid #B45309';}
+      else if(sel){chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;background:var(--blue);color:#fff;border:2px solid var(--blue)';}
+      else if(isMaka){chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;background:#FEF3C7;color:#B45309;border:2px solid #FCD34D';}
+      else{chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;background:var(--card);color:var(--text);border:2px solid var(--border)';}
     }
     applyChipStyle();
-    chip.textContent=s.name||'';
+    chip.textContent=(isMaka?'👑 ':'')+(s.name||'');
     chip.dataset.selected=isSelected?'1':'0';
     chip.addEventListener('click',function(){
       var idx=checked.indexOf(s.id);
@@ -2598,14 +2602,16 @@ function renderListsTab(){
     var namesPanel=document.createElement('div');
     namesPanel.style.cssText='display:none;margin-bottom:10px;background:var(--bg-secondary);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)';
     if(soldiers.length){
-      soldiers.forEach(function(sol,i){
+      var sortedSols=soldiers.slice().sort(function(a,b){var aM=(a.roles||[]).indexOf('מ"כ')!==-1?0:1;var bM=(b.roles||[]).indexOf('מ"כ')!==-1?0:1;return aM-bM;});
+      sortedSols.forEach(function(sol,i){
+        var isMaka=(sol.roles||[]).indexOf('מ"כ')!==-1;
         var row=document.createElement('div');
-        row.style.cssText='padding:5px 0;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:4px;border-bottom:'+(i<soldiers.length-1?'1px solid var(--border)':'none');
+        row.style.cssText='padding:5px 0;font-size:14px;font-weight:'+(isMaka?'800':'600')+';color:'+(isMaka?'#B45309':'var(--text)')+';display:flex;align-items:center;gap:4px;border-bottom:'+(i<sortedSols.length-1?'1px solid var(--border)':'none')+(isMaka?';background:rgba(180,83,9,.06);border-radius:6px;padding-right:4px':'');
         var numSpan=document.createElement('span');
         numSpan.textContent=(i+1)+'. ';
         var nameLink=document.createElement('span');
-        nameLink.textContent=sol.name||'חייל';
-        nameLink.style.cssText='cursor:pointer;color:var(--text);text-decoration:underline;text-decoration-color:var(--text3)';
+        nameLink.textContent=(isMaka?'👑 ':'')+(sol.name||'חייל');
+        nameLink.style.cssText='cursor:pointer;color:'+(isMaka?'#B45309':'var(--text)')+';text-decoration:underline;text-decoration-color:var(--text3)';
         (function(sid){nameLink.addEventListener('click',function(e){e.stopPropagation();showDetail(sid);});})(sol.id);
         row.appendChild(numSpan);
         row.appendChild(nameLink);
@@ -2633,7 +2639,8 @@ function renderListsTab(){
     waBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
     waBtn.textContent='📲 שיתוף';
     (function(l,sols){waBtn.addEventListener('click',function(){
-      var msg='🪖 *'+l.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים'+(l.notes?'\n\n📝 '+l.notes:'');
+      var sorted=sols.slice().sort(function(a,b){var aM=(a.roles||[]).indexOf('מ"כ')!==-1?0:1;var bM=(b.roles||[]).indexOf('מ"כ')!==-1?0:1;return aM-bM;});
+      var msg='🪖 *'+l.name+'*\n\n'+sorted.map(function(s,i){var mk=(s.roles||[]).indexOf('מ"כ')!==-1;return(i+1)+'. '+(mk?'👑 ':'')+( s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sorted.length+' חיילים'+(l.notes?'\n\n📝 '+l.notes:'');
       window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
     });})(lst,soldiers);
 
@@ -3548,7 +3555,8 @@ function init(){
     var lst=_saveListFromEditor();
     if(!lst)return;
     var sols=lst.soldierIds.map(function(id){return(state.soldiers||[]).find(function(s){return s.id===id;});}).filter(Boolean);
-    var msg='🪖 *'+lst.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים'+(lst.notes?'\n\n📝 '+lst.notes:'');
+    var solsSorted=sols.slice().sort(function(a,b){var aM=(a.roles||[]).indexOf('מ"כ')!==-1?0:1;var bM=(b.roles||[]).indexOf('מ"כ')!==-1?0:1;return aM-bM;});
+    var msg='🪖 *'+lst.name+'*\n\n'+solsSorted.map(function(s,i){var mk=(s.roles||[]).indexOf('מ"כ')!==-1;return(i+1)+'. '+(mk?'👑 ':'')+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+solsSorted.length+' חיילים'+(lst.notes?'\n\n📝 '+lst.notes:'');
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   });
 }
