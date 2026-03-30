@@ -1808,10 +1808,20 @@ function buildLeavesTab(s){
             if(ds>=_pl.from&&ds<_pl.to){
               _hasStatus=true;
               if(_pl.approved){
+                var _approvedStyle='position:relative;background:'+(isToday?'#34D399':'#D1FAE5')+';color:'+(isToday?'#064E3B':'#065F46')+';font-weight:700;border-radius:8px';
                 if(ds<_td){
                   btn.style.cssText='position:relative;background:'+(isToday?'#F472B6':'#FCE7F3')+';color:'+(isToday?'#831843':'#9D174D')+';font-weight:700;border-radius:8px';
                 } else {
-                  btn.style.cssText='position:relative;background:'+(isToday?'#34D399':'#D1FAE5')+';color:'+(isToday?'#064E3B':'#065F46')+';font-weight:700;border-radius:8px';
+                  btn.style.cssText=_approvedStyle+';cursor:pointer';
+                }
+                if(ds===_pl.from){
+                  btn.title='לחץ למחיקת היציאה';
+                  (function(pl){btn.addEventListener('click',function(){
+                    showConfirm('למחוק את היציאה '+fmtDate(pl.from)+' → '+fmtDate(pl.to)+'?',function(){
+                      s.pendingLeaves=( s.pendingLeaves||[]).filter(function(x){return x!==pl;});
+                      saveSoldier(s);renderLv();
+                    },{icon:'🗑',danger:true});
+                  });}(_pl));
                 }
               } else {
                 btn.style.cssText='position:relative;background:'+(isToday?'#93C5FD':'#DBEAFE')+';color:'+(isToday?'#1E3A8A':'#1E40AF')+';font-weight:700;border-radius:8px';
