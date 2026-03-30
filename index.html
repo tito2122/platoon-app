@@ -4531,19 +4531,12 @@ function _remCheck(){
           item._firedEvent=firedKey;
           changed=true;
           _remFire(item);
-          item._deleteAfterRender=true; // mark for deletion
         }
       }
     }
   });
 
-  if(changed){
-    // Remove one-time event reminders that just fired
-    var filtered=items.filter(function(it){return !it._deleteAfterRender;});
-    var hadDeletes=filtered.length<items.length;
-    _remSave(filtered);
-    if(hadDeletes) setTimeout(renderReminders,200);
-  }
+  if(changed)_remSave(items);
 }
 
 function _remSort(){
