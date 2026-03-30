@@ -499,7 +499,8 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   </div>
   <div class="scroll-area" style="flex:1">
     <div class="list-pad">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <button id="rem-sort-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">⬆⬇ מיין לפי סוג</button>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
           <div id="rem-perm-banner"></div>
           <button id="rem-test-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">🔔 בדיקת התראה</button>
@@ -519,7 +520,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
           <div class="rem-type-btns">
             <button class="rem-type-btn" id="rem-type-daily" type="button">⏰ כל יום</button>
             <button class="rem-type-btn" id="rem-type-weekly" type="button">🔁 ימים נבחרים</button>
-            <button class="rem-type-btn sel" id="rem-type-event" type="button">📅 אירוע</button>
+            <button class="rem-type-btn sel" id="rem-type-event" type="button">📅 חד פעמי</button>
           </div>
           <div id="rem-fields-daily" style="display:none">
             <label class="rem-form-label">שעה</label>
@@ -4369,11 +4370,12 @@ function renderReminders(){
     } else {
       var dLabel=item.date?item.date.split('-').reverse().join('/'):'';
       var beforeLbl=item.before===0?'בשעת האירוע':item.before+' דק\' לפני';
-      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+beforeLbl+')</span>';
+      badge='<span class="rem-badge rem-badge-event">📅 חד פעמי – '+dLabel+' '+item.time+' ('+beforeLbl+')</span>';
     }
     badge+=' <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
 
     card.innerHTML=
+      '<div class="rem-drag-handle" style="cursor:grab;color:var(--text3);font-size:20px;padding:2px 4px 0 4px;align-self:center;touch-action:none;user-select:none;-webkit-user-select:none">⠿</div>'+
       '<div class="rem-card-body">'+
         '<div class="rem-card-title">'+_escHtml(item.title)+'</div>'+
         (item.desc?'<div class="rem-card-sub">'+_escHtml(item.desc)+'</div>':'')+
@@ -4399,6 +4401,8 @@ function renderReminders(){
 
     listEl.appendChild(card);
   });
+
+  _remInitDrag(listEl);
 }
 
 function _escHtml(s){
@@ -4527,12 +4531,122 @@ function _remCheck(){
           item._firedEvent=firedKey;
           changed=true;
           _remFire(item);
+          item._deleteAfterRender=true; // mark for deletion
         }
       }
     }
   });
 
-  if(changed)_remSave(items);
+  if(changed){
+    // Remove one-time event reminders that just fired
+    var filtered=items.filter(function(it){return !it._deleteAfterRender;});
+    var hadDeletes=filtered.length<items.length;
+    _remSave(filtered);
+    if(hadDeletes) setTimeout(renderReminders,200);
+  }
+}
+
+function _remSort(){
+  var TYPE_ORDER={event:0,daily:1,weekly:2};
+  var items=_remLoad();
+  items.sort(function(a,b){
+    var oa=TYPE_ORDER[a.type]||0, ob=TYPE_ORDER[b.type]||0;
+    if(oa!==ob)return oa-ob;
+    if(a.type==='event') return (a.date||'')+(a.time||'') < (b.date||'')+(b.time||'') ? -1:1;
+    return (a.time||'')<(b.time||'')?-1:1;
+  });
+  _remSave(items);
+  renderReminders();
+  toast('✅ מוין לפי סוג');
+}
+
+function _remInitDrag(listEl){
+  var cards=Array.from(listEl.querySelectorAll('.rem-card'));
+  var dragIdx=-1;
+
+  // ── Desktop HTML5 drag ──
+  cards.forEach(function(card,idx){
+    card.setAttribute('draggable','true');
+    card.addEventListener('dragstart',function(e){
+      dragIdx=idx;
+      e.dataTransfer.effectAllowed='move';
+      setTimeout(function(){card.style.opacity='0.35';},0);
+    });
+    card.addEventListener('dragend',function(){
+      card.style.opacity='';
+      cards.forEach(function(c){c.style.boxShadow='';});
+      dragIdx=-1;
+    });
+    card.addEventListener('dragover',function(e){
+      e.preventDefault();
+      cards.forEach(function(c){c.style.boxShadow='';});
+      if(idx!==dragIdx) card.style.boxShadow='0 -3px 0 0 var(--blue)';
+    });
+    card.addEventListener('dragleave',function(){card.style.boxShadow='';});
+    card.addEventListener('drop',function(e){
+      e.preventDefault();
+      cards.forEach(function(c){c.style.boxShadow='';});
+      if(dragIdx===-1||dragIdx===idx)return;
+      var arr=_remLoad();
+      var moved=arr.splice(dragIdx,1)[0];
+      arr.splice(idx,0,moved);
+      _remSave(arr);
+      renderReminders();
+      _remSchedule();
+    });
+  });
+
+  // ── Mobile touch drag ──
+  var tIdx=-1, tEl=null, tClone=null, tOffY=0, tOffX=0;
+
+  cards.forEach(function(card,idx){
+    var handle=card.querySelector('.rem-drag-handle');
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();
+      tIdx=idx; tEl=card;
+      var r=card.getBoundingClientRect();
+      tOffX=r.left; tOffY=e.touches[0].clientY-r.top;
+      tClone=card.cloneNode(true);
+      tClone.style.cssText='position:fixed;z-index:9999;width:'+r.width+'px;left:'+r.left+'px;top:'+r.top+'px;opacity:.85;pointer-events:none;border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.18)';
+      document.body.appendChild(tClone);
+      card.style.opacity='0.3';
+    },{passive:false});
+
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      if(tIdx===-1||!tClone)return;
+      var y=e.touches[0].clientY;
+      tClone.style.top=(y-tOffY)+'px';
+      cards.forEach(function(c){c.style.boxShadow='';});
+      for(var i=0;i<cards.length;i++){
+        if(i===tIdx)continue;
+        var r=cards[i].getBoundingClientRect();
+        if(y>=r.top&&y<=r.bottom){cards[i].style.boxShadow='0 -3px 0 0 var(--blue)';break;}
+      }
+    },{passive:false});
+
+    handle.addEventListener('touchend',function(e){
+      if(tClone){tClone.remove();tClone=null;}
+      if(tEl){tEl.style.opacity='';tEl=null;}
+      cards.forEach(function(c){c.style.boxShadow='';});
+      var y=e.changedTouches[0].clientY;
+      var targetIdx=-1;
+      for(var i=0;i<cards.length;i++){
+        if(i===tIdx)continue;
+        var r=cards[i].getBoundingClientRect();
+        if(y>=r.top&&y<=r.bottom){targetIdx=i;break;}
+      }
+      if(targetIdx!==-1&&tIdx!==-1){
+        var arr=_remLoad();
+        var moved=arr.splice(tIdx,1)[0];
+        arr.splice(targetIdx,0,moved);
+        _remSave(arr);
+        renderReminders();
+        _remSchedule();
+      }
+      tIdx=-1;
+    });
+  });
 }
 
 // Form logic
@@ -4633,6 +4747,8 @@ var _remSelDays=[];
     document.getElementById('rem-form-wrap').style.display='block';
     document.getElementById('rem-add-open-btn').style.display='none';
   };
+
+  document.getElementById('rem-sort-btn').addEventListener('click',_remSort);
 
   document.getElementById('rem-test-btn').addEventListener('click',function(){
     if(!('Notification' in window)){toast('⚠️ הדפדפן לא תומך בהתראות');return;}
