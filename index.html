@@ -499,9 +499,13 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   </div>
   <div class="scroll-area" style="flex:1">
     <div class="list-pad">
-      <div id="rem-perm-banner"></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+          <div id="rem-perm-banner"></div>
+          <button id="rem-test-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">🔔 בדיקת התראה</button>
+        </div>
+      </div>
       <div id="rem-pwa-banner"></div>
-      <button id="rem-test-btn" style="width:100%;min-height:40px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px">🔔 שלח התראת בדיקה</button>
       <div id="rem-list"></div>
       <button id="rem-add-open-btn" style="width:100%;min-height:46px;border-radius:var(--r-sm);border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ הוסף תזכורת חדשה</button>
       <div id="rem-form-wrap" style="display:none">
@@ -4323,17 +4327,17 @@ function renderReminders(){
   var permBanner=document.getElementById('rem-perm-banner');
   if(permBanner){
     if(!('Notification' in window)){
-      permBanner.innerHTML='<div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:10px;padding:12px 14px;font-size:12px;font-weight:600;color:#C2410C;margin-bottom:12px">⚠️ הדפדפן שלך לא תומך בהתראות. נסה Chrome או Safari PWA.</div>';
+      permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#C2410C">⚠️ לא נתמך</span>';
     } else if(Notification.permission==='default'){
-      permBanner.innerHTML='<div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:20px">🔔</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:#1D4ED8;margin-bottom:2px">הפעל התראות</div><div style="font-size:12px;color:#3B82F6">נדרש אישור לקבלת התראות מהאפליקציה</div></div><button id="rem-perm-btn" style="padding:8px 14px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל</button></div>';
+      permBanner.innerHTML='<button id="rem-perm-btn" style="padding:5px 11px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל התראות</button>';
       var pb=document.getElementById('rem-perm-btn');
       if(pb)pb.addEventListener('click',function(){
         Notification.requestPermission().then(function(){renderReminders();});
       });
     } else if(Notification.permission==='denied'){
-      permBanner.innerHTML='<div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:10px;padding:12px 14px;font-size:12px;font-weight:600;color:#C2410C;margin-bottom:12px">⚠️ התראות חסומות בדפדפן.<br>כדי לפתוח: לחץ על 🔒 בשורת הכתובת ← הרשאות אתר ← התראות ← אפשר</div>';
+      permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#C2410C" title="לחץ על 🔒 בשורת הכתובת ← התראות ← אפשר">🚫 חסום</span>';
     } else if(Notification.permission==='granted'){
-      permBanner.innerHTML='<div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:600;color:#166534;margin-bottom:12px">✅ התראות מופעלות</div>';
+      permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#166534">✅ מופעל</span>';
     }
   }
 
