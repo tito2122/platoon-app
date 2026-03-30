@@ -3519,11 +3519,12 @@ function init(){
     });
   });
 
-  // Swipe בין עמודות ראשיות
+  // Swipe בין עמודות ראשיות + rubber band בקצוות
   (function(){
     var TABS=['list','week','stats','missions','lists'];
     var swipeStartX=0,swipeStartY=0,swipeStartTime=0;
     var scr=document.getElementById('scr-main');
+    var RESISTANCE=0.1,MAX_STRETCH=22;
     function getCurrentTab(){
       var active=document.querySelector('.main-tab-btn.active');
       return active?active.dataset.mtab:'list';
@@ -3532,19 +3533,37 @@ function init(){
       var btn=document.querySelector('.main-tab-btn[data-mtab="'+name+'"]');
       if(btn)btn.click();
     }
+    function snapBack(){
+      scr.style.transition='transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)';
+      scr.style.transform='translateX(0)';
+    }
     scr.addEventListener('touchstart',function(e){
       swipeStartX=e.touches[0].clientX;
       swipeStartY=e.touches[0].clientY;
       swipeStartTime=Date.now();
+      scr.style.transition='none';
+    },{passive:true});
+    scr.addEventListener('touchmove',function(e){
+      var dx=e.touches[0].clientX-swipeStartX;
+      var dy=e.touches[0].clientY-swipeStartY;
+      if(Math.abs(dy)>Math.abs(dx))return;
+      var cur=TABS.indexOf(getCurrentTab());
+      var atStart=(cur===0&&dx<0);           // בעמודה ראשונה וגולל שמאלה
+      var atEnd=(cur===TABS.length-1&&dx>0); // בעמודה אחרונה וגולל ימינה
+      if(atStart||atEnd){
+        var stretch=Math.max(-MAX_STRETCH,Math.min(MAX_STRETCH,dx*RESISTANCE));
+        scr.style.transform='translateX('+stretch+'px)';
+      }
     },{passive:true});
     scr.addEventListener('touchend',function(e){
       var dx=e.changedTouches[0].clientX-swipeStartX;
       var dy=e.changedTouches[0].clientY-swipeStartY;
       var dt=Date.now()-swipeStartTime;
+      snapBack();
       if(dt>400||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
       var cur=TABS.indexOf(getCurrentTab());
-      if(dx>0&&cur<TABS.length-1)goToTab(TABS[cur+1]); // ימינה → הבא (שמאל)
-      if(dx<0&&cur>0)goToTab(TABS[cur-1]);              // שמאלה → הקודם (ימין)
+      if(dx>0&&cur<TABS.length-1)goToTab(TABS[cur+1]);
+      if(dx<0&&cur>0)goToTab(TABS[cur-1]);
     },{passive:true});
   })();
 
@@ -4202,39 +4221,6 @@ if(window.visualViewport){
 }
 })();
 
-(function() {
-  let startX = 0;
-  let isDragging = false;
-
-  const RESISTANCE = 0.08;
-  const MAX_STRETCH = 20;
-
-  document.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    isDragging = true;
-  }, { passive: true });
-
-  document.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-
-    const scrollLeft = document.documentElement.scrollLeft;
-    const maxScroll = document.documentElement.scrollWidth - window.innerWidth;
-
-    if (scrollLeft > 0 && scrollLeft < maxScroll) return;
-
-    const diff = (e.touches[0].clientX - startX) * RESISTANCE;
-    const clamped = Math.max(-MAX_STRETCH, Math.min(MAX_STRETCH, diff));
-
-    document.body.style.transition = 'none';
-    document.body.style.transform = `translateX(${clamped}px)`;
-  }, { passive: true });
-
-  document.addEventListener('touchend', () => {
-    isDragging = false;
-    document.body.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-    document.body.style.transform = 'translateX(0)';
-  });
-})();
 </script>
 </body>
 </html>
