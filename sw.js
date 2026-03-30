@@ -1,4 +1,4 @@
-var CACHE='pwa-v7';
+var CACHE='pwa-v8';
 
 self.addEventListener('install',function(e){
   self.skipWaiting();
@@ -9,6 +9,37 @@ self.addEventListener('activate',function(e){
     caches.keys().then(function(keys){
       return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));
     }).then(function(){return self.clients.claim();})
+  );
+});
+
+self.addEventListener('message',function(e){
+  if(!e.data)return;
+  if(e.data.type==='SHOW_NOTIFICATION'){
+    var title=e.data.title||'תזכורת';
+    var body=e.data.body||'';
+    e.waitUntil(
+      self.registration.showNotification(title,{
+        body:body,
+        icon:'/platoon-app/icons/icon-192.png',
+        badge:'/platoon-app/icons/icon-192.png',
+        tag:'platoon-reminder',
+        renotify:true,
+        dir:'rtl',
+        lang:'he'
+      })
+    );
+  }
+});
+
+self.addEventListener('notificationclick',function(e){
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({type:'window',includeUncontrolled:true}).then(function(cls){
+      for(var i=0;i<cls.length;i++){
+        if(cls[i].url.includes('platoon-app')&&'focus' in cls[i]){return cls[i].focus();}
+      }
+      if(clients.openWindow)return clients.openWindow('/platoon-app/');
+    })
   );
 });
 

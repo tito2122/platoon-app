@@ -301,6 +301,22 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 .week-empty{font-size:13px;color:var(--text3);font-style:italic;padding:4px 0}
 .week-toggle{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;color:var(--text3);font-size:13px;font-weight:600;border-top:1.5px solid var(--border);justify-content:center}
 .week-toggle:active{background:var(--bg)}
+.rem-card{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:flex-start;gap:10px}
+.rem-card-body{flex:1;min-width:0}
+.rem-card-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px}
+.rem-card-sub{font-size:12px;color:var(--text3);margin-bottom:6px}
+.rem-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.rem-badge-daily{background:#EDE9FE;color:#5B21B6}
+.rem-badge-event{background:#FEF3C7;color:#92400E}
+.rem-del-btn{width:32px;height:32px;border-radius:10px;border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rem-form-card{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.rem-form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block}
+.rem-form-input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:var(--font);font-size:14px;color:var(--text);outline:none;margin-bottom:10px}
+.rem-form-input:focus{border-color:var(--blue)}
+.rem-type-btns{display:flex;gap:8px;margin-bottom:12px}
+.rem-type-btn{flex:1;padding:9px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.rem-type-btn.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
+.rem-perm-banner{border-radius:var(--r-sm);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600}
 </style>
   <!-- Google Maps Places API -->
   <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key:"AIzaSyCthZ8d-029orCo1XEWimrOCTQ_CFHSyAw",v:"weekly",language:"he",region:"IL"});</script>
@@ -355,6 +371,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <nav style="padding:12px;flex:1;display:flex;flex-direction:column;gap:4px">
     <button id="sb-nav-main" class="sb-nav-btn active">🏠 דשבורד ראשי</button>
     <button id="sb-nav-tasks" class="sb-nav-btn">📋 ניהול משימות יומיומיות</button>
+    <button id="sb-nav-reminders" class="sb-nav-btn">🔔 תזכורות</button>
   </nav>
 </div>
 <div id="ptr-indicator" style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .2s;z-index:10;background:var(--bg)">
@@ -467,6 +484,62 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
         </div>
         <div id="tasks-list-container"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- מסך תזכורות -->
+<div class="screen hidden" id="scr-reminders">
+  <div class="app-header">
+    <button id="menu-btn-reminders" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">☰</button>
+    <div class="title-wrap" style="margin:0 8px">
+      <h1>תזכורות</h1>
+      <div class="sub" id="rem-sub-lbl">ניהול התראות</div>
+    </div>
+  </div>
+  <div class="scroll-area" style="flex:1">
+    <div class="list-pad">
+      <div id="rem-perm-banner"></div>
+      <div id="rem-pwa-banner"></div>
+      <div id="rem-list"></div>
+      <button id="rem-add-open-btn" style="width:100%;min-height:46px;border-radius:var(--r-sm);border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ הוסף תזכורת חדשה</button>
+      <div id="rem-form-wrap" style="display:none">
+        <div class="rem-form-card">
+          <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">🔔 תזכורת חדשה</div>
+          <label class="rem-form-label">כותרת *</label>
+          <input class="rem-form-input" id="rem-inp-title" type="text" placeholder="לדוגמא: ספירת כוח אדם">
+          <label class="rem-form-label">תיאור (אופציונלי)</label>
+          <input class="rem-form-input" id="rem-inp-desc" type="text" placeholder="פרטים נוספים...">
+          <label class="rem-form-label">סוג תזכורת</label>
+          <div class="rem-type-btns">
+            <button class="rem-type-btn sel" id="rem-type-daily" type="button">⏰ שעה קבועה כל יום</button>
+            <button class="rem-type-btn" id="rem-type-event" type="button">📅 לפני אירוע</button>
+          </div>
+          <div id="rem-fields-daily">
+            <label class="rem-form-label">שעה</label>
+            <input class="rem-form-input" id="rem-inp-time" type="time">
+          </div>
+          <div id="rem-fields-event" style="display:none">
+            <label class="rem-form-label">תאריך האירוע</label>
+            <input class="rem-form-input" id="rem-inp-event-date" type="date">
+            <label class="rem-form-label">שעת האירוע</label>
+            <input class="rem-form-input" id="rem-inp-event-time" type="time">
+            <label class="rem-form-label">להזכיר כמה זמן לפני?</label>
+            <select class="rem-form-input" id="rem-inp-before">
+              <option value="10">10 דקות לפני</option>
+              <option value="30">30 דקות לפני</option>
+              <option value="60" selected>שעה לפני</option>
+              <option value="120">שעתיים לפני</option>
+              <option value="1440">יום לפני</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button id="rem-form-save" style="flex:1;min-height:42px;border-radius:var(--r-sm);border:none;background:var(--green);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">שמור תזכורת</button>
+            <button id="rem-form-cancel" style="min-height:42px;padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">ביטול</button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:16px 0;font-size:11px;color:var(--text3);line-height:1.6">⚠️ התראות פועלות רק כשהאתר פתוח בדפדפן.<br>להתראות ברקע — התקן את האפליקציה כ-PWA.</div>
     </div>
   </div>
 </div>
@@ -3683,8 +3756,10 @@ function closeSidebar(){
 function showMainDash(){
   document.getElementById('scr-main').classList.remove('hidden','slide-left');
   document.getElementById('scr-tasks').classList.add('hidden');
+  document.getElementById('scr-reminders').classList.add('hidden');
   document.getElementById('sb-nav-main').classList.add('active');
   document.getElementById('sb-nav-tasks').classList.remove('active');
+  document.getElementById('sb-nav-reminders').classList.remove('active');
   renderMain();
 }
 function showTasksDash(){
@@ -3693,8 +3768,19 @@ function showTasksDash(){
   if(inp)inp.value=k;
   document.getElementById('scr-main').classList.add('hidden');
   document.getElementById('scr-tasks').classList.remove('hidden','slide-left');
+  document.getElementById('scr-reminders').classList.add('hidden');
   document.getElementById('sb-nav-main').classList.remove('active');
   document.getElementById('sb-nav-tasks').classList.add('active');
+  document.getElementById('sb-nav-reminders').classList.remove('active');
+}
+function showRemindersDash(){
+  document.getElementById('scr-main').classList.add('hidden');
+  document.getElementById('scr-tasks').classList.add('hidden');
+  document.getElementById('scr-reminders').classList.remove('hidden','slide-left');
+  document.getElementById('sb-nav-main').classList.remove('active');
+  document.getElementById('sb-nav-tasks').classList.remove('active');
+  document.getElementById('sb-nav-reminders').classList.add('active');
+  renderReminders();
 }
 
 // ==============================
@@ -3876,6 +3962,8 @@ document.getElementById('sidebar-close-btn').addEventListener('click',closeSideb
 document.getElementById('sidebar-overlay').addEventListener('click',closeSidebar);
 document.getElementById('sb-nav-main').addEventListener('click',function(){closeSidebar();showMainDash();});
 document.getElementById('sb-nav-tasks').addEventListener('click',function(){closeSidebar();showTasksDash();});
+document.getElementById('sb-nav-reminders').addEventListener('click',function(){closeSidebar();showRemindersDash();});
+document.getElementById('menu-btn-reminders').addEventListener('click',openSidebar);
 
 document.getElementById('tasks-settings-toggle').addEventListener('click',function(){
   var sec=document.getElementById('tasks-settings-section');
@@ -4210,6 +4298,197 @@ function _handleBack(){
     }
   });
 })();
+// ==============================
+// REMINDERS SYSTEM
+// ==============================
+var _remType='daily'; // current form type selection
+
+function _remLoad(){
+  try{return JSON.parse(localStorage.getItem('reminders_v1')||'[]');}catch(e){return[];}
+}
+function _remSave(arr){
+  try{localStorage.setItem('reminders_v1',JSON.stringify(arr));}catch(e){}
+}
+
+function renderReminders(){
+  var items=_remLoad();
+  var listEl=document.getElementById('rem-list');
+  if(!listEl)return;
+
+  // Permission banner
+  var permBanner=document.getElementById('rem-perm-banner');
+  if(permBanner){
+    if('Notification' in window && Notification.permission==='default'){
+      permBanner.innerHTML='<div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:20px">🔔</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:#1D4ED8;margin-bottom:2px">הפעל התראות</div><div style="font-size:12px;color:#3B82F6">לחץ לאישור קבלת התראות מהאפליקציה</div></div><button id="rem-perm-btn" style="padding:8px 14px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל</button></div>';
+      var pb=document.getElementById('rem-perm-btn');
+      if(pb)pb.addEventListener('click',function(){
+        Notification.requestPermission().then(function(){renderReminders();});
+      });
+    } else if('Notification' in window && Notification.permission==='denied'){
+      permBanner.innerHTML='<div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:10px;padding:12px 14px;font-size:12px;font-weight:600;color:#C2410C;margin-bottom:12px">⚠️ ההתראות חסומות בדפדפן. כדי להפעיל: הגדרות האתר ← התראות ← אפשר</div>';
+    } else {
+      permBanner.innerHTML='';
+    }
+  }
+
+  if(!items.length){
+    listEl.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--text3);font-size:14px">אין תזכורות עדיין 🔕<br><span style="font-size:12px">לחץ על הכפתור למטה להוסיף</span></div>';
+    return;
+  }
+
+  listEl.innerHTML='';
+  items.forEach(function(item,idx){
+    var card=document.createElement('div');
+    card.className='rem-card';
+
+    var badge='';
+    if(item.type==='daily'){
+      badge='<span class="rem-badge rem-badge-daily">⏰ יומי – '+item.time+'</span>';
+    } else {
+      var dLabel=item.date?item.date.split('-').reverse().join('/'):'';
+      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+item.before+' דק\' לפני)</span>';
+    }
+
+    card.innerHTML=
+      '<div class="rem-card-body">'+
+        '<div class="rem-card-title">'+_escHtml(item.title)+'</div>'+
+        (item.desc?'<div class="rem-card-sub">'+_escHtml(item.desc)+'</div>':'')+
+        badge+
+      '</div>'+
+      '<button class="rem-del-btn" data-idx="'+idx+'" title="מחק">✕</button>';
+
+    card.querySelector('.rem-del-btn').addEventListener('click',function(){
+      var i=parseInt(this.getAttribute('data-idx'));
+      showConfirm('למחוק את התזכורת "'+items[i].title+'"?',function(){
+        items.splice(i,1);
+        _remSave(items);
+        renderReminders();
+      });
+    });
+
+    listEl.appendChild(card);
+  });
+}
+
+function _escHtml(s){
+  return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function _remFire(item){
+  var title=item.title;
+  var body=item.desc||'';
+  if('Notification' in window && Notification.permission==='granted'){
+    try{
+      if(navigator.serviceWorker && navigator.serviceWorker.controller){
+        navigator.serviceWorker.controller.postMessage({type:'SHOW_NOTIFICATION',title:title,body:body});
+      } else {
+        new Notification(title,{body:body,icon:'/platoon-app/icons/icon-192.png'});
+      }
+    }catch(e){toast('🔔 '+title+(body?' — '+body:''));}
+  } else {
+    toast('🔔 '+title+(body?' — '+body:''));
+  }
+}
+
+function _remCheck(){
+  var items=_remLoad();
+  if(!items.length)return;
+  var now=new Date();
+  var hhmm=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
+  var ds=toDateStr(now.getFullYear(),now.getMonth(),now.getDate());
+  var changed=false;
+
+  items.forEach(function(item){
+    if(item.type==='daily'){
+      if(item.time===hhmm){
+        var fired=item._firedDaily||'';
+        if(fired!==ds){
+          item._firedDaily=ds;
+          changed=true;
+          _remFire(item);
+        }
+      }
+    } else if(item.type==='event'){
+      if(!item.date||!item.time)return;
+      // compute fire time = event datetime minus `before` minutes
+      var evMs=new Date(item.date+'T'+item.time+':00').getTime();
+      var fireMs=evMs-(item.before||60)*60000;
+      var diff=Math.abs(now.getTime()-fireMs);
+      // fire if within 1 minute window and not already fired
+      if(diff<60000){
+        var firedKey=item.date+'_'+item.time;
+        if(item._firedEvent!==firedKey){
+          item._firedEvent=firedKey;
+          changed=true;
+          _remFire(item);
+        }
+      }
+    }
+  });
+
+  if(changed)_remSave(items);
+}
+
+// Form logic
+(function(){
+  function setType(t){
+    _remType=t;
+    document.getElementById('rem-type-daily').classList.toggle('sel',t==='daily');
+    document.getElementById('rem-type-event').classList.toggle('sel',t==='event');
+    document.getElementById('rem-fields-daily').style.display=t==='daily'?'':'none';
+    document.getElementById('rem-fields-event').style.display=t==='event'?'':'none';
+  }
+
+  document.getElementById('rem-type-daily').addEventListener('click',function(){setType('daily');});
+  document.getElementById('rem-type-event').addEventListener('click',function(){setType('event');});
+
+  document.getElementById('rem-add-open-btn').addEventListener('click',function(){
+    document.getElementById('rem-form-wrap').style.display='block';
+    document.getElementById('rem-add-open-btn').style.display='none';
+    document.getElementById('rem-inp-title').value='';
+    document.getElementById('rem-inp-desc').value='';
+    document.getElementById('rem-inp-time').value='08:00';
+    document.getElementById('rem-inp-event-date').value='';
+    document.getElementById('rem-inp-event-time').value='08:00';
+    document.getElementById('rem-inp-before').value='60';
+    setType('daily');
+  });
+
+  document.getElementById('rem-form-cancel').addEventListener('click',function(){
+    document.getElementById('rem-form-wrap').style.display='none';
+    document.getElementById('rem-add-open-btn').style.display='';
+  });
+
+  document.getElementById('rem-form-save').addEventListener('click',function(){
+    var title=(document.getElementById('rem-inp-title').value||'').trim();
+    if(!title){toast('⚠️ יש להזין כותרת');return;}
+    var item={id:Date.now(),title:title,desc:(document.getElementById('rem-inp-desc').value||'').trim(),type:_remType};
+    if(_remType==='daily'){
+      var t=document.getElementById('rem-inp-time').value;
+      if(!t){toast('⚠️ יש לבחור שעה');return;}
+      item.time=t;
+    } else {
+      var d=document.getElementById('rem-inp-event-date').value;
+      var et=document.getElementById('rem-inp-event-time').value;
+      if(!d||!et){toast('⚠️ יש למלא תאריך ושעה');return;}
+      item.date=d;
+      item.time=et;
+      item.before=parseInt(document.getElementById('rem-inp-before').value)||60;
+    }
+    var items=_remLoad();
+    items.push(item);
+    _remSave(items);
+    document.getElementById('rem-form-wrap').style.display='none';
+    document.getElementById('rem-add-open-btn').style.display='';
+    renderReminders();
+    toast('✅ תזכורת נשמרה');
+  });
+})();
+
+// Start checking every minute
+setInterval(_remCheck,60000);
+_remCheck();
+
 startSync();
 scheduleMidnightCheck();
 // תיקון: כשמקלדת נסגרת viewport לא חוזר — גורם לנעלם של bottom bar
