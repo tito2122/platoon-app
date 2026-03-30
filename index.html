@@ -535,6 +535,8 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
               <option value="1440">יום לפני</option>
             </select>
           </div>
+          <label class="rem-form-label">צליל התראה</label>
+          <div id="rem-sound-btns" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px"></div>
           <div style="display:flex;gap:8px;margin-top:4px">
             <button id="rem-form-save" style="flex:1;min-height:42px;border-radius:var(--r-sm);border:none;background:var(--green);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">שמור תזכורת</button>
             <button id="rem-form-cancel" style="min-height:42px;padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">ביטול</button>
@@ -4345,13 +4347,14 @@ function renderReminders(){
     var card=document.createElement('div');
     card.className='rem-card';
 
+    var sndObj=_REM_SOUNDS.find(function(s){return s.id===item.sound;})||_REM_SOUNDS[0];
     var badge='';
     if(item.type==='daily'){
-      badge='<span class="rem-badge rem-badge-daily">⏰ יומי – '+item.time+'</span>';
+      badge='<span class="rem-badge rem-badge-daily">⏰ יומי – '+item.time+'</span> <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
     } else {
       var dLabel=item.date?item.date.split('-').reverse().join('/'):'';
       var beforeLbl=item.before===0?'בדיוק בשעת האירוע':item.before+' דק\' לפני';
-      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+beforeLbl+')</span>';
+      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+beforeLbl+')</span> <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
     }
 
     card.innerHTML=
@@ -4379,19 +4382,56 @@ function _escHtml(s){
   return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function _remPlayAlarm(){
+var _REM_SOUNDS=[
+  {id:'beep',    label:'📳 ביפ כפול',  play:function(ctx){_rsBeep(ctx,[[0,880,.25,.4],[.3,880,.25,.4],[.6,1100,.4,.5],[1.1,880,.25,.4],[1.4,880,.25,.4],[1.7,1100,.5,.5]]);}},
+  {id:'bell',    label:'🔔 פעמון',     play:function(ctx){_rsBell(ctx);}},
+  {id:'siren',   label:'🚨 סירנה',     play:function(ctx){_rsSiren(ctx);}},
+  {id:'tri',     label:'🎵 שלושה טונים',play:function(ctx){_rsBeep(ctx,[[0,523,.2,.35],[.25,659,.2,.35],[.5,784,.45,.45],[.9,523,.2,.35],[1.15,659,.2,.35],[1.4,784,.5,.5]]);}},
+  {id:'ping',    label:'✨ פינג קצר',  play:function(ctx){_rsBeep(ctx,[[0,1200,.05,.4],[.05,1400,.05,.3],[.1,1600,.35,.5]]);}},
+  {id:'military',label:'⚔️ צבאי',      play:function(ctx){_rsBeep(ctx,[[0,220,.12,.5],[.15,220,.12,.5],[.3,220,.12,.5],[.6,440,.3,.5],[1.0,220,.12,.5],[1.15,220,.12,.5],[1.3,220,.12,.5],[1.6,440,.4,.5]]);}}
+];
+var _remSoundSel='beep';
+
+function _rsBeep(ctx,notes){
+  notes.forEach(function(n){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.value=n[1];
+    g.gain.setValueAtTime(n[3]||0.4,ctx.currentTime+n[0]);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+n[0]+n[2]);
+    o.start(ctx.currentTime+n[0]);o.stop(ctx.currentTime+n[0]+n[2]+0.05);
+  });
+}
+function _rsBell(ctx){
+  [0,0.5,1.0].forEach(function(t){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.setValueAtTime(1200,ctx.currentTime+t);
+    o.frequency.exponentialRampToValueAtTime(600,ctx.currentTime+t+0.4);
+    g.gain.setValueAtTime(0.5,ctx.currentTime+t);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.4);
+    o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.45);
+  });
+}
+function _rsSiren(ctx){
+  var o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);
+  o.type='sawtooth';
+  o.frequency.setValueAtTime(300,ctx.currentTime);
+  for(var i=0;i<8;i++){
+    o.frequency.linearRampToValueAtTime(i%2===0?800:300,ctx.currentTime+0.25*(i+1));
+  }
+  g.gain.setValueAtTime(0.3,ctx.currentTime);
+  g.gain.setValueAtTime(0.3,ctx.currentTime+1.9);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+2.0);
+  o.start(ctx.currentTime);o.stop(ctx.currentTime+2.05);
+}
+
+function _remPlayAlarm(soundId){
   try{
     var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    function beep(t,freq,dur,vol){
-      var o=ctx.createOscillator(),g=ctx.createGain();
-      o.connect(g);g.connect(ctx.destination);
-      o.type='sine';o.frequency.value=freq;
-      g.gain.setValueAtTime(vol||0.4,ctx.currentTime+t);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+dur);
-      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+dur+0.05);
-    }
-    beep(0,880,0.25,0.4);beep(0.3,880,0.25,0.4);beep(0.6,1100,0.4,0.5);
-    beep(1.1,880,0.25,0.4);beep(1.4,880,0.25,0.4);beep(1.7,1100,0.5,0.5);
+    var snd=_REM_SOUNDS.find(function(s){return s.id===(soundId||_remSoundSel);})||_REM_SOUNDS[0];
+    snd.play(ctx);
   }catch(e){}
 }
 
@@ -4411,7 +4451,7 @@ function _remShowNotif(title,body,tag){
 function _remFire(item){
   var title=item.title;
   var body=item.desc||'';
-  _remPlayAlarm();
+  _remPlayAlarm(item.sound);
   var shown=_remShowNotif(title,body,'platoon-rem-'+item.id);
   // Always show toast too (so user sees it even when app is in foreground)
   toast('🔔 '+title+(body?' — '+body:''));
@@ -4472,6 +4512,32 @@ function _remCheck(){
     document.getElementById('rem-fields-event').style.display=t==='event'?'':'none';
   }
 
+  // Build sound picker buttons
+  (function(){
+    var wrap=document.getElementById('rem-sound-btns');
+    _REM_SOUNDS.forEach(function(s){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.setAttribute('data-sid',s.id);
+      btn.style.cssText='padding:7px 11px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px';
+      btn.innerHTML=s.label+' <span style="font-size:10px;opacity:.6">▶</span>';
+      btn.addEventListener('click',function(){
+        _remSoundSel=s.id;
+        wrap.querySelectorAll('button').forEach(function(b){
+          var sel=b.getAttribute('data-sid')===_remSoundSel;
+          b.style.background=sel?'var(--blue)':'var(--card2)';
+          b.style.color=sel?'#fff':'var(--text2)';
+          b.style.borderColor=sel?'var(--blue)':'var(--border)';
+        });
+        _remPlayAlarm(s.id);
+      });
+      wrap.appendChild(btn);
+    });
+    // set initial selection visual
+    var first=wrap.querySelector('[data-sid="beep"]');
+    if(first){first.style.background='var(--blue)';first.style.color='#fff';first.style.borderColor='var(--blue)';}
+  })();
+
   document.getElementById('rem-test-btn').addEventListener('click',function(){
     if(!('Notification' in window)){toast('⚠️ הדפדפן לא תומך בהתראות');return;}
     if(Notification.permission==='granted'){
@@ -4504,6 +4570,13 @@ function _remCheck(){
     document.getElementById('rem-inp-event-date').value='';
     document.getElementById('rem-inp-event-time').value='08:00';
     document.getElementById('rem-inp-before').value='60';
+    _remSoundSel='beep';
+    document.getElementById('rem-sound-btns').querySelectorAll('button').forEach(function(b){
+      var sel=b.getAttribute('data-sid')==='beep';
+      b.style.background=sel?'var(--blue)':'var(--card2)';
+      b.style.color=sel?'#fff':'var(--text2)';
+      b.style.borderColor=sel?'var(--blue)':'var(--border)';
+    });
     setType('daily');
   });
 
@@ -4515,7 +4588,7 @@ function _remCheck(){
   document.getElementById('rem-form-save').addEventListener('click',function(){
     var title=(document.getElementById('rem-inp-title').value||'').trim();
     if(!title){toast('⚠️ יש להזין כותרת');return;}
-    var item={id:Date.now(),title:title,desc:(document.getElementById('rem-inp-desc').value||'').trim(),type:_remType};
+    var item={id:Date.now(),title:title,desc:(document.getElementById('rem-inp-desc').value||'').trim(),type:_remType,sound:_remSoundSel};
     if(_remType==='daily'){
       var t=document.getElementById('rem-inp-time').value;
       if(!t){toast('⚠️ יש לבחור שעה');return;}
