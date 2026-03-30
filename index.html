@@ -3508,6 +3508,36 @@ function init(){
       if(t==='lists')renderListsTab();
     });
   });
+
+  // Swipe בין עמודות
+  (function(){
+    var TABS=['list','week','stats','missions','lists'];
+    var swipeStartX=0,swipeStartY=0,swipeStartTime=0;
+    var scr=document.getElementById('scr-main');
+    function getCurrentTab(){
+      var active=document.querySelector('.main-tab-btn.active');
+      return active?active.dataset.mtab:'list';
+    }
+    function goToTab(name){
+      var btn=document.querySelector('.main-tab-btn[data-mtab="'+name+'"]');
+      if(btn)btn.click();
+    }
+    scr.addEventListener('touchstart',function(e){
+      swipeStartX=e.touches[0].clientX;
+      swipeStartY=e.touches[0].clientY;
+      swipeStartTime=Date.now();
+    },{passive:true});
+    scr.addEventListener('touchend',function(e){
+      var dx=e.changedTouches[0].clientX-swipeStartX;
+      var dy=e.changedTouches[0].clientY-swipeStartY;
+      var dt=Date.now()-swipeStartTime;
+      if(dt>400||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
+      var cur=TABS.indexOf(getCurrentTab());
+      if(dx<0&&cur<TABS.length-1)goToTab(TABS[cur+1]); // שמאלה → הבא
+      if(dx>0&&cur>0)goToTab(TABS[cur-1]);              // ימינה → הקודם
+    },{passive:true});
+  })();
+
   document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
   document.getElementById('btn-report').addEventListener('click',openReportModal);
   document.getElementById('modal-close').addEventListener('click',closeReportModal);
