@@ -17,13 +17,17 @@ self.addEventListener('message',function(e){
   if(e.data.type==='SHOW_NOTIFICATION'){
     var title=e.data.title||'תזכורת';
     var body=e.data.body||'';
+    var tag=e.data.tag||'platoon-reminder';
     e.waitUntil(
       self.registration.showNotification(title,{
         body:body,
         icon:'/platoon-app/icons/icon-192.png',
         badge:'/platoon-app/icons/icon-192.png',
-        tag:'platoon-reminder',
+        tag:tag,
         renotify:true,
+        requireInteraction:true,
+        vibrate:[300,100,300,100,600],
+        silent:false,
         dir:'rtl',
         lang:'he'
       })

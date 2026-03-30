@@ -4376,15 +4376,33 @@ function _escHtml(s){
   return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function _remPlayAlarm(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    function beep(t,freq,dur,vol){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(vol||0.4,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+dur);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+dur+0.05);
+    }
+    beep(0,880,0.25,0.4);beep(0.3,880,0.25,0.4);beep(0.6,1100,0.4,0.5);
+    beep(1.1,880,0.25,0.4);beep(1.4,880,0.25,0.4);beep(1.7,1100,0.5,0.5);
+  }catch(e){}
+}
+
 function _remFire(item){
   var title=item.title;
   var body=item.desc||'';
+  _remPlayAlarm();
   if('Notification' in window && Notification.permission==='granted'){
     try{
+      var opts={body:body,icon:'/platoon-app/icons/icon-192.png',requireInteraction:true,vibrate:[300,100,300,100,600],silent:false,tag:'platoon-rem-'+item.id,renotify:true,dir:'rtl',lang:'he'};
       if(navigator.serviceWorker && navigator.serviceWorker.controller){
-        navigator.serviceWorker.controller.postMessage({type:'SHOW_NOTIFICATION',title:title,body:body});
+        navigator.serviceWorker.controller.postMessage({type:'SHOW_NOTIFICATION',title:title,body:body,tag:opts.tag});
       } else {
-        new Notification(title,{body:body,icon:'/platoon-app/icons/icon-192.png'});
+        new Notification(title,opts);
       }
     }catch(e){toast('🔔 '+title+(body?' — '+body:''));}
   } else {
@@ -4485,13 +4503,53 @@ function _remCheck(){
     document.getElementById('rem-form-wrap').style.display='none';
     document.getElementById('rem-add-open-btn').style.display='';
     renderReminders();
+    _remSchedule();
     toast('✅ תזכורת נשמרה');
   });
 })();
 
-// Check every 30s so we don't miss a minute regardless of page load time
-setInterval(_remCheck,30000);
-_remCheck();
+// Precise scheduling: calculate exact ms to each reminder and use setTimeout
+var _remTimer=null;
+function _remSchedule(){
+  if(_remTimer){clearTimeout(_remTimer);_remTimer=null;}
+  var items=_remLoad();
+  var now=new Date();
+  var nowMs=now.getTime();
+  var earliest=Infinity;
+
+  items.forEach(function(item){
+    var fireMs;
+    if(item.type==='daily'){
+      var parts=(item.time||'').split(':');
+      var h=parseInt(parts[0])||0,m=parseInt(parts[1])||0;
+      var t=new Date(now);t.setHours(h,m,0,0);
+      fireMs=t.getTime();
+      // If already passed today (more than 2s ago), schedule for tomorrow
+      if(fireMs<nowMs-2000)fireMs+=86400000;
+    } else {
+      if(!item.date||!item.time)return;
+      var before=item.before==null?60:item.before;
+      var evMs=new Date(item.date+'T'+item.time+':00').getTime();
+      fireMs=evMs-before*60000;
+      if(fireMs<nowMs-2000)return; // past event, skip
+    }
+    if(fireMs<earliest)earliest=fireMs;
+  });
+
+  if(earliest===Infinity){
+    // No upcoming reminders; check again in 5 minutes (in case user adds one)
+    _remTimer=setTimeout(_remSchedule,300000);
+    return;
+  }
+
+  var delay=Math.max(earliest-nowMs,0);
+  _remTimer=setTimeout(function(){
+    _remCheck();
+    _remSchedule(); // reschedule for next reminder
+  },delay);
+}
+
+_remSchedule();
 
 startSync();
 scheduleMidnightCheck();
