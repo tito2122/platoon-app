@@ -542,17 +542,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
                 <button class="rem-type-btn" type="button" style="width:100%;pointer-events:none">🕐 <span id="rem-ev-time-lbl">08:00</span></button>
                 <input type="time" id="rem-inp-event-time" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2;box-sizing:border-box">
               </div>
-              <div style="position:relative;flex:1">
-                <button class="rem-type-btn" type="button" style="width:100%;pointer-events:none;font-size:11px">⏱ <span id="rem-ev-before-lbl">בשעה</span></button>
-                <select id="rem-inp-before" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2">
-                  <option value="0">בדיוק בשעת האירוע</option>
-                  <option value="10">10 דקות לפני</option>
-                  <option value="30">30 דקות לפני</option>
-                  <option value="60">שעה לפני</option>
-                  <option value="120">שעתיים לפני</option>
-                  <option value="1440">יום לפני</option>
-                </select>
-              </div>
+              <input type="hidden" id="rem-inp-before" value="0">
             </div>
           </div>
           <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -4377,8 +4367,7 @@ function renderReminders(){
       badge='<span class="rem-badge rem-badge-daily" style="background:#E0E7FF;color:#3730A3">🔁 '+daysLbl+' – '+item.time+'</span>';
     } else {
       var dLabel=item.date?item.date.split('-').reverse().join('/'):'';
-      var beforeLbl=item.before===0?'בשעת האירוע':item.before+' דק\' לפני';
-      badge='<span class="rem-badge rem-badge-event">📅 חד פעמי – '+dLabel+' '+item.time+' ('+beforeLbl+')</span>';
+      badge='<span class="rem-badge rem-badge-event">📅 חד פעמי – '+dLabel+' '+item.time+'</span>';
     }
     badge+=' <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
 
@@ -4656,8 +4645,6 @@ var _remSelDays=[];
 
 (function(){
   var DAY_NAMES=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
-  var BEFORE_LABELS={'0':'בשעה','10':'10 דק\'','30':'30 דק\'','60':'שעה לפני','120':'שעתיים','1440':'יום לפני'};
-
   function _fmtEvDate(v){
     if(!v)return 'תאריך';
     var p=v.split('-');
@@ -4672,15 +4659,12 @@ var _remSelDays=[];
   function _updateEvLabels(){
     var dv=document.getElementById('rem-inp-event-date').value;
     var tv=document.getElementById('rem-inp-event-time').value;
-    var bv=document.getElementById('rem-inp-before').value;
     document.getElementById('rem-ev-date-lbl').textContent=_fmtEvDate(dv);
     document.getElementById('rem-ev-time-lbl').textContent=tv||'שעה';
-    document.getElementById('rem-ev-before-lbl').textContent=BEFORE_LABELS[bv]||bv+' דק\'';
   }
 
   document.getElementById('rem-inp-event-date').addEventListener('change',_updateEvLabels);
   document.getElementById('rem-inp-event-time').addEventListener('change',_updateEvLabels);
-  document.getElementById('rem-inp-before').addEventListener('change',_updateEvLabels);
 
   function setType(t){
     _remType=t;
