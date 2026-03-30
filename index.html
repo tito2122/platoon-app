@@ -4579,6 +4579,7 @@ function _remInitDrag(listEl){
       _remSave(arr);
       renderReminders();
       _remSchedule();
+      _capScheduleAll();
     });
   });
 
@@ -4877,7 +4878,67 @@ function _remSchedule(){
   },delay);
 }
 
+// ── Capacitor native notifications bridge ──
+function _remCalcFireMs(item){
+  var now=new Date(), nowMs=now.getTime();
+  if(item.type==='daily'){
+    var p=(item.time||'').split(':');
+    var t=new Date(now); t.setHours(parseInt(p[0])||0,parseInt(p[1])||0,0,0);
+    var ms=t.getTime(); return ms<nowMs-2000?ms+86400000:ms;
+  } else if(item.type==='weekly'){
+    var wp=(item.time||'').split(':');
+    var wh=parseInt(wp[0])||0,wm=parseInt(wp[1])||0;
+    for(var d=0;d<7;d++){
+      var c=new Date(now); c.setDate(c.getDate()+d); c.setHours(wh,wm,0,0);
+      if((item.days||[]).indexOf(c.getDay())!==-1&&c.getTime()>nowMs-2000)return c.getTime();
+    }
+    return null;
+  } else if(item.type==='event'){
+    if(!item.date||!item.time)return null;
+    var before=item.before==null?0:item.before;
+    var ms2=new Date(item.date+'T'+item.time+':00').getTime()-before*60000;
+    return ms2>nowMs-2000?ms2:null;
+  }
+  return null;
+}
+
+function _capScheduleAll(){
+  if(!window.Capacitor)return;
+  var LN=window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
+  if(!LN)return;
+  LN.requestPermissions().then(function(){
+    var items=_remLoad();
+    // Cancel all existing
+    var toCancel=items.map(function(_,i){return{id:(i+1)};});
+    if(toCancel.length) LN.cancel({notifications:toCancel}).catch(function(){});
+    // Schedule upcoming ones
+    var notifs=[];
+    items.forEach(function(item,i){
+      var ms=_remCalcFireMs(item);
+      if(!ms)return;
+      notifs.push({id:(i+1),title:item.title,body:item.desc||'',schedule:{at:new Date(ms),allowWhileIdle:true},sound:'default',extra:{remId:item.id}});
+    });
+    if(notifs.length) LN.schedule({notifications:notifs}).catch(function(e){console.warn('cap notif err',e);});
+  }).catch(function(){});
+}
+
+// Override _remFire to also show native when in Capacitor
+(function(){
+  var _orig=_remFire;
+  _remFire=function(item){
+    _orig(item);
+    // Reschedule all after firing (so recurring reminders get rescheduled)
+    setTimeout(_capScheduleAll,500);
+  };
+})();
+
 _remSchedule();
+// Schedule native notifications if running in Capacitor
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',_capScheduleAll);
+}else{
+  setTimeout(_capScheduleAll,1000);
+}
 
 startSync();
 scheduleMidnightCheck();
