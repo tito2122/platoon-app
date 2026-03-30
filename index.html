@@ -510,21 +510,28 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
       <button id="rem-add-open-btn" style="width:100%;min-height:46px;border-radius:var(--r-sm);border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ הוסף תזכורת חדשה</button>
       <div id="rem-form-wrap" style="display:none">
         <div class="rem-form-card">
-          <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">🔔 תזכורת חדשה</div>
+          <div id="rem-form-title" style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">🔔 תזכורת חדשה</div>
           <label class="rem-form-label">כותרת *</label>
           <input class="rem-form-input" id="rem-inp-title" type="text" placeholder="לדוגמא: ספירת כוח אדם">
           <label class="rem-form-label">תיאור (אופציונלי)</label>
           <input class="rem-form-input" id="rem-inp-desc" type="text" placeholder="פרטים נוספים...">
           <label class="rem-form-label">סוג תזכורת</label>
           <div class="rem-type-btns">
-            <button class="rem-type-btn sel" id="rem-type-daily" type="button">⏰ שעה קבועה כל יום</button>
-            <button class="rem-type-btn" id="rem-type-event" type="button">📅 לפני אירוע</button>
+            <button class="rem-type-btn" id="rem-type-daily" type="button">⏰ כל יום</button>
+            <button class="rem-type-btn" id="rem-type-weekly" type="button">🔁 ימים נבחרים</button>
+            <button class="rem-type-btn sel" id="rem-type-event" type="button">📅 אירוע</button>
           </div>
-          <div id="rem-fields-daily">
+          <div id="rem-fields-daily" style="display:none">
             <label class="rem-form-label">שעה</label>
             <input class="rem-form-input" id="rem-inp-time" type="time">
           </div>
-          <div id="rem-fields-event" style="display:none">
+          <div id="rem-fields-weekly" style="display:none">
+            <label class="rem-form-label">ימים</label>
+            <div id="rem-day-btns" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap"></div>
+            <label class="rem-form-label">שעה</label>
+            <input class="rem-form-input" id="rem-inp-weekly-time" type="time">
+          </div>
+          <div id="rem-fields-event">
             <label class="rem-form-label">תאריך האירוע</label>
             <input class="rem-form-input" id="rem-inp-event-date" type="date">
             <label class="rem-form-label">שעת האירוע</label>
@@ -4352,14 +4359,19 @@ function renderReminders(){
     card.className='rem-card';
 
     var sndObj=_REM_SOUNDS.find(function(s){return s.id===item.sound;})||_REM_SOUNDS[0];
+    var _dayNames=['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','שבת'];
     var badge='';
     if(item.type==='daily'){
-      badge='<span class="rem-badge rem-badge-daily">⏰ יומי – '+item.time+'</span> <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
+      badge='<span class="rem-badge rem-badge-daily">⏰ כל יום – '+item.time+'</span>';
+    } else if(item.type==='weekly'){
+      var daysLbl=(item.days||[]).map(function(d){return _dayNames[d];}).join(', ');
+      badge='<span class="rem-badge rem-badge-daily" style="background:#E0E7FF;color:#3730A3">🔁 '+daysLbl+' – '+item.time+'</span>';
     } else {
       var dLabel=item.date?item.date.split('-').reverse().join('/'):'';
-      var beforeLbl=item.before===0?'בדיוק בשעת האירוע':item.before+' דק\' לפני';
-      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+beforeLbl+')</span> <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
+      var beforeLbl=item.before===0?'בשעת האירוע':item.before+' דק\' לפני';
+      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+beforeLbl+')</span>';
     }
+    badge+=' <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
 
     card.innerHTML=
       '<div class="rem-card-body">'+
@@ -4367,7 +4379,10 @@ function renderReminders(){
         (item.desc?'<div class="rem-card-sub">'+_escHtml(item.desc)+'</div>':'')+
         badge+
       '</div>'+
-      '<button class="rem-del-btn" data-idx="'+idx+'" title="מחק">✕</button>';
+      '<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">'+
+        '<button class="rem-del-btn" data-idx="'+idx+'" title="מחק">✕</button>'+
+        '<button class="rem-edit-btn" data-idx="'+idx+'" title="עריכה" style="width:32px;height:32px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✏️</button>'+
+      '</div>';
 
     card.querySelector('.rem-del-btn').addEventListener('click',function(){
       var i=parseInt(this.getAttribute('data-idx'));
@@ -4376,6 +4391,10 @@ function renderReminders(){
         _remSave(items);
         renderReminders();
       });
+    });
+    card.querySelector('.rem-edit-btn').addEventListener('click',function(){
+      var i=parseInt(this.getAttribute('data-idx'));
+      _remOpenForm(i);
     });
 
     listEl.appendChild(card);
@@ -4486,12 +4505,22 @@ function _remCheck(){
           _remFire(item);
         }
       }
+    } else if(item.type==='weekly'){
+      var wdays=item.days||[];
+      if(!wdays.length||!item.time)return;
+      if(wdays.indexOf(now.getDay())!==-1 && item.time===hhmm){
+        var firedKey2=ds+'_'+hhmm;
+        if(item._firedWeekly!==firedKey2){
+          item._firedWeekly=firedKey2;
+          changed=true;
+          _remFire(item);
+        }
+      }
     } else if(item.type==='event'){
       if(!item.date||!item.time)return;
       var before=item.before==null?60:item.before;
       var evMs=new Date(item.date+'T'+item.time+':00').getTime();
       var fireMs=evMs-before*60000;
-      // fire if now is inside the [fireMs, fireMs+90s) window (90s to survive 30s polling gaps)
       var firedKey=item.date+'_'+item.time+'_'+before;
       if(nowMs>=fireMs && nowMs<fireMs+90000){
         if(item._firedEvent!==firedKey){
@@ -4507,14 +4536,58 @@ function _remCheck(){
 }
 
 // Form logic
+var _remEditIdx=-1;
+var _remSelDays=[];
+
 (function(){
+  var DAY_NAMES=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+
   function setType(t){
     _remType=t;
-    document.getElementById('rem-type-daily').classList.toggle('sel',t==='daily');
-    document.getElementById('rem-type-event').classList.toggle('sel',t==='event');
-    document.getElementById('rem-fields-daily').style.display=t==='daily'?'':'none';
-    document.getElementById('rem-fields-event').style.display=t==='event'?'':'none';
+    ['daily','weekly','event'].forEach(function(tp){
+      document.getElementById('rem-type-'+tp).classList.toggle('sel',t===tp);
+      document.getElementById('rem-fields-'+tp).style.display=t===tp?'':'none';
+    });
   }
+
+  function setSoundUI(sid){
+    _remSoundSel=sid||'beep';
+    document.getElementById('rem-sound-btns').querySelectorAll('button').forEach(function(b){
+      var sel=b.getAttribute('data-sid')===_remSoundSel;
+      b.style.background=sel?'var(--blue)':'var(--card2)';
+      b.style.color=sel?'#fff':'var(--text2)';
+      b.style.borderColor=sel?'var(--blue)':'var(--border)';
+    });
+  }
+
+  function updateDayUI(){
+    document.getElementById('rem-day-btns').querySelectorAll('button').forEach(function(b){
+      var d=parseInt(b.getAttribute('data-day'));
+      var sel=_remSelDays.indexOf(d)!==-1;
+      b.style.background=sel?'var(--blue)':'var(--card2)';
+      b.style.color=sel?'#fff':'var(--text2)';
+      b.style.borderColor=sel?'var(--blue)':'var(--border)';
+    });
+  }
+
+  // Build day picker buttons
+  (function(){
+    var wrap=document.getElementById('rem-day-btns');
+    DAY_NAMES.forEach(function(name,i){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.setAttribute('data-day',i);
+      btn.style.cssText='padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
+      btn.textContent=name;
+      btn.addEventListener('click',function(){
+        var d=parseInt(this.getAttribute('data-day'));
+        var pos=_remSelDays.indexOf(d);
+        if(pos===-1)_remSelDays.push(d); else _remSelDays.splice(pos,1);
+        updateDayUI();
+      });
+      wrap.appendChild(btn);
+    });
+  })();
 
   // Build sound picker buttons
   (function(){
@@ -4525,22 +4598,41 @@ function _remCheck(){
       btn.setAttribute('data-sid',s.id);
       btn.style.cssText='padding:7px 11px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px';
       btn.innerHTML=s.label+' <span style="font-size:10px;opacity:.6">▶</span>';
-      btn.addEventListener('click',function(){
-        _remSoundSel=s.id;
-        wrap.querySelectorAll('button').forEach(function(b){
-          var sel=b.getAttribute('data-sid')===_remSoundSel;
-          b.style.background=sel?'var(--blue)':'var(--card2)';
-          b.style.color=sel?'#fff':'var(--text2)';
-          b.style.borderColor=sel?'var(--blue)':'var(--border)';
-        });
-        _remPlayAlarm(s.id);
-      });
+      btn.addEventListener('click',function(){setSoundUI(s.id);_remPlayAlarm(s.id);});
       wrap.appendChild(btn);
     });
-    // set initial selection visual
-    var first=wrap.querySelector('[data-sid="beep"]');
-    if(first){first.style.background='var(--blue)';first.style.color='#fff';first.style.borderColor='var(--blue)';}
   })();
+
+  window._remOpenForm=function(editIdx){
+    _remEditIdx=(editIdx==null)?-1:editIdx;
+    var items=_remLoad();
+    var item=(_remEditIdx>=0)?items[_remEditIdx]:null;
+
+    document.getElementById('rem-form-title').textContent=item?'✏️ עריכת תזכורת':'🔔 תזכורת חדשה';
+    document.getElementById('rem-inp-title').value=item?item.title:'';
+    document.getElementById('rem-inp-desc').value=item?item.desc||'':'';
+    setSoundUI(item?item.sound:'beep');
+
+    if(item && item.type==='daily'){
+      document.getElementById('rem-inp-time').value=item.time||'08:00';
+      setType('daily');
+    } else if(item && item.type==='weekly'){
+      _remSelDays=(item.days||[]).slice();
+      document.getElementById('rem-inp-weekly-time').value=item.time||'08:00';
+      updateDayUI();
+      setType('weekly');
+    } else {
+      // event (default)
+      document.getElementById('rem-inp-event-date').value=item?item.date||'':'';
+      document.getElementById('rem-inp-event-time').value=item?item.time||'08:00':'08:00';
+      document.getElementById('rem-inp-before').value=item&&item.before!=null?item.before:60;
+      _remSelDays=[];
+      setType('event');
+    }
+
+    document.getElementById('rem-form-wrap').style.display='block';
+    document.getElementById('rem-add-open-btn').style.display='none';
+  };
 
   document.getElementById('rem-test-btn').addEventListener('click',function(){
     if(!('Notification' in window)){toast('⚠️ הדפדפן לא תומך בהתראות');return;}
@@ -4551,11 +4643,7 @@ function _remCheck(){
     } else if(Notification.permission==='default'){
       Notification.requestPermission().then(function(p){
         renderReminders();
-        if(p==='granted'){
-          _remPlayAlarm();
-          _remShowNotif('🔔 בדיקת התראה','המערכת עובדת כראוי!','platoon-test');
-          toast('✅ הרשאה ניתנה ונשלחה התראת בדיקה');
-        }
+        if(p==='granted'){_remPlayAlarm();_remShowNotif('🔔 בדיקת התראה','המערכת עובדת כראוי!','platoon-test');toast('✅ הרשאה ניתנה ונשלחה התראת בדיקה');}
       });
     } else {
       toast('⚠️ התראות חסומות — פתח הגדרות דפדפן לאפשר');
@@ -4563,57 +4651,50 @@ function _remCheck(){
   });
 
   document.getElementById('rem-type-daily').addEventListener('click',function(){setType('daily');});
+  document.getElementById('rem-type-weekly').addEventListener('click',function(){setType('weekly');});
   document.getElementById('rem-type-event').addEventListener('click',function(){setType('event');});
 
-  document.getElementById('rem-add-open-btn').addEventListener('click',function(){
-    document.getElementById('rem-form-wrap').style.display='block';
-    document.getElementById('rem-add-open-btn').style.display='none';
-    document.getElementById('rem-inp-title').value='';
-    document.getElementById('rem-inp-desc').value='';
-    document.getElementById('rem-inp-time').value='08:00';
-    document.getElementById('rem-inp-event-date').value='';
-    document.getElementById('rem-inp-event-time').value='08:00';
-    document.getElementById('rem-inp-before').value='60';
-    _remSoundSel='beep';
-    document.getElementById('rem-sound-btns').querySelectorAll('button').forEach(function(b){
-      var sel=b.getAttribute('data-sid')==='beep';
-      b.style.background=sel?'var(--blue)':'var(--card2)';
-      b.style.color=sel?'#fff':'var(--text2)';
-      b.style.borderColor=sel?'var(--blue)':'var(--border)';
-    });
-    setType('event');
-  });
+  document.getElementById('rem-add-open-btn').addEventListener('click',function(){_remOpenForm(-1);});
 
   document.getElementById('rem-form-cancel').addEventListener('click',function(){
     document.getElementById('rem-form-wrap').style.display='none';
     document.getElementById('rem-add-open-btn').style.display='';
+    _remEditIdx=-1;
   });
 
   document.getElementById('rem-form-save').addEventListener('click',function(){
     var title=(document.getElementById('rem-inp-title').value||'').trim();
     if(!title){toast('⚠️ יש להזין כותרת');return;}
-    var item={id:Date.now(),title:title,desc:(document.getElementById('rem-inp-desc').value||'').trim(),type:_remType,sound:_remSoundSel};
+    var items=_remLoad();
+    var existing=(_remEditIdx>=0)?items[_remEditIdx]:null;
+    var item={id:existing?existing.id:Date.now(),title:title,desc:(document.getElementById('rem-inp-desc').value||'').trim(),type:_remType,sound:_remSoundSel};
     if(_remType==='daily'){
       var t=document.getElementById('rem-inp-time').value;
       if(!t){toast('⚠️ יש לבחור שעה');return;}
       item.time=t;
+    } else if(_remType==='weekly'){
+      if(!_remSelDays.length){toast('⚠️ יש לבחור לפחות יום אחד');return;}
+      var wt=document.getElementById('rem-inp-weekly-time').value;
+      if(!wt){toast('⚠️ יש לבחור שעה');return;}
+      item.days=_remSelDays.slice().sort(function(a,b){return a-b;});
+      item.time=wt;
     } else {
       var d=document.getElementById('rem-inp-event-date').value;
       var et=document.getElementById('rem-inp-event-time').value;
       if(!d||!et){toast('⚠️ יש למלא תאריך ושעה');return;}
-      item.date=d;
-      item.time=et;
+      item.date=d; item.time=et;
       var bv=parseInt(document.getElementById('rem-inp-before').value);
       item.before=isNaN(bv)?60:bv;
     }
-    var items=_remLoad();
-    items.push(item);
+    var wasEdit=_remEditIdx>=0;
+    if(wasEdit){items[_remEditIdx]=item;} else {items.push(item);}
     _remSave(items);
     document.getElementById('rem-form-wrap').style.display='none';
     document.getElementById('rem-add-open-btn').style.display='';
+    _remEditIdx=-1;
     renderReminders();
     _remSchedule();
-    toast('✅ תזכורת נשמרה');
+    toast(wasEdit?'✅ תזכורת עודכנה':'✅ תזכורת נשמרה');
   });
 })();
 
@@ -4633,14 +4714,28 @@ function _remSchedule(){
       var h=parseInt(parts[0])||0,m=parseInt(parts[1])||0;
       var t=new Date(now);t.setHours(h,m,0,0);
       fireMs=t.getTime();
-      // If already passed today (more than 2s ago), schedule for tomorrow
       if(fireMs<nowMs-2000)fireMs+=86400000;
+    } else if(item.type==='weekly'){
+      var wdays=item.days||[];
+      if(!wdays.length||!item.time)return;
+      var wp=(item.time||'').split(':');
+      var wh=parseInt(wp[0])||0,wm=parseInt(wp[1])||0;
+      for(var dd=0;dd<7;dd++){
+        var cand=new Date(now);
+        cand.setDate(cand.getDate()+dd);
+        cand.setHours(wh,wm,0,0);
+        if(wdays.indexOf(cand.getDay())!==-1 && cand.getTime()>nowMs-2000){
+          fireMs=cand.getTime();
+          break;
+        }
+      }
+      if(!fireMs)return;
     } else {
       if(!item.date||!item.time)return;
       var before=item.before==null?60:item.before;
       var evMs=new Date(item.date+'T'+item.time+':00').getTime();
       fireMs=evMs-before*60000;
-      if(fireMs<nowMs-2000)return; // past event, skip
+      if(fireMs<nowMs-2000)return;
     }
     if(fireMs<earliest)earliest=fireMs;
   });
