@@ -97,7 +97,7 @@ if('serviceWorker' in navigator){
   --shadow:0 2px 12px rgba(0,0,0,.08);
   --font:'Rubik',sans-serif;--hh:56px;
 }
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;overflow-x:hidden}
 body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl;font-size:16px;line-height:1.5;overscroll-behavior:none}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
 .screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
@@ -4200,6 +4200,40 @@ if(window.visualViewport){
     setTimeout(function(){document.body.style.height='';},300);
   });
 }
+})();
+
+(function() {
+  let startX = 0;
+  let isDragging = false;
+
+  const RESISTANCE = 0.08;
+  const MAX_STRETCH = 20;
+
+  document.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+
+    const scrollLeft = document.documentElement.scrollLeft;
+    const maxScroll = document.documentElement.scrollWidth - window.innerWidth;
+
+    if (scrollLeft > 0 && scrollLeft < maxScroll) return;
+
+    const diff = (e.touches[0].clientX - startX) * RESISTANCE;
+    const clamped = Math.max(-MAX_STRETCH, Math.min(MAX_STRETCH, diff));
+
+    document.body.style.transition = 'none';
+    document.body.style.transform = `translateX(${clamped}px)`;
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    isDragging = false;
+    document.body.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    document.body.style.transform = 'translateX(0)';
+  });
 })();
 </script>
 </body>
