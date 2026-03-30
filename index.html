@@ -3519,7 +3519,7 @@ function init(){
     });
   });
 
-  // Swipe בין עמודות
+  // Swipe בין עמודות ראשיות
   (function(){
     var TABS=['list','week','stats','missions','lists'];
     var swipeStartX=0,swipeStartY=0,swipeStartTime=0;
@@ -3543,8 +3543,34 @@ function init(){
       var dt=Date.now()-swipeStartTime;
       if(dt>400||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
       var cur=TABS.indexOf(getCurrentTab());
-      if(dx<0&&cur<TABS.length-1)goToTab(TABS[cur+1]); // שמאלה → הבא
-      if(dx>0&&cur>0)goToTab(TABS[cur-1]);              // ימינה → הקודם
+      if(dx>0&&cur<TABS.length-1)goToTab(TABS[cur+1]); // ימינה → הבא (שמאל)
+      if(dx<0&&cur>0)goToTab(TABS[cur-1]);              // שמאלה → הקודם (ימין)
+    },{passive:true});
+  })();
+
+  // Swipe בפרטי חייל בין יציאות ופרטים
+  (function(){
+    var DET_TABS=['leaves','info'];
+    var sx=0,sy=0,st=0;
+    var scr=document.getElementById('scr-det');
+    function getCurDetTab(){
+      return document.getElementById('tab-leaves').classList.contains('active')?'leaves':'info';
+    }
+    function goDetTab(name){
+      var btn=document.querySelector('.tab-btn[data-tab="'+name+'"]');
+      if(btn)btn.click();
+    }
+    scr.addEventListener('touchstart',function(e){
+      sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();
+    },{passive:true});
+    scr.addEventListener('touchend',function(e){
+      var dx=e.changedTouches[0].clientX-sx;
+      var dy=e.changedTouches[0].clientY-sy;
+      var dt=Date.now()-st;
+      if(dt>400||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
+      var cur=DET_TABS.indexOf(getCurDetTab());
+      if(dx>0&&cur<DET_TABS.length-1)goDetTab(DET_TABS[cur+1]);
+      if(dx<0&&cur>0)goDetTab(DET_TABS[cur-1]);
     },{passive:true});
   })();
 
