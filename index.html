@@ -4462,12 +4462,8 @@ function _remPlayAlarm(soundId){
 function _remShowNotif(title,body,tag){
   if(!('Notification' in window)||Notification.permission!=='granted')return false;
   try{
-    var opts={body:body||'',icon:'/platoon-app/icons/icon-192.png',requireInteraction:true,vibrate:[300,100,300,100,600],silent:false,tag:tag||'platoon-rem',renotify:true,dir:'rtl',lang:'he'};
-    if(navigator.serviceWorker && navigator.serviceWorker.controller){
-      navigator.serviceWorker.controller.postMessage({type:'SHOW_NOTIFICATION',title:title,body:opts.body,tag:opts.tag});
-    } else {
-      new Notification(title,opts);
-    }
+    // Use direct Notification() — synchronous and immediate, no SW round-trip delay
+    new Notification(title,{body:body||'',icon:'/platoon-app/icons/icon-192.png',requireInteraction:true,vibrate:[300,100,300,100,600],silent:false,tag:tag||'platoon-rem',renotify:true,dir:'rtl',lang:'he'});
     return true;
   }catch(e){return false;}
 }
