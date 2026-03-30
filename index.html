@@ -4740,7 +4740,7 @@ var _remSelDays=[];
       var todayStr=(function(){var n=new Date();return n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);})();
       document.getElementById('rem-inp-event-date').value=item?item.date||todayStr:todayStr;
       document.getElementById('rem-inp-event-time').value=item?item.time||'08:00':'08:00';
-      document.getElementById('rem-inp-before').value=item&&item.before!=null?item.before:60;
+      document.getElementById('rem-inp-before').value=item&&item.before!=null?item.before:0;
       _remSelDays=[];
       setType('event');
     }
