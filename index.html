@@ -526,6 +526,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
             <input class="rem-form-input" id="rem-inp-event-time" type="time">
             <label class="rem-form-label">להזכיר כמה זמן לפני?</label>
             <select class="rem-form-input" id="rem-inp-before">
+              <option value="0">בדיוק בשעת האירוע</option>
               <option value="10">10 דקות לפני</option>
               <option value="30">30 דקות לפני</option>
               <option value="60" selected>שעה לפני</option>
@@ -4346,7 +4347,8 @@ function renderReminders(){
       badge='<span class="rem-badge rem-badge-daily">⏰ יומי – '+item.time+'</span>';
     } else {
       var dLabel=item.date?item.date.split('-').reverse().join('/'):'';
-      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+item.before+' דק\' לפני)</span>';
+      var beforeLbl=item.before===0?'בדיוק בשעת האירוע':item.before+' דק\' לפני';
+      badge='<span class="rem-badge rem-badge-event">📅 '+dLabel+' '+item.time+' ('+beforeLbl+')</span>';
     }
 
     card.innerHTML=
@@ -4396,27 +4398,28 @@ function _remCheck(){
   var now=new Date();
   var hhmm=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
   var ds=toDateStr(now.getFullYear(),now.getMonth(),now.getDate());
+  var nowMs=now.getTime();
   var changed=false;
 
   items.forEach(function(item){
     if(item.type==='daily'){
       if(item.time===hhmm){
-        var fired=item._firedDaily||'';
-        if(fired!==ds){
-          item._firedDaily=ds;
+        // fire once per day-minute combination
+        var firedKey=ds+'_'+hhmm;
+        if(item._firedDaily!==firedKey){
+          item._firedDaily=firedKey;
           changed=true;
           _remFire(item);
         }
       }
     } else if(item.type==='event'){
       if(!item.date||!item.time)return;
-      // compute fire time = event datetime minus `before` minutes
+      var before=item.before==null?60:item.before;
       var evMs=new Date(item.date+'T'+item.time+':00').getTime();
-      var fireMs=evMs-(item.before||60)*60000;
-      var diff=Math.abs(now.getTime()-fireMs);
-      // fire if within 1 minute window and not already fired
-      if(diff<60000){
-        var firedKey=item.date+'_'+item.time;
+      var fireMs=evMs-before*60000;
+      // fire if now is inside the [fireMs, fireMs+90s) window (90s to survive 30s polling gaps)
+      var firedKey=item.date+'_'+item.time+'_'+before;
+      if(nowMs>=fireMs && nowMs<fireMs+90000){
         if(item._firedEvent!==firedKey){
           item._firedEvent=firedKey;
           changed=true;
@@ -4473,7 +4476,8 @@ function _remCheck(){
       if(!d||!et){toast('⚠️ יש למלא תאריך ושעה');return;}
       item.date=d;
       item.time=et;
-      item.before=parseInt(document.getElementById('rem-inp-before').value)||60;
+      var bv=parseInt(document.getElementById('rem-inp-before').value);
+      item.before=isNaN(bv)?60:bv;
     }
     var items=_remLoad();
     items.push(item);
@@ -4485,8 +4489,8 @@ function _remCheck(){
   });
 })();
 
-// Start checking every minute
-setInterval(_remCheck,60000);
+// Check every 30s so we don't miss a minute regardless of page load time
+setInterval(_remCheck,30000);
 _remCheck();
 
 startSync();
