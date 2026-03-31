@@ -4082,6 +4082,654 @@ function _handleBack(){
     }
   });
 })();
+// ==============================
+// REMINDERS SYSTEM
+// ==============================
+var _remType='daily'; // current form type selection
+
+function _remLoad(){
+  try{return JSON.parse(localStorage.getItem('reminders_v1')||'[]');}catch(e){return[];}
+}
+function _remSave(arr){
+  try{localStorage.setItem('reminders_v1',JSON.stringify(arr));}catch(e){}
+}
+
+function renderReminders(){
+  var items=_remLoad();
+  var listEl=document.getElementById('rem-list');
+  if(!listEl)return;
+
+  // Permission banner
+  var permBanner=document.getElementById('rem-perm-banner');
+  if(permBanner){
+    var _LN=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
+    if(_LN){
+      // Running as native app — use Capacitor LocalNotifications
+      _LN.checkPermissions().then(function(res){
+        if(res.display==='granted'){
+          permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#166534">✅ מופעל</span>';
+        } else {
+          permBanner.innerHTML='<button id="rem-perm-btn" style="padding:5px 11px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל התראות</button>';
+          var pb=document.getElementById('rem-perm-btn');
+          if(pb)pb.addEventListener('click',function(){
+            _LN.requestPermissions().then(function(){renderReminders();_capScheduleAll();});
+          });
+        }
+      }).catch(function(){permBanner.innerHTML='';});
+    } else if(!('Notification' in window)){
+      permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#C2410C">⚠️ לא נתמך</span>';
+    } else if(Notification.permission==='default'){
+      permBanner.innerHTML='<button id="rem-perm-btn" style="padding:5px 11px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל התראות</button>';
+      var pb2=document.getElementById('rem-perm-btn');
+      if(pb2)pb2.addEventListener('click',function(){
+        Notification.requestPermission().then(function(){renderReminders();});
+      });
+    } else if(Notification.permission==='denied'){
+      permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#C2410C" title="לחץ על 🔒 בשורת הכתובת ← התראות ← אפשר">🚫 חסום</span>';
+    } else if(Notification.permission==='granted'){
+      permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#166534">✅ מופעל</span>';
+    }
+  }
+
+  if(!items.length){
+    listEl.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--text3);font-size:14px">אין תזכורות עדיין 🔕<br><span style="font-size:12px">לחץ על הכפתור למטה להוסיף</span></div>';
+    return;
+  }
+
+  listEl.innerHTML='';
+  items.forEach(function(item,idx){
+    var card=document.createElement('div');
+    card.className='rem-card';
+
+    var sndObj=_REM_SOUNDS.find(function(s){return s.id===item.sound;})||_REM_SOUNDS[0];
+    var _dayNames=['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','שבת'];
+    var badge='';
+    if(item.type==='daily'){
+      badge='<span class="rem-badge rem-badge-daily">⏰ כל יום – '+item.time+'</span>';
+    } else if(item.type==='weekly'){
+      var daysLbl=(item.days||[]).map(function(d){return _dayNames[d];}).join(', ');
+      badge='<span class="rem-badge rem-badge-daily" style="background:#E0E7FF;color:#3730A3">🔁 '+daysLbl+' – '+item.time+'</span>';
+    } else {
+      var dLabel=item.date?item.date.split('-').reverse().join('/'):'';
+      badge='<span class="rem-badge rem-badge-event">📅 חד פעמי – '+dLabel+' '+item.time+'</span>';
+    }
+    badge+=' <span class="rem-badge" style="background:var(--card2);color:var(--text3)">'+sndObj.label+'</span>';
+
+    card.innerHTML=
+      '<div class="rem-drag-handle" style="cursor:grab;color:var(--text3);font-size:20px;padding:2px 4px 0 4px;align-self:center;touch-action:none;user-select:none;-webkit-user-select:none">⠿</div>'+
+      '<div class="rem-card-body">'+
+        '<div class="rem-card-title">'+_escHtml(item.title)+'</div>'+
+        (item.desc?'<div class="rem-card-sub">'+_escHtml(item.desc)+'</div>':'')+
+        badge+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">'+
+        '<button class="rem-del-btn" data-idx="'+idx+'" title="מחק">✕</button>'+
+        '<button class="rem-edit-btn" data-idx="'+idx+'" title="עריכה" style="width:32px;height:32px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✏️</button>'+
+      '</div>';
+
+    card.querySelector('.rem-del-btn').addEventListener('click',function(){
+      var i=parseInt(this.getAttribute('data-idx'));
+      showConfirm('למחוק את התזכורת "'+items[i].title+'"?',function(){
+        items.splice(i,1);
+        _remSave(items);
+        renderReminders();
+      });
+    });
+    card.querySelector('.rem-edit-btn').addEventListener('click',function(){
+      var i=parseInt(this.getAttribute('data-idx'));
+      _remOpenForm(i);
+    });
+
+    listEl.appendChild(card);
+  });
+
+  _remInitDrag(listEl);
+}
+
+function _escHtml(s){
+  return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+var _REM_SOUNDS=[
+  {id:'beep',    label:'📳 ביפ כפול',  play:function(ctx){_rsBeep(ctx,[[0,880,.25,.4],[.3,880,.25,.4],[.6,1100,.4,.5],[1.1,880,.25,.4],[1.4,880,.25,.4],[1.7,1100,.5,.5]]);}},
+  {id:'bell',    label:'🔔 פעמון',     play:function(ctx){_rsBell(ctx);}},
+  {id:'siren',   label:'🚨 סירנה',     play:function(ctx){_rsSiren(ctx);}},
+  {id:'tri',     label:'🎵 שלושה טונים',play:function(ctx){_rsBeep(ctx,[[0,523,.2,.35],[.25,659,.2,.35],[.5,784,.45,.45],[.9,523,.2,.35],[1.15,659,.2,.35],[1.4,784,.5,.5]]);}},
+  {id:'ping',    label:'✨ פינג קצר',  play:function(ctx){_rsBeep(ctx,[[0,1200,.05,.4],[.05,1400,.05,.3],[.1,1600,.35,.5]]);}},
+  {id:'military',label:'⚔️ צבאי',      play:function(ctx){_rsBeep(ctx,[[0,220,.12,.5],[.15,220,.12,.5],[.3,220,.12,.5],[.6,440,.3,.5],[1.0,220,.12,.5],[1.15,220,.12,.5],[1.3,220,.12,.5],[1.6,440,.4,.5]]);}}
+];
+var _remSoundSel='beep';
+
+function _rsBeep(ctx,notes){
+  notes.forEach(function(n){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.value=n[1];
+    g.gain.setValueAtTime(n[3]||0.4,ctx.currentTime+n[0]);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+n[0]+n[2]);
+    o.start(ctx.currentTime+n[0]);o.stop(ctx.currentTime+n[0]+n[2]+0.05);
+  });
+}
+function _rsBell(ctx){
+  [0,0.5,1.0].forEach(function(t){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.setValueAtTime(1200,ctx.currentTime+t);
+    o.frequency.exponentialRampToValueAtTime(600,ctx.currentTime+t+0.4);
+    g.gain.setValueAtTime(0.5,ctx.currentTime+t);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.4);
+    o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.45);
+  });
+}
+function _rsSiren(ctx){
+  var o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);
+  o.type='sawtooth';
+  o.frequency.setValueAtTime(300,ctx.currentTime);
+  for(var i=0;i<8;i++){
+    o.frequency.linearRampToValueAtTime(i%2===0?800:300,ctx.currentTime+0.25*(i+1));
+  }
+  g.gain.setValueAtTime(0.3,ctx.currentTime);
+  g.gain.setValueAtTime(0.3,ctx.currentTime+1.9);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+2.0);
+  o.start(ctx.currentTime);o.stop(ctx.currentTime+2.05);
+}
+
+function _remPlayAlarm(soundId){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var snd=_REM_SOUNDS.find(function(s){return s.id===(soundId||_remSoundSel);})||_REM_SOUNDS[0];
+    snd.play(ctx);
+  }catch(e){}
+}
+
+function _remShowNotif(title,body,tag){
+  var _LN=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
+  if(_LN){
+    // Native app — fire immediately via LocalNotifications
+    var nid=Math.floor(Math.random()*100000);
+    _LN.schedule({notifications:[{id:nid,title:title,body:body||'',schedule:{at:new Date(Date.now()+500)},sound:'default',extra:null}]}).catch(function(){});
+    return true;
+  }
+  if(!('Notification' in window)||Notification.permission!=='granted')return false;
+  try{
+    new Notification(title,{body:body||'',icon:'/platoon-app/icons/icon-192.png',requireInteraction:true,vibrate:[300,100,300,100,600],silent:false,tag:tag||'platoon-rem',renotify:true,dir:'rtl',lang:'he'});
+    return true;
+  }catch(e){return false;}
+}
+
+function _remFire(item){
+  var title=item.title;
+  var body=item.desc||'';
+  _remPlayAlarm(item.sound);
+  var shown=_remShowNotif(title,body,'platoon-rem-'+item.id);
+  // Always show toast too (so user sees it even when app is in foreground)
+  toast('🔔 '+title+(body?' — '+body:''));
+  if(!shown && !('Notification' in window)){
+    // Already showed toast above, nothing more to do
+  } else if(!shown && 'Notification' in window && Notification.permission!=='granted'){
+    toast('⚠️ יש לאשר הרשאות התראות במסך התזכורות');
+  }
+}
+
+function _remCheck(){
+  var items=_remLoad();
+  if(!items.length)return;
+  var now=new Date();
+  var hhmm=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
+  var ds=toDateStr(now.getFullYear(),now.getMonth(),now.getDate());
+  var nowMs=now.getTime();
+  var changed=false;
+
+  items.forEach(function(item){
+    if(item.type==='daily'){
+      if(item.time===hhmm){
+        // fire once per day-minute combination
+        var firedKey=ds+'_'+hhmm;
+        if(item._firedDaily!==firedKey){
+          item._firedDaily=firedKey;
+          changed=true;
+          _remFire(item);
+        }
+      }
+    } else if(item.type==='weekly'){
+      var wdays=item.days||[];
+      if(!wdays.length||!item.time)return;
+      if(wdays.indexOf(now.getDay())!==-1 && item.time===hhmm){
+        var firedKey2=ds+'_'+hhmm;
+        if(item._firedWeekly!==firedKey2){
+          item._firedWeekly=firedKey2;
+          changed=true;
+          _remFire(item);
+        }
+      }
+    } else if(item.type==='event'){
+      if(!item.date||!item.time)return;
+      var before=item.before==null?60:item.before;
+      var evMs=new Date(item.date+'T'+item.time+':00').getTime();
+      var fireMs=evMs-before*60000;
+      var firedKey=item.date+'_'+item.time+'_'+before;
+      if(nowMs>=fireMs && nowMs<fireMs+90000){
+        if(item._firedEvent!==firedKey){
+          item._firedEvent=firedKey;
+          changed=true;
+          _remFire(item);
+        }
+      }
+    }
+  });
+
+  if(changed)_remSave(items);
+}
+
+function _remSort(){
+  var TYPE_ORDER={event:0,daily:1,weekly:2};
+  var items=_remLoad();
+  items.sort(function(a,b){
+    var oa=TYPE_ORDER[a.type]||0, ob=TYPE_ORDER[b.type]||0;
+    if(oa!==ob)return oa-ob;
+    if(a.type==='event') return (a.date||'')+(a.time||'') < (b.date||'')+(b.time||'') ? -1:1;
+    return (a.time||'')<(b.time||'')?-1:1;
+  });
+  _remSave(items);
+  renderReminders();
+  toast('✅ מוין לפי סוג');
+}
+
+function _remInitDrag(listEl){
+  var cards=Array.from(listEl.querySelectorAll('.rem-card'));
+  var dragIdx=-1;
+
+  // ── Desktop HTML5 drag ──
+  cards.forEach(function(card,idx){
+    card.setAttribute('draggable','true');
+    card.addEventListener('dragstart',function(e){
+      dragIdx=idx;
+      e.dataTransfer.effectAllowed='move';
+      setTimeout(function(){card.style.opacity='0.35';},0);
+    });
+    card.addEventListener('dragend',function(){
+      card.style.opacity='';
+      cards.forEach(function(c){c.style.boxShadow='';});
+      dragIdx=-1;
+    });
+    card.addEventListener('dragover',function(e){
+      e.preventDefault();
+      cards.forEach(function(c){c.style.boxShadow='';});
+      if(idx!==dragIdx) card.style.boxShadow='0 -3px 0 0 var(--blue)';
+    });
+    card.addEventListener('dragleave',function(){card.style.boxShadow='';});
+    card.addEventListener('drop',function(e){
+      e.preventDefault();
+      cards.forEach(function(c){c.style.boxShadow='';});
+      if(dragIdx===-1||dragIdx===idx)return;
+      var arr=_remLoad();
+      var moved=arr.splice(dragIdx,1)[0];
+      arr.splice(idx,0,moved);
+      _remSave(arr);
+      renderReminders();
+      _remSchedule();
+      _capScheduleAll();
+    });
+  });
+
+  // ── Mobile touch drag ──
+  var tIdx=-1, tEl=null, tClone=null, tOffY=0, tOffX=0;
+
+  cards.forEach(function(card,idx){
+    var handle=card.querySelector('.rem-drag-handle');
+    handle.addEventListener('touchstart',function(e){
+      e.preventDefault();
+      tIdx=idx; tEl=card;
+      var r=card.getBoundingClientRect();
+      tOffX=r.left; tOffY=e.touches[0].clientY-r.top;
+      tClone=card.cloneNode(true);
+      tClone.style.cssText='position:fixed;z-index:9999;width:'+r.width+'px;left:'+r.left+'px;top:'+r.top+'px;opacity:.85;pointer-events:none;border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.18)';
+      document.body.appendChild(tClone);
+      card.style.opacity='0.3';
+    },{passive:false});
+
+    handle.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      if(tIdx===-1||!tClone)return;
+      var y=e.touches[0].clientY;
+      tClone.style.top=(y-tOffY)+'px';
+      cards.forEach(function(c){c.style.boxShadow='';});
+      for(var i=0;i<cards.length;i++){
+        if(i===tIdx)continue;
+        var r=cards[i].getBoundingClientRect();
+        if(y>=r.top&&y<=r.bottom){cards[i].style.boxShadow='0 -3px 0 0 var(--blue)';break;}
+      }
+    },{passive:false});
+
+    handle.addEventListener('touchend',function(e){
+      if(tClone){tClone.remove();tClone=null;}
+      if(tEl){tEl.style.opacity='';tEl=null;}
+      cards.forEach(function(c){c.style.boxShadow='';});
+      var y=e.changedTouches[0].clientY;
+      var targetIdx=-1;
+      for(var i=0;i<cards.length;i++){
+        if(i===tIdx)continue;
+        var r=cards[i].getBoundingClientRect();
+        if(y>=r.top&&y<=r.bottom){targetIdx=i;break;}
+      }
+      if(targetIdx!==-1&&tIdx!==-1){
+        var arr=_remLoad();
+        var moved=arr.splice(tIdx,1)[0];
+        arr.splice(targetIdx,0,moved);
+        _remSave(arr);
+        renderReminders();
+        _remSchedule();
+      }
+      tIdx=-1;
+    });
+  });
+}
+
+// Form logic
+var _remEditIdx=-1;
+var _remSelDays=[];
+
+(function(){
+  var DAY_NAMES=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  function _fmtEvDate(v){
+    if(!v)return 'תאריך';
+    var p=v.split('-');
+    var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+    var t=new Date();t.setHours(0,0,0,0);
+    if(d.getTime()===t.getTime())return 'היום';
+    t.setDate(t.getDate()+1);
+    if(d.getTime()===t.getTime())return 'מחר';
+    return p[2]+'/'+p[1];
+  }
+
+  function _updateEvLabels(){
+    var dv=document.getElementById('rem-inp-event-date').value;
+    var tv=document.getElementById('rem-inp-event-time').value;
+    document.getElementById('rem-ev-date-lbl').textContent=_fmtEvDate(dv);
+    document.getElementById('rem-ev-time-lbl').textContent=tv||'שעה';
+  }
+
+  document.getElementById('rem-inp-event-date').addEventListener('change',_updateEvLabels);
+  document.getElementById('rem-inp-event-time').addEventListener('change',_updateEvLabels);
+
+  function setType(t){
+    _remType=t;
+    ['daily','weekly','event'].forEach(function(tp){
+      document.getElementById('rem-type-'+tp).classList.toggle('sel',t===tp);
+      document.getElementById('rem-fields-'+tp).style.display=t===tp?'':'none';
+    });
+  }
+
+  function setSoundUI(sid){
+    _remSoundSel=sid||'beep';
+    document.getElementById('rem-sound-btns').querySelectorAll('button').forEach(function(b){
+      var sel=b.getAttribute('data-sid')===_remSoundSel;
+      b.style.background=sel?'var(--blue)':'var(--card2)';
+      b.style.color=sel?'#fff':'var(--text2)';
+      b.style.borderColor=sel?'var(--blue)':'var(--border)';
+    });
+  }
+
+  function updateDayUI(){
+    document.getElementById('rem-day-btns').querySelectorAll('button').forEach(function(b){
+      var d=parseInt(b.getAttribute('data-day'));
+      var sel=_remSelDays.indexOf(d)!==-1;
+      b.style.background=sel?'var(--blue)':'var(--card2)';
+      b.style.color=sel?'#fff':'var(--text2)';
+      b.style.borderColor=sel?'var(--blue)':'var(--border)';
+    });
+  }
+
+  // Build day picker buttons
+  (function(){
+    var wrap=document.getElementById('rem-day-btns');
+    DAY_NAMES.forEach(function(name,i){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.setAttribute('data-day',i);
+      btn.style.cssText='padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer';
+      btn.textContent=name;
+      btn.addEventListener('click',function(){
+        var d=parseInt(this.getAttribute('data-day'));
+        var pos=_remSelDays.indexOf(d);
+        if(pos===-1)_remSelDays.push(d); else _remSelDays.splice(pos,1);
+        updateDayUI();
+      });
+      wrap.appendChild(btn);
+    });
+  })();
+
+  // Build sound picker buttons
+  (function(){
+    var wrap=document.getElementById('rem-sound-btns');
+    _REM_SOUNDS.forEach(function(s){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.setAttribute('data-sid',s.id);
+      btn.style.cssText='padding:7px 11px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px';
+      btn.innerHTML=s.label+' <span style="font-size:10px;opacity:.6">▶</span>';
+      btn.addEventListener('click',function(){setSoundUI(s.id);_remPlayAlarm(s.id);});
+      wrap.appendChild(btn);
+    });
+  })();
+
+  window._remOpenForm=function(editIdx){
+    _remEditIdx=(editIdx==null)?-1:editIdx;
+    var items=_remLoad();
+    var item=(_remEditIdx>=0)?items[_remEditIdx]:null;
+
+    document.getElementById('rem-form-title').textContent=item?'✏️ עריכת תזכורת':'🔔 תזכורת חדשה';
+    document.getElementById('rem-inp-title').value=item?item.title:'';
+    document.getElementById('rem-inp-desc').value=item?item.desc||'':'';
+    setSoundUI(item?item.sound:'beep');
+
+    if(item && item.type==='daily'){
+      document.getElementById('rem-inp-time').value=item.time||'08:00';
+      setType('daily');
+    } else if(item && item.type==='weekly'){
+      _remSelDays=(item.days||[]).slice();
+      document.getElementById('rem-inp-weekly-time').value=item.time||'08:00';
+      updateDayUI();
+      setType('weekly');
+    } else {
+      // event (default)
+      var todayStr=(function(){var n=new Date();return n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);})();
+      document.getElementById('rem-inp-event-date').value=item?item.date||todayStr:todayStr;
+      document.getElementById('rem-inp-event-time').value=item?item.time||'08:00':'08:00';
+      document.getElementById('rem-inp-before').value=item&&item.before!=null?item.before:0;
+      _remSelDays=[];
+      setType('event');
+      _updateEvLabels();
+    }
+
+    document.getElementById('rem-form-wrap').style.display='block';
+    document.getElementById('rem-add-open-btn').style.display='none';
+  };
+
+  document.getElementById('rem-sort-btn').addEventListener('click',_remSort);
+
+  document.getElementById('rem-test-btn').addEventListener('click',function(){
+    if(!('Notification' in window)){toast('⚠️ הדפדפן לא תומך בהתראות');return;}
+    if(Notification.permission==='granted'){
+      _remPlayAlarm();
+      var shown=_remShowNotif('🔔 בדיקת התראה','המערכת עובדת כראוי!','platoon-test');
+      toast(shown?'✅ נשלחה התראת בדיקה':'⚠️ הנוטיפיקציה נכשלה — נסה לרענן');
+    } else if(Notification.permission==='default'){
+      Notification.requestPermission().then(function(p){
+        renderReminders();
+        if(p==='granted'){_remPlayAlarm();_remShowNotif('🔔 בדיקת התראה','המערכת עובדת כראוי!','platoon-test');toast('✅ הרשאה ניתנה ונשלחה התראת בדיקה');}
+      });
+    } else {
+      toast('⚠️ התראות חסומות — פתח הגדרות דפדפן לאפשר');
+    }
+  });
+
+  document.getElementById('rem-type-daily').addEventListener('click',function(){setType('daily');});
+  document.getElementById('rem-type-weekly').addEventListener('click',function(){setType('weekly');});
+  document.getElementById('rem-type-event').addEventListener('click',function(){setType('event');});
+
+  document.getElementById('rem-add-open-btn').addEventListener('click',function(){_remOpenForm(-1);});
+
+  document.getElementById('rem-form-cancel').addEventListener('click',function(){
+    document.getElementById('rem-form-wrap').style.display='none';
+    document.getElementById('rem-add-open-btn').style.display='';
+    _remEditIdx=-1;
+  });
+
+  document.getElementById('rem-form-save').addEventListener('click',function(){
+    var title=(document.getElementById('rem-inp-title').value||'').trim();
+    if(!title){toast('⚠️ יש להזין כותרת');return;}
+    var items=_remLoad();
+    var existing=(_remEditIdx>=0)?items[_remEditIdx]:null;
+    var item={id:existing?existing.id:Date.now(),title:title,desc:(document.getElementById('rem-inp-desc').value||'').trim(),type:_remType,sound:_remSoundSel};
+    if(_remType==='daily'){
+      var t=document.getElementById('rem-inp-time').value;
+      if(!t){toast('⚠️ יש לבחור שעה');return;}
+      item.time=t;
+    } else if(_remType==='weekly'){
+      if(!_remSelDays.length){toast('⚠️ יש לבחור לפחות יום אחד');return;}
+      var wt=document.getElementById('rem-inp-weekly-time').value;
+      if(!wt){toast('⚠️ יש לבחור שעה');return;}
+      item.days=_remSelDays.slice().sort(function(a,b){return a-b;});
+      item.time=wt;
+    } else {
+      var d=document.getElementById('rem-inp-event-date').value;
+      var et=document.getElementById('rem-inp-event-time').value;
+      if(!d||!et){toast('⚠️ יש למלא תאריך ושעה');return;}
+      item.date=d; item.time=et;
+      var bv=parseInt(document.getElementById('rem-inp-before').value);
+      item.before=isNaN(bv)?60:bv;
+    }
+    var wasEdit=_remEditIdx>=0;
+    if(wasEdit){items[_remEditIdx]=item;} else {items.push(item);}
+    _remSave(items);
+    document.getElementById('rem-form-wrap').style.display='none';
+    document.getElementById('rem-add-open-btn').style.display='';
+    _remEditIdx=-1;
+    renderReminders();
+    _remSchedule();
+    toast(wasEdit?'✅ תזכורת עודכנה':'✅ תזכורת נשמרה');
+  });
+})();
+
+// Precise scheduling: calculate exact ms to each reminder and use setTimeout
+var _remTimer=null;
+function _remSchedule(){
+  if(_remTimer){clearTimeout(_remTimer);_remTimer=null;}
+  var items=_remLoad();
+  var now=new Date();
+  var nowMs=now.getTime();
+  var earliest=Infinity;
+
+  items.forEach(function(item){
+    var fireMs;
+    if(item.type==='daily'){
+      var parts=(item.time||'').split(':');
+      var h=parseInt(parts[0])||0,m=parseInt(parts[1])||0;
+      var t=new Date(now);t.setHours(h,m,0,0);
+      fireMs=t.getTime();
+      if(fireMs<nowMs-2000)fireMs+=86400000;
+    } else if(item.type==='weekly'){
+      var wdays=item.days||[];
+      if(!wdays.length||!item.time)return;
+      var wp=(item.time||'').split(':');
+      var wh=parseInt(wp[0])||0,wm=parseInt(wp[1])||0;
+      for(var dd=0;dd<7;dd++){
+        var cand=new Date(now);
+        cand.setDate(cand.getDate()+dd);
+        cand.setHours(wh,wm,0,0);
+        if(wdays.indexOf(cand.getDay())!==-1 && cand.getTime()>nowMs-2000){
+          fireMs=cand.getTime();
+          break;
+        }
+      }
+      if(!fireMs)return;
+    } else {
+      if(!item.date||!item.time)return;
+      var before=item.before==null?60:item.before;
+      var evMs=new Date(item.date+'T'+item.time+':00').getTime();
+      fireMs=evMs-before*60000;
+      if(fireMs<nowMs-2000)return;
+    }
+    if(fireMs<earliest)earliest=fireMs;
+  });
+
+  if(earliest===Infinity){
+    // No upcoming reminders; check again in 5 minutes (in case user adds one)
+    _remTimer=setTimeout(_remSchedule,300000);
+    return;
+  }
+
+  var delay=Math.max(earliest-nowMs,0);
+  _remTimer=setTimeout(function(){
+    _remCheck();
+    _remSchedule(); // reschedule for next reminder
+  },delay);
+}
+
+// ── Capacitor native notifications bridge ──
+function _remCalcFireMs(item){
+  var now=new Date(), nowMs=now.getTime();
+  if(item.type==='daily'){
+    var p=(item.time||'').split(':');
+    var t=new Date(now); t.setHours(parseInt(p[0])||0,parseInt(p[1])||0,0,0);
+    var ms=t.getTime(); return ms<nowMs-2000?ms+86400000:ms;
+  } else if(item.type==='weekly'){
+    var wp=(item.time||'').split(':');
+    var wh=parseInt(wp[0])||0,wm=parseInt(wp[1])||0;
+    for(var d=0;d<7;d++){
+      var c=new Date(now); c.setDate(c.getDate()+d); c.setHours(wh,wm,0,0);
+      if((item.days||[]).indexOf(c.getDay())!==-1&&c.getTime()>nowMs-2000)return c.getTime();
+    }
+    return null;
+  } else if(item.type==='event'){
+    if(!item.date||!item.time)return null;
+    var before=item.before==null?0:item.before;
+    var ms2=new Date(item.date+'T'+item.time+':00').getTime()-before*60000;
+    return ms2>nowMs-2000?ms2:null;
+  }
+  return null;
+}
+
+function _capScheduleAll(){
+  if(!window.Capacitor)return;
+  var LN=window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
+  if(!LN)return;
+  LN.requestPermissions().then(function(){
+    var items=_remLoad();
+    // Cancel all existing
+    var toCancel=items.map(function(_,i){return{id:(i+1)};});
+    if(toCancel.length) LN.cancel({notifications:toCancel}).catch(function(){});
+    // Schedule upcoming ones
+    var notifs=[];
+    items.forEach(function(item,i){
+      var ms=_remCalcFireMs(item);
+      if(!ms)return;
+      notifs.push({id:(i+1),title:item.title,body:item.desc||'',schedule:{at:new Date(ms),allowWhileIdle:true},sound:'default',extra:{remId:item.id}});
+    });
+    if(notifs.length) LN.schedule({notifications:notifs}).catch(function(e){console.warn('cap notif err',e);});
+  }).catch(function(){});
+}
+
+// Override _remFire to also show native when in Capacitor
+(function(){
+  var _orig=_remFire;
+  _remFire=function(item){
+    _orig(item);
+    // Reschedule all after firing (so recurring reminders get rescheduled)
+    setTimeout(_capScheduleAll,500);
+  };
+})();
+
+_remSchedule();
+// Schedule native notifications if running in Capacitor
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',_capScheduleAll);
+}else{
+  setTimeout(_capScheduleAll,1000);
+}
+
 startSync();
 scheduleMidnightCheck();
 // תיקון: כשמקלדת נסגרת viewport לא חוזר — גורם לנעלם של bottom bar
