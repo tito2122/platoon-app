@@ -248,6 +248,14 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(16px);background:#1A1D23;color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .main-tab-btn.active{color:var(--blue)!important;border-bottom-color:var(--blue)!important}
+.drum-item{height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;scroll-snap-align:center;color:var(--text)}
+.rem-form-card{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.rem-form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block}
+.rem-form-input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:var(--font);font-size:14px;color:var(--text);outline:none;margin-bottom:10px}
+.rem-form-input:focus{border-color:var(--blue)}
+.rem-type-btns{display:flex;gap:8px;margin-bottom:12px}
+.rem-type-btn{flex:1;padding:9px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.rem-type-btn.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
 body.dark-mode{
   --bg:#0F1320;--card:#161D2F;--card2:#1C2438;--border:#252F47;
   --text:#F0F4FF;--text2:#8A96B4;--text3:#5A6480;
@@ -355,6 +363,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <nav style="padding:12px;flex:1;display:flex;flex-direction:column;gap:4px">
     <button id="sb-nav-main" class="sb-nav-btn active">🏠 דשבורד ראשי</button>
     <button id="sb-nav-tasks" class="sb-nav-btn">📋 ניהול משימות יומיומיות</button>
+    <button id="sb-nav-missions" class="sb-nav-btn">🎯 יזומות</button>
   </nav>
 </div>
 <div id="ptr-indicator" style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .2s;z-index:10;background:var(--bg)">
@@ -372,7 +381,8 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <button class="main-tab-btn active" data-mtab="list" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">👥 חיילים</button>
     <button class="main-tab-btn" data-mtab="week" id="week-tab-btn" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s"><span id="week-cal-icon" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:#E53E3E;border-radius:4px;color:#fff;font-size:11px;font-weight:900;vertical-align:middle;margin-left:4px;line-height:1">?</span> לוח שבועי</button>
     <button class="main-tab-btn" data-mtab="stats" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:19px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📊</button>
-    <button class="main-tab-btn" data-mtab="missions" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">🎯 יזומות</button>
+    <button class="main-tab-btn" data-mtab="missions" style="display:none">🎯 יזומות</button>
+    <button class="main-tab-btn" data-mtab="reminders" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">🔔 תזכורות</button>
     <button class="main-tab-btn" data-mtab="lists" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📋 רשימות</button>
   </div>
   <div class="dashboard">
@@ -398,6 +408,64 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <div id="main-tab-stats" class="scroll-area" style="display:none"><div class="list-pad" id="stats-wrap"></div></div>
   <div id="main-tab-missions" class="scroll-area" style="display:none"><div class="list-pad" id="missions-wrap"></div></div>
   <div id="main-tab-lists" class="scroll-area" style="display:none"><div class="list-pad" id="lists-wrap"></div></div>
+  <div id="main-tab-reminders" class="scroll-area" style="display:none">
+    <div class="list-pad">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <div id="rem-perm-banner"></div>
+          <button id="rem-test-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">🔔 בדיקה</button>
+        </div>
+        <button id="rem-sort-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">⬆⬇ מיין</button>
+      </div>
+      <div id="rem-list"></div>
+      <button id="rem-add-open-btn" style="width:100%;min-height:46px;border-radius:var(--r-sm);border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ הוסף תזכורת חדשה</button>
+      <div id="rem-form-wrap" style="display:none">
+        <div class="rem-form-card">
+          <div id="rem-form-title" style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">🔔 תזכורת חדשה</div>
+          <label class="rem-form-label">כותרת *</label>
+          <input class="rem-form-input" id="rem-inp-title" type="text" placeholder="לדוגמא: ספירת כוח אדם">
+          <label class="rem-form-label">תיאור (אופציונלי)</label>
+          <input class="rem-form-input" id="rem-inp-desc" type="text" placeholder="פרטים נוספים...">
+          <label class="rem-form-label">סוג תזכורת</label>
+          <div class="rem-type-btns">
+            <button class="rem-type-btn" id="rem-type-daily" type="button">⏰ כל יום</button>
+            <button class="rem-type-btn" id="rem-type-weekly" type="button">🔁 ימים נבחרים</button>
+            <button class="rem-type-btn sel" id="rem-type-event" type="button">📅 חד פעמי</button>
+          </div>
+          <div id="rem-fields-daily" style="display:none"></div>
+          <div id="rem-fields-weekly" style="display:none">
+            <label class="rem-form-label">ימים</label>
+            <div id="rem-day-btns" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap"></div>
+          </div>
+          <div id="rem-fields-event">
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <div style="flex:1;position:relative">
+                <input type="date" id="rem-inp-event-date" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:none;background:transparent">
+                <button class="rem-type-btn" type="button" style="width:100%;pointer-events:none">📅 <span id="rem-ev-date-lbl">היום</span></button>
+              </div>
+            </div>
+          </div>
+          <span id="rem-ev-time-lbl" style="display:none"></span>
+          <label class="rem-form-label">שעה</label>
+          <div id="rem-drum-wrap" style="background:var(--card2);border-radius:14px;overflow:hidden;position:relative;height:220px;display:flex;margin-bottom:12px">
+            <div style="position:absolute;left:0;right:0;top:88px;height:44px;background:rgba(37,99,235,.12);border-top:1.5px solid var(--blue);border-bottom:1.5px solid var(--blue);pointer-events:none;z-index:2"></div>
+            <div id="rem-drum-h" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch"></div>
+            <div style="width:28px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--text);flex-shrink:0">:</div>
+            <div id="rem-drum-m" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch"></div>
+          </div>
+          <input type="hidden" id="rem-inp-time" value="08:00">
+          <input type="hidden" id="rem-inp-weekly-time" value="08:00">
+          <input type="hidden" id="rem-inp-event-time" value="08:00">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button id="rem-form-save" style="flex:1;min-height:42px;border-radius:var(--r-sm);border:none;background:var(--green);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">שמור תזכורת</button>
+            <button id="rem-form-cancel" style="min-height:42px;padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">ביטול</button>
+          </div>
+          <label class="rem-form-label">צליל התראה</label>
+          <div id="rem-sound-btns" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <button class="fab" id="fab">+</button>
   <div id="fab-menu-popup" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:200;flex-direction:column;gap:10px;align-items:center;pointer-events:auto">
     <button id="fab-add-soldier" style="background:var(--blue);color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.35);white-space:nowrap">👥 הוסף חייל</button>
@@ -3273,12 +3341,12 @@ function setupMissionDrag(){
 var _openMissionId=null;
 
 function switchToMissionsTab(){
-  document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='missions');});
   document.getElementById('main-tab-list').style.display='none';
   document.getElementById('main-tab-week').style.display='none';
   document.getElementById('main-tab-stats').style.display='none';
   document.getElementById('main-tab-missions').style.display='';
   document.getElementById('main-tab-lists').style.display='none';
+  document.getElementById('main-tab-reminders').style.display='none';
   document.getElementById('fab').style.display='';
   document.querySelector('.dashboard').style.display='none';
   document.getElementById('filter-banner').style.display='none';
@@ -3462,14 +3530,16 @@ function init(){
       document.getElementById('main-tab-stats').style.display=t==='stats'?'':'none';
       document.getElementById('main-tab-missions').style.display=t==='missions'?'':'none';
       document.getElementById('main-tab-lists').style.display=t==='lists'?'':'none';
+      document.getElementById('main-tab-reminders').style.display=t==='reminders'?'':'none';
       document.getElementById('fab').style.display=(t==='list'||t==='missions'||t==='lists')?'':'none';
       document.querySelector('.dashboard').style.display=t==='list'?'':'none';
       document.getElementById('filter-banner').style.display=t!=='list'?'none':'';
-      document.querySelector('.bottom-bar').style.display=(t==='missions'||t==='lists')?'none':'';
+      document.querySelector('.bottom-bar').style.display=(t==='missions'||t==='lists'||t==='reminders')?'none':'';
       if(t==='week')renderWeek();
       if(t==='stats')renderStats();
       if(t==='missions')renderMissions();
       if(t==='lists')renderListsTab();
+      if(t==='reminders')renderReminders();
     });
   });
   document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
@@ -3557,6 +3627,7 @@ function showMainDash(){
   document.getElementById('scr-tasks').classList.add('hidden');
   document.getElementById('sb-nav-main').classList.add('active');
   document.getElementById('sb-nav-tasks').classList.remove('active');
+  document.getElementById('sb-nav-missions').classList.remove('active');
   renderMain();
 }
 function showTasksDash(){
@@ -3567,6 +3638,7 @@ function showTasksDash(){
   document.getElementById('scr-tasks').classList.remove('hidden','slide-left');
   document.getElementById('sb-nav-main').classList.remove('active');
   document.getElementById('sb-nav-tasks').classList.add('active');
+  document.getElementById('sb-nav-missions').classList.remove('active');
 }
 
 // ==============================
@@ -3748,6 +3820,14 @@ document.getElementById('sidebar-close-btn').addEventListener('click',closeSideb
 document.getElementById('sidebar-overlay').addEventListener('click',closeSidebar);
 document.getElementById('sb-nav-main').addEventListener('click',function(){closeSidebar();showMainDash();});
 document.getElementById('sb-nav-tasks').addEventListener('click',function(){closeSidebar();showTasksDash();});
+document.getElementById('sb-nav-missions').addEventListener('click',function(){
+  closeSidebar();
+  showMainDash();
+  document.getElementById('sb-nav-missions').classList.add('active');
+  document.getElementById('sb-nav-main').classList.remove('active');
+  switchToMissionsTab();
+  renderMissions();
+});
 
 document.getElementById('tasks-settings-toggle').addEventListener('click',function(){
   var sec=document.getElementById('tasks-settings-section');
@@ -4016,6 +4096,17 @@ function _handleBack(){
     document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='list');});
     document.getElementById('main-tab-list').style.display='';
     listsTab.style.display='none';
+    document.getElementById('fab').style.display='';
+    document.querySelector('.dashboard').style.display='';
+    document.querySelector('.bottom-bar').style.display='';
+    return;
+  }
+  // תזכורות פתוח → חזור לחיילים
+  var remTab=document.getElementById('main-tab-reminders');
+  if(remTab&&remTab.style.display!=='none'){
+    document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='list');});
+    document.getElementById('main-tab-list').style.display='';
+    remTab.style.display='none';
     document.getElementById('fab').style.display='';
     document.querySelector('.dashboard').style.display='';
     document.querySelector('.bottom-bar').style.display='';
@@ -4445,13 +4536,10 @@ var _remSelDays=[];
 
   function _updateEvLabels(){
     var dv=document.getElementById('rem-inp-event-date').value;
-    var tv=document.getElementById('rem-inp-event-time').value;
     document.getElementById('rem-ev-date-lbl').textContent=_fmtEvDate(dv);
-    document.getElementById('rem-ev-time-lbl').textContent=tv||'שעה';
   }
 
   document.getElementById('rem-inp-event-date').addEventListener('change',_updateEvLabels);
-  document.getElementById('rem-inp-event-time').addEventListener('change',_updateEvLabels);
 
   function setType(t){
     _remType=t;
@@ -4459,6 +4547,8 @@ var _remSelDays=[];
       document.getElementById('rem-type-'+tp).classList.toggle('sel',t===tp);
       document.getElementById('rem-fields-'+tp).style.display=t===tp?'':'none';
     });
+    var inp=document.getElementById(t==='daily'?'rem-inp-time':t==='weekly'?'rem-inp-weekly-time':'rem-inp-event-time');
+    if(window._drumSetTime&&inp) window._drumSetTime(inp.value||'08:00');
   }
 
   function setSoundUI(sid){
@@ -4514,6 +4604,45 @@ var _remSelDays=[];
     });
   })();
 
+  // Drum time picker init
+  (function(){
+    var dh=document.getElementById('rem-drum-h');
+    var dm=document.getElementById('rem-drum-m');
+    if(!dh||!dm)return;
+    var itemH=44;
+    var hHtml='<div style="height:88px"></div>';
+    for(var h=0;h<24;h++) hHtml+='<div class="drum-item">'+('0'+h).slice(-2)+'</div>';
+    hHtml+='<div style="height:88px"></div>';
+    dh.innerHTML=hHtml;
+    var mHtml='<div style="height:88px"></div>';
+    for(var m=0;m<60;m++) mHtml+='<div class="drum-item">'+('0'+m).slice(-2)+'</div>';
+    mHtml+='<div style="height:88px"></div>';
+    dm.innerHTML=mHtml;
+    dh.scrollTop=8*itemH;
+    dm.scrollTop=0;
+    function _drumUpdate(){
+      var h=Math.min(23,Math.max(0,Math.round(dh.scrollTop/itemH)));
+      var mi=Math.min(59,Math.max(0,Math.round(dm.scrollTop/itemH)));
+      var tv=('0'+h).slice(-2)+':'+('0'+mi).slice(-2);
+      var inputId=_remType==='daily'?'rem-inp-time':_remType==='weekly'?'rem-inp-weekly-time':'rem-inp-event-time';
+      var inp=document.getElementById(inputId);
+      if(inp) inp.value=tv;
+      if(_remType==='event'){
+        var lbl=document.getElementById('rem-ev-time-lbl');
+        if(lbl) lbl.textContent=tv;
+      }
+    }
+    dh.addEventListener('scroll',_drumUpdate);
+    dm.addEventListener('scroll',_drumUpdate);
+    window._drumSetTime=function(timeStr){
+      var parts=(timeStr||'08:00').split(':');
+      var h=Math.max(0,Math.min(23,parseInt(parts[0])||0));
+      var mi=Math.max(0,Math.min(59,parseInt(parts[1])||0));
+      dh.scrollTop=h*itemH;
+      dm.scrollTop=mi*itemH;
+    };
+  })();
+
   window._remOpenForm=function(editIdx){
     _remEditIdx=(editIdx==null)?-1:editIdx;
     var items=_remLoad();
@@ -4542,6 +4671,9 @@ var _remSelDays=[];
       setType('event');
       _updateEvLabels();
     }
+    // Scroll drum to correct time (after setType which also calls _drumSetTime)
+    var activeInp=document.getElementById(_remType==='daily'?'rem-inp-time':_remType==='weekly'?'rem-inp-weekly-time':'rem-inp-event-time');
+    if(window._drumSetTime&&activeInp) setTimeout(function(){window._drumSetTime(activeInp.value||'08:00');},50);
 
     document.getElementById('rem-form-wrap').style.display='block';
     document.getElementById('rem-add-open-btn').style.display='none';
