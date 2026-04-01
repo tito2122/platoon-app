@@ -97,12 +97,12 @@ if('serviceWorker' in navigator){
   --shadow:0 2px 12px rgba(0,0,0,.08);
   --font:'Rubik',sans-serif;--hh:56px;
 }
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;overflow-x:hidden}
 body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl;font-size:16px;line-height:1.5;overscroll-behavior:none}
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;will-change:transform}
 .screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
 .screen.slide-left{transform:translateX(-38%);opacity:0;pointer-events:none}
-.app-header{background:#4B5320;border-bottom:1.5px solid var(--border);padding:env(safe-area-inset-top) 16px 0;height:calc(var(--hh) + env(safe-area-inset-top));display:flex;align-items:flex-end;gap:12px;flex-shrink:0;z-index:10;color:#fff}
+.app-header{background:linear-gradient(135deg,#4B5320,#A8B878);border-bottom:1.5px solid var(--border);padding:0 16px;padding-top:env(safe-area-inset-top);height:calc(var(--hh) + env(safe-area-inset-top));display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10;color:#fff}
 .app-header .title-wrap h1{color:#fff}
 .app-header .title-wrap .sub{color:rgba(255,255,255,.7)}
 .logo-icon{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#1E40AF,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.35)}
@@ -248,14 +248,6 @@ textarea.finp{resize:vertical;min-height:80px;line-height:1.6}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(16px);background:#1A1D23;color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .main-tab-btn.active{color:var(--blue)!important;border-bottom-color:var(--blue)!important}
-.drum-item{height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;scroll-snap-align:center;color:var(--text)}
-.rem-form-card{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
-.rem-form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block}
-.rem-form-input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:var(--font);font-size:14px;color:var(--text);outline:none;margin-bottom:10px}
-.rem-form-input:focus{border-color:var(--blue)}
-.rem-type-btns{display:flex;gap:8px;margin-bottom:12px}
-.rem-type-btn{flex:1;padding:9px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
-.rem-type-btn.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
 body.dark-mode{
   --bg:#0F1320;--card:#161D2F;--card2:#1C2438;--border:#252F47;
   --text:#F0F4FF;--text2:#8A96B4;--text3:#5A6480;
@@ -309,6 +301,22 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 .week-empty{font-size:13px;color:var(--text3);font-style:italic;padding:4px 0}
 .week-toggle{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;color:var(--text3);font-size:13px;font-weight:600;border-top:1.5px solid var(--border);justify-content:center}
 .week-toggle:active{background:var(--bg)}
+.rem-card{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:flex-start;gap:10px}
+.rem-card-body{flex:1;min-width:0}
+.rem-card-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px}
+.rem-card-sub{font-size:12px;color:var(--text3);margin-bottom:6px}
+.rem-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.rem-badge-daily{background:#EDE9FE;color:#5B21B6}
+.rem-badge-event{background:#FEF3C7;color:#92400E}
+.rem-del-btn{width:32px;height:32px;border-radius:10px;border:1.5px solid #FECDD3;background:var(--red-bg);color:var(--red);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rem-form-card{background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.rem-form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block}
+.rem-form-input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);font-family:var(--font);font-size:14px;color:var(--text);outline:none;margin-bottom:10px}
+.rem-form-input:focus{border-color:var(--blue)}
+.rem-type-btns{display:flex;gap:8px;margin-bottom:12px}
+.rem-type-btn{flex:1;padding:9px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.rem-type-btn.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
+.rem-perm-banner{border-radius:var(--r-sm);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600}
 </style>
   <!-- Google Maps Places API -->
   <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key:"AIzaSyCthZ8d-029orCo1XEWimrOCTQ_CFHSyAw",v:"weekly",language:"he",region:"IL"});</script>
@@ -363,7 +371,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <nav style="padding:12px;flex:1;display:flex;flex-direction:column;gap:4px">
     <button id="sb-nav-main" class="sb-nav-btn active">🏠 דשבורד ראשי</button>
     <button id="sb-nav-tasks" class="sb-nav-btn">📋 ניהול משימות יומיומיות</button>
-    <button id="sb-nav-missions" class="sb-nav-btn">🎯 יזומות</button>
+    <button id="sb-nav-reminders" class="sb-nav-btn">🔔 תזכורות</button>
   </nav>
 </div>
 <div id="ptr-indicator" style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .2s;z-index:10;background:var(--bg)">
@@ -381,8 +389,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <button class="main-tab-btn active" data-mtab="list" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">👥 חיילים</button>
     <button class="main-tab-btn" data-mtab="week" id="week-tab-btn" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s"><span id="week-cal-icon" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:#E53E3E;border-radius:4px;color:#fff;font-size:11px;font-weight:900;vertical-align:middle;margin-left:4px;line-height:1">?</span> לוח שבועי</button>
     <button class="main-tab-btn" data-mtab="stats" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:19px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📊</button>
-    <button class="main-tab-btn" data-mtab="missions" style="display:none">🎯 יזומות</button>
-    <button class="main-tab-btn" data-mtab="reminders" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">🔔 תזכורות</button>
+    <button class="main-tab-btn" data-mtab="missions" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">🎯 יזומות</button>
     <button class="main-tab-btn" data-mtab="lists" style="flex:1;min-height:44px;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);cursor:pointer;border-bottom:3px solid transparent;transition:all .18s">📋 רשימות</button>
   </div>
   <div class="dashboard">
@@ -408,64 +415,6 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
   <div id="main-tab-stats" class="scroll-area" style="display:none"><div class="list-pad" id="stats-wrap"></div></div>
   <div id="main-tab-missions" class="scroll-area" style="display:none"><div class="list-pad" id="missions-wrap"></div></div>
   <div id="main-tab-lists" class="scroll-area" style="display:none"><div class="list-pad" id="lists-wrap"></div></div>
-  <div id="main-tab-reminders" class="scroll-area" style="display:none">
-    <div class="list-pad">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="display:flex;gap:6px;align-items:center">
-          <div id="rem-perm-banner"></div>
-          <button id="rem-test-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">🔔 בדיקה</button>
-        </div>
-        <button id="rem-sort-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">⬆⬇ מיין</button>
-      </div>
-      <div id="rem-list"></div>
-      <button id="rem-add-open-btn" style="width:100%;min-height:46px;border-radius:var(--r-sm);border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ הוסף תזכורת חדשה</button>
-      <div id="rem-form-wrap" style="display:none">
-        <div class="rem-form-card">
-          <div id="rem-form-title" style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">🔔 תזכורת חדשה</div>
-          <label class="rem-form-label">כותרת *</label>
-          <input class="rem-form-input" id="rem-inp-title" type="text" placeholder="לדוגמא: ספירת כוח אדם">
-          <label class="rem-form-label">תיאור (אופציונלי)</label>
-          <input class="rem-form-input" id="rem-inp-desc" type="text" placeholder="פרטים נוספים...">
-          <label class="rem-form-label">סוג תזכורת</label>
-          <div class="rem-type-btns">
-            <button class="rem-type-btn" id="rem-type-daily" type="button">⏰ כל יום</button>
-            <button class="rem-type-btn" id="rem-type-weekly" type="button">🔁 ימים נבחרים</button>
-            <button class="rem-type-btn sel" id="rem-type-event" type="button">📅 חד פעמי</button>
-          </div>
-          <div id="rem-fields-daily" style="display:none"></div>
-          <div id="rem-fields-weekly" style="display:none">
-            <label class="rem-form-label">ימים</label>
-            <div id="rem-day-btns" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap"></div>
-          </div>
-          <div id="rem-fields-event">
-            <div style="display:flex;gap:8px;margin-bottom:10px">
-              <div style="flex:1;position:relative">
-                <input type="date" id="rem-inp-event-date" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:none;background:transparent">
-                <button class="rem-type-btn" type="button" style="width:100%;pointer-events:none">📅 <span id="rem-ev-date-lbl">היום</span></button>
-              </div>
-            </div>
-          </div>
-          <span id="rem-ev-time-lbl" style="display:none"></span>
-          <label class="rem-form-label">שעה</label>
-          <div id="rem-drum-wrap" style="background:var(--card2);border-radius:14px;overflow:hidden;position:relative;height:220px;display:flex;margin-bottom:12px">
-            <div style="position:absolute;left:0;right:0;top:88px;height:44px;background:rgba(37,99,235,.12);border-top:1.5px solid var(--blue);border-bottom:1.5px solid var(--blue);pointer-events:none;z-index:2"></div>
-            <div id="rem-drum-h" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch"></div>
-            <div style="width:28px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--text);flex-shrink:0">:</div>
-            <div id="rem-drum-m" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch"></div>
-          </div>
-          <input type="hidden" id="rem-inp-time" value="08:00">
-          <input type="hidden" id="rem-inp-weekly-time" value="08:00">
-          <input type="hidden" id="rem-inp-event-time" value="08:00">
-          <div style="display:flex;gap:8px;margin-bottom:12px">
-            <button id="rem-form-save" style="flex:1;min-height:42px;border-radius:var(--r-sm);border:none;background:var(--green);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">שמור תזכורת</button>
-            <button id="rem-form-cancel" style="min-height:42px;padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">ביטול</button>
-          </div>
-          <label class="rem-form-label">צליל התראה</label>
-          <div id="rem-sound-btns" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px"></div>
-        </div>
-      </div>
-    </div>
-  </div>
   <button class="fab" id="fab">+</button>
   <div id="fab-menu-popup" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:200;flex-direction:column;gap:10px;align-items:center;pointer-events:auto">
     <button id="fab-add-soldier" style="background:var(--blue);color:#fff;border:none;border-radius:14px;padding:12px 28px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.35);white-space:nowrap">👥 הוסף חייל</button>
@@ -535,6 +484,76 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
         </div>
         <div id="tasks-list-container"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- מסך תזכורות -->
+<div class="screen hidden" id="scr-reminders">
+  <div class="app-header">
+    <button id="menu-btn-reminders" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">☰</button>
+    <div class="title-wrap" style="margin:0 8px">
+      <h1>תזכורות</h1>
+      <div class="sub" id="rem-sub-lbl">ניהול התראות</div>
+    </div>
+  </div>
+  <div class="scroll-area" style="flex:1">
+    <div class="list-pad">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <button id="rem-sort-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">⬆⬇ מיין לפי סוג</button>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+          <div id="rem-perm-banner"></div>
+          <button id="rem-test-btn" style="padding:5px 11px;border-radius:8px;border:1.5px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">🔔 בדיקת התראה</button>
+        </div>
+      </div>
+      <div id="rem-pwa-banner"></div>
+      <div id="rem-list"></div>
+      <button id="rem-add-open-btn" style="width:100%;min-height:46px;border-radius:var(--r-sm);border:1.5px dashed var(--border);background:transparent;color:var(--blue);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ הוסף תזכורת חדשה</button>
+      <div id="rem-form-wrap" style="display:none">
+        <div class="rem-form-card">
+          <div id="rem-form-title" style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">🔔 תזכורת חדשה</div>
+          <label class="rem-form-label">כותרת *</label>
+          <input class="rem-form-input" id="rem-inp-title" type="text" placeholder="לדוגמא: ספירת כוח אדם">
+          <label class="rem-form-label">תיאור (אופציונלי)</label>
+          <input class="rem-form-input" id="rem-inp-desc" type="text" placeholder="פרטים נוספים...">
+          <label class="rem-form-label">סוג תזכורת</label>
+          <div class="rem-type-btns">
+            <button class="rem-type-btn" id="rem-type-daily" type="button">⏰ כל יום</button>
+            <button class="rem-type-btn" id="rem-type-weekly" type="button">🔁 ימים נבחרים</button>
+            <button class="rem-type-btn sel" id="rem-type-event" type="button">📅 חד פעמי</button>
+          </div>
+          <div id="rem-fields-daily" style="display:none">
+            <label class="rem-form-label">שעה</label>
+            <input class="rem-form-input" id="rem-inp-time" type="time">
+          </div>
+          <div id="rem-fields-weekly" style="display:none">
+            <label class="rem-form-label">ימים</label>
+            <div id="rem-day-btns" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap"></div>
+            <label class="rem-form-label">שעה</label>
+            <input class="rem-form-input" id="rem-inp-weekly-time" type="time">
+          </div>
+          <div id="rem-fields-event">
+            <div style="display:flex;gap:8px;margin-bottom:10px">
+              <div style="position:relative;flex:1">
+                <button class="rem-type-btn" type="button" style="width:100%;pointer-events:none">📅 <span id="rem-ev-date-lbl">היום</span></button>
+                <input type="date" id="rem-inp-event-date" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2;box-sizing:border-box">
+              </div>
+              <div style="position:relative;flex:1">
+                <button class="rem-type-btn" type="button" style="width:100%;pointer-events:none">🕐 <span id="rem-ev-time-lbl">08:00</span></button>
+                <input type="time" id="rem-inp-event-time" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;z-index:2;box-sizing:border-box">
+              </div>
+              <input type="hidden" id="rem-inp-before" value="0">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button id="rem-form-save" style="flex:1;min-height:42px;border-radius:var(--r-sm);border:none;background:var(--green);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">שמור תזכורת</button>
+            <button id="rem-form-cancel" style="min-height:42px;padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--card2);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">ביטול</button>
+          </div>
+          <label class="rem-form-label">צליל התראה</label>
+          <div id="rem-sound-btns" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px"></div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:16px 0;font-size:11px;color:var(--text3);line-height:1.6">⚠️ התראות פועלות רק כשהאתר פתוח בדפדפן.<br>להתראות ברקע — התקן את האפליקציה כ-PWA.</div>
     </div>
   </div>
 </div>
@@ -882,7 +901,7 @@ function wrapWithUndo(ta){
 }
 function toDateStr(y,m,d){return y+'-'+(m<9?'0':'')+(m+1)+'-'+(d<10?'0':'')+d;}
 function today(){var n=new Date();if(n.getHours()<6){n.setDate(n.getDate()-1);}return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
-function tomorrowStr(){var n=new Date();n.setDate(n.getDate()+1);return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
+function tomorrowStr(){var n=new Date();if(n.getHours()<6){n.setDate(n.getDate()-1);}n.setDate(n.getDate()+1);return toDateStr(n.getFullYear(),n.getMonth(),n.getDate());}
 function fmtDate(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 function fmtDateHe(s){if(!s)return'';var p=s.split('-');return p[2]+' ב'+MONTHS_HE[+p[1]-1]+' '+p[0];}
 
@@ -1285,12 +1304,23 @@ function renderList(){
       tTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
       if(td===activeLv.from){
         tTag.textContent='✈️ יוצא היום';
+      } else if(activeLv.to===tom){
+        tTag.textContent='🏠 חוזר מחר';
       } else {
         var retDay=activeLv.to.split('-')[2].replace(/^0/,'');
         tTag.textContent='🏠 חוזר ב-'+retDay;
       }
       tagsRow.appendChild(tTag);
     } else {
+      // חוזר היום — חופשה שמסתיימת היום (קרוב יותר לתאריך)
+      var returningToday=(s.leaves||[]).some(function(lv){return lv.to===td;})
+        ||(s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.to===td;});
+      if(returningToday){
+        var retTodayTag=document.createElement('span');
+        retTodayTag.style.cssText='background:#FEF3C7;color:#92400E;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700';
+        retTodayTag.textContent='🏠 חוזר היום';
+        tagsRow.appendChild(retTodayTag);
+      }
       // יציאה עתידית מאושרת
       var firstApproved=(s.pendingLeaves||[]).filter(function(pl){return pl.approved&&pl.from&&pl.to&&pl.from>td;}).sort(function(a,b){return a.from<b.from?-1:1;})[0];
       var approvedFrom=firstApproved?firstApproved.from:null;
@@ -1353,7 +1383,8 @@ function buildInfoTab(s){
     var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;gap:14px;margin-bottom:16px';
     var avatarWrap=document.createElement('div');avatarWrap.style.cssText='flex-shrink:0';
     if(s.photoData){
-      var photoImg=document.createElement('img');photoImg.src=s.photoData;photoImg.style.cssText='width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border)';
+      var photoImg=document.createElement('img');photoImg.src=s.photoData;photoImg.style.cssText='width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--border);cursor:pointer';
+      photoImg.addEventListener('click',function(){document.getElementById('lightbox-img').src=s.photoData;document.getElementById('photo-lightbox').style.display='flex';});
       avatarWrap.appendChild(photoImg);
     } else {
       var bigAv=document.createElement('div');bigAv.style.cssText='width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#34D399,var(--green-dark))';
@@ -1781,9 +1812,6 @@ function buildLeavesTab(s){
   var totLbl=document.createElement('span');totLbl.style.cssText='font-size:13px;font-weight:600;color:#92400E';totLbl.textContent='סה"כ ימי יציאה:';
   var totNum=document.createElement('span');totNum.style.cssText='font-size:24px;font-weight:900;color:#B45309';
   totBox.appendChild(totLbl);totBox.appendChild(totNum);
-  totBox.style.cursor='pointer';
-  totBox.title='לחץ לגלילה למעלה';
-  totBox.addEventListener('click',function(){document.getElementById('tab-leaves').scrollTop=0;});
 
   var lvList=document.createElement('div');
   var nextTotEl=null;
@@ -1867,10 +1895,20 @@ function buildLeavesTab(s){
             if(ds>=_pl.from&&ds<_pl.to){
               _hasStatus=true;
               if(_pl.approved){
+                var _approvedStyle='position:relative;background:'+(isToday?'#34D399':'#D1FAE5')+';color:'+(isToday?'#064E3B':'#065F46')+';font-weight:700;border-radius:8px';
                 if(ds<_td){
                   btn.style.cssText='position:relative;background:'+(isToday?'#F472B6':'#FCE7F3')+';color:'+(isToday?'#831843':'#9D174D')+';font-weight:700;border-radius:8px';
                 } else {
-                  btn.style.cssText='position:relative;background:'+(isToday?'#34D399':'#D1FAE5')+';color:'+(isToday?'#064E3B':'#065F46')+';font-weight:700;border-radius:8px';
+                  btn.style.cssText=_approvedStyle+';cursor:pointer';
+                }
+                if(ds===_pl.from){
+                  btn.title='לחץ למחיקת היציאה';
+                  (function(pl){btn.addEventListener('click',function(){
+                    showConfirm('למחוק את היציאה '+fmtDate(pl.from)+' → '+fmtDate(pl.to)+'?',function(){
+                      s.pendingLeaves=( s.pendingLeaves||[]).filter(function(x){return x!==pl;});
+                      saveSoldier(s);renderLv();
+                    },{icon:'🗑',danger:true});
+                  });}(_pl));
                 }
               } else {
                 btn.style.cssText='position:relative;background:'+(isToday?'#93C5FD':'#DBEAFE')+';color:'+(isToday?'#1E3A8A':'#1E40AF')+';font-weight:700;border-radius:8px';
@@ -2248,6 +2286,7 @@ function showReportResult(ds){
     for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
     if(s.nextApproved&&s.nextFrom&&s.nextTo&&ds>=s.nextFrom&&ds<s.nextTo)return false;
     if((s.pendingLeaves||[]).some(function(pl){return pl.approved&&pl.from&&pl.to&&ds>=pl.from&&ds<pl.to;}))return false;
+    if((s.shams||[]).indexOf(ds)!==-1)return false;
     return true;
   });
   if(!pl.length){
@@ -2578,7 +2617,8 @@ function openListEditorModal(listId){
   document.getElementById('list-notes-input').value=lst?lst.notes||'':'';
   var container=document.getElementById('list-soldiers-container');
   container.innerHTML='';
-  var soldiers=(state.soldiers||[]).filter(function(s){return !s.isMissing;}).slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'','he');});
+  function _edRank(s){var r=s.roles||[];if(r.indexOf('מפקד מחלקה')!==-1)return 0;if(r.indexOf('סמ"ל')!==-1)return 1;if(r.indexOf('מ"כ')!==-1)return 2;return 3;}
+  var soldiers=(state.soldiers||[]).filter(function(s){return !s.isMissing;}).slice().sort(function(a,b){var d=_edRank(a)-_edRank(b);return d!==0?d:(a.name||'').localeCompare(b.name||'','he');});
   var checked=lst?(lst.soldierIds||[]).slice():[];
   var counter=document.getElementById('list-selection-counter');
   function updateCounter(){counter.textContent='נבחרו '+checked.length+' מתוך '+soldiers.length;}
@@ -2587,9 +2627,13 @@ function openListEditorModal(listId){
     var chip=document.createElement('button');
     chip.type='button';
     chip.dataset.sid=s.id;
+    var _chipRank=_edRank(s);var isCmd=_chipRank<3;
     function applyChipStyle(){
       var sel=checked.indexOf(s.id)!==-1;
-      chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;'+(sel?'background:var(--blue);color:#fff;border:2px solid var(--blue)':'background:var(--card);color:var(--text);border:2px solid var(--border)');
+      if(sel&&isCmd){chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;background:#B45309;color:#fff;border:2px solid #B45309';}
+      else if(sel){chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;background:var(--blue);color:#fff;border:2px solid var(--blue)';}
+      else if(isCmd){chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;background:#FEF3C7;color:#B45309;border:2px solid #FCD34D';}
+      else{chip.style.cssText='padding:8px 14px;border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;background:var(--card);color:var(--text);border:2px solid var(--border)';}
     }
     applyChipStyle();
     chip.textContent=s.name||'';
@@ -2654,17 +2698,26 @@ function renderListsTab(){
     var namesPanel=document.createElement('div');
     namesPanel.style.cssText='display:none;margin-bottom:10px;background:var(--bg-secondary);border-radius:var(--r-sm);padding:10px 12px;border:1px solid var(--border)';
     if(soldiers.length){
-      soldiers.forEach(function(sol,i){
+      function _sRank(s){var r=s.roles||[];if(r.indexOf('מפקד מחלקה')!==-1)return 0;if(r.indexOf('סמ"ל')!==-1)return 1;if(r.indexOf('מ"כ')!==-1)return 2;return 3;}
+      var sortedSols=soldiers.slice().sort(function(a,b){return _sRank(a)-_sRank(b);});
+      var cmdCount=sortedSols.filter(function(s){return _sRank(s)<3;}).length;
+      sortedSols.forEach(function(sol,i){
+        var rank=_sRank(sol);
+        var isCmd=rank<3;
+        // קו הפרדה לפני החייל הרגיל הראשון
+        if(i===cmdCount&&cmdCount>0&&cmdCount<sortedSols.length){
+          var sep=document.createElement('div');
+          sep.style.cssText='height:1px;background:var(--border);margin:4px 0';
+          namesPanel.appendChild(sep);
+        }
         var row=document.createElement('div');
-        row.style.cssText='padding:5px 0;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:4px;border-bottom:'+(i<soldiers.length-1?'1px solid var(--border)':'none');
-        var numSpan=document.createElement('span');
-        numSpan.textContent=(i+1)+'. ';
+        row.style.cssText='padding:5px 0;font-size:14px;font-weight:'+(isCmd?'800':'600')+';color:'+(isCmd?'#B45309':'var(--text)')+';display:flex;align-items:center;gap:4px'+(isCmd?';background:rgba(180,83,9,.06);border-radius:6px;padding-right:4px':'');
+        var numSpan=document.createElement('span');numSpan.textContent=(i+1)+'. ';
         var nameLink=document.createElement('span');
-        nameLink.textContent=sol.name||'חייל';
-        nameLink.style.cssText='cursor:pointer;color:var(--text);text-decoration:underline;text-decoration-color:var(--text3)';
+        nameLink.textContent=((sol.roles||[]).indexOf('מפקד מחלקה')!==-1?'👑 ':'')+(sol.name||'חייל');
+        nameLink.style.cssText='cursor:pointer;color:'+(isCmd?'#B45309':'var(--text)')+';text-decoration:underline;text-decoration-color:var(--text3)';
         (function(sid){nameLink.addEventListener('click',function(e){e.stopPropagation();showDetail(sid);});})(sol.id);
-        row.appendChild(numSpan);
-        row.appendChild(nameLink);
+        row.appendChild(numSpan);row.appendChild(nameLink);
         namesPanel.appendChild(row);
       });
     } else {
@@ -2689,7 +2742,14 @@ function renderListsTab(){
     waBtn.style.cssText='flex:1;min-height:36px;border-radius:var(--r-sm);border:none;background:#25D366;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer';
     waBtn.textContent='📲 שיתוף';
     (function(l,sols){waBtn.addEventListener('click',function(){
-      var msg='🪖 *'+l.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים'+(l.notes?'\n\n📝 '+l.notes:'');
+      function _r(s){var r=s.roles||[];if(r.indexOf('מפקד מחלקה')!==-1)return 0;if(r.indexOf('סמ"ל')!==-1)return 1;if(r.indexOf('מ"כ')!==-1)return 2;return 3;}
+      var sorted=sols.slice().sort(function(a,b){return _r(a)-_r(b);});
+      var cmds=sorted.filter(function(s){return _r(s)<3;});
+      var regular=sorted.filter(function(s){return _r(s)===3;});
+      var lines=cmds.map(function(s,i){var crown=(s.roles||[]).indexOf('מפקד מחלקה')!==-1?'👑 ':'';return(i+1)+'. '+crown+'*'+(s.name||'חייל').trim()+' — '+(s.phone||'ללא טלפון')+'*';});
+      if(cmds.length&&regular.length)lines.push('—————');
+      regular.forEach(function(s,i){lines.push((cmds.length+i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון'));});
+      var msg='🪖 *'+l.name+'*\n\n'+lines.join('\n')+'\n\nסה"כ: '+sorted.length+' חיילים'+(l.notes?'\n\n📝 '+l.notes:'');
       window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
     });})(lst,soldiers);
 
@@ -3344,12 +3404,12 @@ function setupMissionDrag(){
 var _openMissionId=null;
 
 function switchToMissionsTab(){
+  document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='missions');});
   document.getElementById('main-tab-list').style.display='none';
   document.getElementById('main-tab-week').style.display='none';
   document.getElementById('main-tab-stats').style.display='none';
   document.getElementById('main-tab-missions').style.display='';
   document.getElementById('main-tab-lists').style.display='none';
-  document.getElementById('main-tab-reminders').style.display='none';
   document.getElementById('fab').style.display='';
   document.querySelector('.dashboard').style.display='none';
   document.getElementById('filter-banner').style.display='none';
@@ -3508,6 +3568,8 @@ function init(){
       renderList();
     }
     setFilter('all');
+    var listEl=document.getElementById('main-tab-list');
+    if(listEl)listEl.scrollTo({top:0,behavior:'smooth'});
   });
   document.getElementById('sb-pr').addEventListener('click',function(){setFilter(state.filter==='present'?'all':'present');});
   document.getElementById('sb-ab').addEventListener('click',function(){setFilter(state.filter==='absent'?'all':'absent');});
@@ -3533,24 +3595,97 @@ function init(){
       document.getElementById('main-tab-stats').style.display=t==='stats'?'':'none';
       document.getElementById('main-tab-missions').style.display=t==='missions'?'':'none';
       document.getElementById('main-tab-lists').style.display=t==='lists'?'':'none';
-      document.getElementById('main-tab-reminders').style.display=t==='reminders'?'':'none';
       document.getElementById('fab').style.display=(t==='list'||t==='missions'||t==='lists')?'':'none';
       document.querySelector('.dashboard').style.display=t==='list'?'':'none';
       document.getElementById('filter-banner').style.display=t!=='list'?'none':'';
-      document.querySelector('.bottom-bar').style.display=(t==='missions'||t==='lists'||t==='reminders')?'none':'';
+      document.querySelector('.bottom-bar').style.display=(t==='missions'||t==='lists')?'none':'';
       if(t==='week')renderWeek();
       if(t==='stats')renderStats();
       if(t==='missions')renderMissions();
       if(t==='lists')renderListsTab();
-      if(t==='reminders')renderReminders();
     });
   });
+
+  // Swipe בין עמודות ראשיות + rubber band בקצוות
+  (function(){
+    var TABS=['list','week','stats','missions','lists'];
+    var swipeStartX=0,swipeStartY=0,swipeStartTime=0;
+    var scr=document.getElementById('scr-main');
+    var RESISTANCE=0.1,MAX_STRETCH=22;
+    function getCurrentTab(){
+      var active=document.querySelector('.main-tab-btn.active');
+      return active?active.dataset.mtab:'list';
+    }
+    function goToTab(name){
+      var btn=document.querySelector('.main-tab-btn[data-mtab="'+name+'"]');
+      if(btn)btn.click();
+    }
+    function snapBack(){
+      scr.style.transition='transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)';
+      scr.style.transform='translateX(0)';
+    }
+    scr.addEventListener('touchstart',function(e){
+      swipeStartX=e.touches[0].clientX;
+      swipeStartY=e.touches[0].clientY;
+      swipeStartTime=Date.now();
+      scr.style.transition='none';
+    },{passive:true});
+    scr.addEventListener('touchmove',function(e){
+      var dx=e.touches[0].clientX-swipeStartX;
+      var dy=e.touches[0].clientY-swipeStartY;
+      if(Math.abs(dy)>Math.abs(dx))return;
+      var cur=TABS.indexOf(getCurrentTab());
+      var atStart=(cur===0&&dx<0);           // בעמודה ראשונה וגולל שמאלה
+      var atEnd=(cur===TABS.length-1&&dx>0); // בעמודה אחרונה וגולל ימינה
+      if(atStart||atEnd){
+        var stretch=Math.max(-MAX_STRETCH,Math.min(MAX_STRETCH,dx*RESISTANCE));
+        scr.style.transform='translateX('+stretch+'px)';
+      }
+    },{passive:true});
+    scr.addEventListener('touchend',function(e){
+      var dx=e.changedTouches[0].clientX-swipeStartX;
+      var dy=e.changedTouches[0].clientY-swipeStartY;
+      var dt=Date.now()-swipeStartTime;
+      snapBack();
+      if(dt>400||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
+      var cur=TABS.indexOf(getCurrentTab());
+      if(dx>0&&cur<TABS.length-1)goToTab(TABS[cur+1]);
+      if(dx<0&&cur>0)goToTab(TABS[cur-1]);
+    },{passive:true});
+  })();
+
+  // Swipe בפרטי חייל בין יציאות ופרטים
+  (function(){
+    var DET_TABS=['leaves','info'];
+    var sx=0,sy=0,st=0;
+    var scr=document.getElementById('scr-det');
+    function getCurDetTab(){
+      return document.getElementById('tab-leaves').classList.contains('active')?'leaves':'info';
+    }
+    function goDetTab(name){
+      var btn=document.querySelector('.tab-btn[data-tab="'+name+'"]');
+      if(btn)btn.click();
+    }
+    scr.addEventListener('touchstart',function(e){
+      sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();
+    },{passive:true});
+    scr.addEventListener('touchend',function(e){
+      var dx=e.changedTouches[0].clientX-sx;
+      var dy=e.changedTouches[0].clientY-sy;
+      var dt=Date.now()-st;
+      if(dt>400||Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.5)return;
+      var cur=DET_TABS.indexOf(getCurDetTab());
+      if(dx>0&&cur<DET_TABS.length-1)goDetTab(DET_TABS[cur+1]);
+      if(dx<0&&cur>0)goDetTab(DET_TABS[cur-1]);
+    },{passive:true});
+  })();
+
   document.getElementById('fb-close').addEventListener('click',function(){setFilter('all');});
   document.getElementById('btn-report').addEventListener('click',openReportModal);
   document.getElementById('modal-close').addEventListener('click',closeReportModal);
   document.getElementById('rr-total').addEventListener('click',function(){
     var ds=rcalSel||today();
-    var _mid3=getMissingIds();var total=state.soldiers.filter(function(s){return !s.isMissing&&!_mid3[s.id];});
+    var _mid3=getMissingIds();var total=state.soldiers.filter(function(s){return !s.isMissing&&!_mid3[s.id]&&(s.shams||[]).indexOf(ds)===-1;});
     var present=total.filter(function(s){
       if(s.status!=='present')return false;
       for(var i=0;i<(s.leaves||[]).length;i++){if(ds>=(s.leaves||[])[i].from&&ds<(s.leaves||[])[i].to)return false;}
@@ -3604,7 +3739,14 @@ function init(){
     var lst=_saveListFromEditor();
     if(!lst)return;
     var sols=lst.soldierIds.map(function(id){return(state.soldiers||[]).find(function(s){return s.id===id;});}).filter(Boolean);
-    var msg='🪖 *'+lst.name+'*\n\n'+sols.map(function(s,i){return(i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון');}).join('\n')+'\n\nסה"כ: '+sols.length+' חיילים'+(lst.notes?'\n\n📝 '+lst.notes:'');
+    function _r2(s){var r=s.roles||[];if(r.indexOf('מפקד מחלקה')!==-1)return 0;if(r.indexOf('סמ"ל')!==-1)return 1;if(r.indexOf('מ"כ')!==-1)return 2;return 3;}
+    var solsSorted=sols.slice().sort(function(a,b){return _r2(a)-_r2(b);});
+    var cmds2=solsSorted.filter(function(s){return _r2(s)<3;});
+    var reg2=solsSorted.filter(function(s){return _r2(s)===3;});
+    var lines2=cmds2.map(function(s,i){var crown=(s.roles||[]).indexOf('מפקד מחלקה')!==-1?'👑 ':'';return(i+1)+'. '+crown+'*'+(s.name||'חייל').trim()+' — '+(s.phone||'ללא טלפון')+'*';});
+    if(cmds2.length&&reg2.length)lines2.push('—————');
+    reg2.forEach(function(s,i){lines2.push((cmds2.length+i+1)+'. '+(s.name||'חייל')+' — '+(s.phone||'ללא טלפון'));});
+    var msg='🪖 *'+lst.name+'*\n\n'+lines2.join('\n')+'\n\nסה"כ: '+solsSorted.length+' חיילים'+(lst.notes?'\n\n📝 '+lst.notes:'');
     window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
   });
 }
@@ -3628,9 +3770,10 @@ function closeSidebar(){
 function showMainDash(){
   document.getElementById('scr-main').classList.remove('hidden','slide-left');
   document.getElementById('scr-tasks').classList.add('hidden');
+  document.getElementById('scr-reminders').classList.add('hidden');
   document.getElementById('sb-nav-main').classList.add('active');
   document.getElementById('sb-nav-tasks').classList.remove('active');
-  document.getElementById('sb-nav-missions').classList.remove('active');
+  document.getElementById('sb-nav-reminders').classList.remove('active');
   renderMain();
 }
 function showTasksDash(){
@@ -3639,9 +3782,19 @@ function showTasksDash(){
   if(inp)inp.value=k;
   document.getElementById('scr-main').classList.add('hidden');
   document.getElementById('scr-tasks').classList.remove('hidden','slide-left');
+  document.getElementById('scr-reminders').classList.add('hidden');
   document.getElementById('sb-nav-main').classList.remove('active');
   document.getElementById('sb-nav-tasks').classList.add('active');
-  document.getElementById('sb-nav-missions').classList.remove('active');
+  document.getElementById('sb-nav-reminders').classList.remove('active');
+}
+function showRemindersDash(){
+  document.getElementById('scr-main').classList.add('hidden');
+  document.getElementById('scr-tasks').classList.add('hidden');
+  document.getElementById('scr-reminders').classList.remove('hidden','slide-left');
+  document.getElementById('sb-nav-main').classList.remove('active');
+  document.getElementById('sb-nav-tasks').classList.remove('active');
+  document.getElementById('sb-nav-reminders').classList.add('active');
+  renderReminders();
 }
 
 // ==============================
@@ -3823,14 +3976,8 @@ document.getElementById('sidebar-close-btn').addEventListener('click',closeSideb
 document.getElementById('sidebar-overlay').addEventListener('click',closeSidebar);
 document.getElementById('sb-nav-main').addEventListener('click',function(){closeSidebar();showMainDash();});
 document.getElementById('sb-nav-tasks').addEventListener('click',function(){closeSidebar();showTasksDash();});
-document.getElementById('sb-nav-missions').addEventListener('click',function(){
-  closeSidebar();
-  showMainDash();
-  document.getElementById('sb-nav-missions').classList.add('active');
-  document.getElementById('sb-nav-main').classList.remove('active');
-  switchToMissionsTab();
-  renderMissions();
-});
+document.getElementById('sb-nav-reminders').addEventListener('click',function(){closeSidebar();showRemindersDash();});
+document.getElementById('menu-btn-reminders').addEventListener('click',openSidebar);
 
 document.getElementById('tasks-settings-toggle').addEventListener('click',function(){
   var sec=document.getElementById('tasks-settings-section');
@@ -4104,17 +4251,6 @@ function _handleBack(){
     document.querySelector('.bottom-bar').style.display='';
     return;
   }
-  // תזכורות פתוח → חזור לחיילים
-  var remTab=document.getElementById('main-tab-reminders');
-  if(remTab&&remTab.style.display!=='none'){
-    document.querySelectorAll('.main-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mtab==='list');});
-    document.getElementById('main-tab-list').style.display='';
-    remTab.style.display='none';
-    document.getElementById('fab').style.display='';
-    document.querySelector('.dashboard').style.display='';
-    document.querySelector('.bottom-bar').style.display='';
-    return;
-  }
   // דשבורד — נשאר
 }
 
@@ -4126,10 +4262,8 @@ function _handleBack(){
     history.pushState({app:true},'');
     _handleBack();
   });
-  // כפתור חזור של אנדרואיד (Capacitor מפעיל CustomEvent על document)
-  document.addEventListener('backButton',function(){
-    _handleBack();
-  });
+  // Android Capacitor back button
+  document.addEventListener('backButton',function(){_handleBack();});
 })();
 (function(){
   var indicator=document.getElementById('ptr-indicator');
@@ -4181,55 +4315,6 @@ function _handleBack(){
   });
 })();
 // ==============================
-// SWIPE NAVIGATION
-// ==============================
-(function(){
-  // Swipe right on detail screen → go back
-  var sx=0,sy=0;
-  var det=document.getElementById('scr-det');
-  det.addEventListener('touchstart',function(e){
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
-  },{passive:true});
-  det.addEventListener('touchend',function(e){
-    var dx=e.changedTouches[0].clientX-sx;
-    var dy=e.changedTouches[0].clientY-sy;
-    if(dx>70&&Math.abs(dy)<60)_handleBack();
-  },{passive:true});
-})();
-(function(){
-  // Swipe left/right on main screen → switch tabs
-  var sx=0,sy=0,startEl=null;
-  var mainTabOrder=['list','week','stats','reminders','lists'];
-  var main=document.getElementById('scr-main');
-  main.addEventListener('touchstart',function(e){
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;startEl=e.target;
-  },{passive:true});
-  main.addEventListener('touchend',function(e){
-    var dx=e.changedTouches[0].clientX-sx;
-    var dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<70||Math.abs(dy)>60)return;
-    // Don't trigger inside drum pickers or scrollable content
-    if(startEl&&startEl.closest&&startEl.closest('#rem-drum-wrap'))return;
-    var cur=null;
-    document.querySelectorAll('.main-tab-btn').forEach(function(b){if(b.classList.contains('active'))cur=b.dataset.mtab;});
-    if(!cur)return;
-    var idx=mainTabOrder.indexOf(cur);if(idx<0)return;
-    var newIdx=dx<0?idx+1:idx-1;
-    if(newIdx<0||newIdx>=mainTabOrder.length)return;
-    var btn=document.querySelector('.main-tab-btn[data-mtab="'+mainTabOrder[newIdx]+'"]');
-    if(btn&&btn.style.display!=='none')btn.click();
-  },{passive:true});
-})();
-// Click on app-header → scroll active tab to top
-document.querySelectorAll('.app-header').forEach(function(hdr){
-  hdr.addEventListener('click',function(){
-    ['list','week','stats','reminders','lists','missions'].forEach(function(t){
-      var el=document.getElementById('main-tab-'+t);
-      if(el&&el.style.display!=='none')el.scrollTop=0;
-    });
-  });
-});
-// ==============================
 // REMINDERS SYSTEM
 // ==============================
 var _remType='daily'; // current form type selection
@@ -4249,26 +4334,12 @@ function renderReminders(){
   // Permission banner
   var permBanner=document.getElementById('rem-perm-banner');
   if(permBanner){
-    var _LN=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
-    if(_LN){
-      // Running as native app — use Capacitor LocalNotifications
-      _LN.checkPermissions().then(function(res){
-        if(res.display==='granted'){
-          permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#166534">✅ מופעל</span>';
-        } else {
-          permBanner.innerHTML='<button id="rem-perm-btn" style="padding:5px 11px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל התראות</button>';
-          var pb=document.getElementById('rem-perm-btn');
-          if(pb)pb.addEventListener('click',function(){
-            _LN.requestPermissions().then(function(){renderReminders();_capScheduleAll();});
-          });
-        }
-      }).catch(function(){permBanner.innerHTML='';});
-    } else if(!('Notification' in window)){
+    if(!('Notification' in window)){
       permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#C2410C">⚠️ לא נתמך</span>';
     } else if(Notification.permission==='default'){
       permBanner.innerHTML='<button id="rem-perm-btn" style="padding:5px 11px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל התראות</button>';
-      var pb2=document.getElementById('rem-perm-btn');
-      if(pb2)pb2.addEventListener('click',function(){
+      var pb=document.getElementById('rem-perm-btn');
+      if(pb)pb.addEventListener('click',function(){
         Notification.requestPermission().then(function(){renderReminders();});
       });
     } else if(Notification.permission==='denied'){
@@ -4391,15 +4462,9 @@ function _remPlayAlarm(soundId){
 }
 
 function _remShowNotif(title,body,tag){
-  var _LN=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
-  if(_LN){
-    // Native app — fire immediately via LocalNotifications
-    var nid=Math.floor(Math.random()*100000);
-    _LN.schedule({notifications:[{id:nid,title:title,body:body||'',schedule:{at:new Date(Date.now()+500)},sound:'default',extra:null}]}).catch(function(){});
-    return true;
-  }
   if(!('Notification' in window)||Notification.permission!=='granted')return false;
   try{
+    // Use direct Notification() — synchronous and immediate, no SW round-trip delay
     new Notification(title,{body:body||'',icon:'/platoon-app/icons/icon-192.png',requireInteraction:true,vibrate:[300,100,300,100,600],silent:false,tag:tag||'platoon-rem',renotify:true,dir:'rtl',lang:'he'});
     return true;
   }catch(e){return false;}
@@ -4592,10 +4657,13 @@ var _remSelDays=[];
 
   function _updateEvLabels(){
     var dv=document.getElementById('rem-inp-event-date').value;
+    var tv=document.getElementById('rem-inp-event-time').value;
     document.getElementById('rem-ev-date-lbl').textContent=_fmtEvDate(dv);
+    document.getElementById('rem-ev-time-lbl').textContent=tv||'שעה';
   }
 
   document.getElementById('rem-inp-event-date').addEventListener('change',_updateEvLabels);
+  document.getElementById('rem-inp-event-time').addEventListener('change',_updateEvLabels);
 
   function setType(t){
     _remType=t;
@@ -4603,8 +4671,6 @@ var _remSelDays=[];
       document.getElementById('rem-type-'+tp).classList.toggle('sel',t===tp);
       document.getElementById('rem-fields-'+tp).style.display=t===tp?'':'none';
     });
-    var inp=document.getElementById(t==='daily'?'rem-inp-time':t==='weekly'?'rem-inp-weekly-time':'rem-inp-event-time');
-    if(window._drumSetTime&&inp) window._drumSetTime(inp.value||'08:00');
   }
 
   function setSoundUI(sid){
@@ -4660,45 +4726,6 @@ var _remSelDays=[];
     });
   })();
 
-  // Drum time picker init
-  (function(){
-    var dh=document.getElementById('rem-drum-h');
-    var dm=document.getElementById('rem-drum-m');
-    if(!dh||!dm)return;
-    var itemH=44;
-    var hHtml='<div style="height:88px"></div>';
-    for(var h=0;h<24;h++) hHtml+='<div class="drum-item">'+('0'+h).slice(-2)+'</div>';
-    hHtml+='<div style="height:88px"></div>';
-    dh.innerHTML=hHtml;
-    var mHtml='<div style="height:88px"></div>';
-    for(var m=0;m<60;m++) mHtml+='<div class="drum-item">'+('0'+m).slice(-2)+'</div>';
-    mHtml+='<div style="height:88px"></div>';
-    dm.innerHTML=mHtml;
-    dh.scrollTop=8*itemH;
-    dm.scrollTop=0;
-    function _drumUpdate(){
-      var h=Math.min(23,Math.max(0,Math.round(dh.scrollTop/itemH)));
-      var mi=Math.min(59,Math.max(0,Math.round(dm.scrollTop/itemH)));
-      var tv=('0'+h).slice(-2)+':'+('0'+mi).slice(-2);
-      var inputId=_remType==='daily'?'rem-inp-time':_remType==='weekly'?'rem-inp-weekly-time':'rem-inp-event-time';
-      var inp=document.getElementById(inputId);
-      if(inp) inp.value=tv;
-      if(_remType==='event'){
-        var lbl=document.getElementById('rem-ev-time-lbl');
-        if(lbl) lbl.textContent=tv;
-      }
-    }
-    dh.addEventListener('scroll',_drumUpdate);
-    dm.addEventListener('scroll',_drumUpdate);
-    window._drumSetTime=function(timeStr){
-      var parts=(timeStr||'08:00').split(':');
-      var h=Math.max(0,Math.min(23,parseInt(parts[0])||0));
-      var mi=Math.max(0,Math.min(59,parseInt(parts[1])||0));
-      dh.scrollTop=h*itemH;
-      dm.scrollTop=mi*itemH;
-    };
-  })();
-
   window._remOpenForm=function(editIdx){
     _remEditIdx=(editIdx==null)?-1:editIdx;
     var items=_remLoad();
@@ -4727,9 +4754,6 @@ var _remSelDays=[];
       setType('event');
       _updateEvLabels();
     }
-    // Scroll drum to correct time (after setType which also calls _drumSetTime)
-    var activeInp=document.getElementById(_remType==='daily'?'rem-inp-time':_remType==='weekly'?'rem-inp-weekly-time':'rem-inp-event-time');
-    if(window._drumSetTime&&activeInp) setTimeout(function(){window._drumSetTime(activeInp.value||'08:00');},50);
 
     document.getElementById('rem-form-wrap').style.display='block';
     document.getElementById('rem-add-open-btn').style.display='none';
@@ -4884,47 +4908,33 @@ function _capScheduleAll(){
   if(!window.Capacitor)return;
   var LN=window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
   if(!LN)return;
-  LN.checkPermissions().then(function(res){
-    if(res.display!=='granted')return;
+  LN.requestPermissions().then(function(){
     var items=_remLoad();
-    var now=Date.now();
-    var notifs=[];
-    var nid=1;
-    items.forEach(function(item){
-      if(item.type==='daily'){
-        var p=(item.time||'08:00').split(':');
-        var h=parseInt(p[0])||0,mi=parseInt(p[1])||0;
-        for(var d=0;d<60;d++){
-          var t=new Date(); t.setDate(t.getDate()+d); t.setHours(h,mi,0,0);
-          if(t.getTime()>now+2000)
-            notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:new Date(t),allowWhileIdle:true},sound:'default'});
-        }
-      } else if(item.type==='weekly'){
-        var wp=(item.time||'08:00').split(':');
-        var wh=parseInt(wp[0])||0,wmi=parseInt(wp[1])||0;
-        var days=item.days||[];
-        for(var d=0;d<90;d++){
-          var c=new Date(); c.setDate(c.getDate()+d); c.setHours(wh,wmi,0,0);
-          if(days.indexOf(c.getDay())!==-1&&c.getTime()>now+2000)
-            notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:new Date(c),allowWhileIdle:true},sound:'default'});
-        }
-      } else if(item.type==='event'){
-        var ms=_remCalcFireMs(item);
-        if(ms&&ms>now+2000)
-          notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:new Date(ms),allowWhileIdle:true},sound:'default'});
-      }
-    });
-    // מחיקת קודמות ותזמון חדשות
     LN.getPending().then(function(pending){
-      var toCancel=(pending.notifications||[]).map(function(n){return{id:n.id};});
-      var doSched=function(){
-        if(notifs.length) LN.schedule({notifications:notifs}).catch(function(e){console.warn('cap sched',e);});
-      };
-      if(toCancel.length) LN.cancel({notifications:toCancel}).then(doSched).catch(doSched);
-      else doSched();
-    }).catch(function(){
-      if(notifs.length) LN.schedule({notifications:notifs}).catch(function(){});
-    });
+      var pendingIds=(pending.notifications||[]).map(function(n){return n.id;});
+      if(pendingIds.length) LN.cancel({notifications:pendingIds.map(function(id){return{id:id};})}).catch(function(){});
+      var notifs=[];var nid=1;var now=Date.now();
+      items.forEach(function(item){
+        if(item.type==='daily'){
+          var parts=item.time.split(':');var h=parseInt(parts[0]),m=parseInt(parts[1]);
+          for(var d=0;d<60;d++){
+            var t=new Date();t.setHours(h,m,0,0);t.setDate(t.getDate()+d);
+            if(t.getTime()>now+30000) notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:t,allowWhileIdle:true},sound:'default',extra:{remId:item.id}});
+          }
+        } else if(item.type==='weekly'){
+          var parts=item.time.split(':');var h=parseInt(parts[0]),m=parseInt(parts[1]);
+          for(var d=0;d<90;d++){
+            var t=new Date();t.setHours(h,m,0,0);t.setDate(t.getDate()+d);
+            var dow=t.getDay();
+            if((item.days||[]).indexOf(dow)!==-1&&t.getTime()>now+30000) notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:t,allowWhileIdle:true},sound:'default',extra:{remId:item.id}});
+          }
+        } else {
+          var ms=_remCalcFireMs(item);
+          if(ms&&ms>now+30000) notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:new Date(ms),allowWhileIdle:true},sound:'default',extra:{remId:item.id}});
+        }
+      });
+      if(notifs.length) LN.schedule({notifications:notifs}).catch(function(e){console.warn('cap notif err',e);});
+    }).catch(function(){});
   }).catch(function(){});
 }
 
@@ -4956,6 +4966,7 @@ if(window.visualViewport){
   });
 }
 })();
+
 </script>
 </body>
 </html>
