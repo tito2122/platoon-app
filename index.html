@@ -4832,19 +4832,47 @@ function _capScheduleAll(){
   if(!window.Capacitor)return;
   var LN=window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications;
   if(!LN)return;
-  LN.requestPermissions().then(function(){
+  LN.checkPermissions().then(function(res){
+    if(res.display!=='granted')return;
     var items=_remLoad();
-    // Cancel all existing
-    var toCancel=items.map(function(_,i){return{id:(i+1)};});
-    if(toCancel.length) LN.cancel({notifications:toCancel}).catch(function(){});
-    // Schedule upcoming ones
+    var now=Date.now();
     var notifs=[];
-    items.forEach(function(item,i){
-      var ms=_remCalcFireMs(item);
-      if(!ms)return;
-      notifs.push({id:(i+1),title:item.title,body:item.desc||'',schedule:{at:new Date(ms),allowWhileIdle:true},sound:'default',extra:{remId:item.id}});
+    var nid=1;
+    items.forEach(function(item){
+      if(item.type==='daily'){
+        var p=(item.time||'08:00').split(':');
+        var h=parseInt(p[0])||0,mi=parseInt(p[1])||0;
+        for(var d=0;d<60;d++){
+          var t=new Date(); t.setDate(t.getDate()+d); t.setHours(h,mi,0,0);
+          if(t.getTime()>now+2000)
+            notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:new Date(t),allowWhileIdle:true},sound:'default'});
+        }
+      } else if(item.type==='weekly'){
+        var wp=(item.time||'08:00').split(':');
+        var wh=parseInt(wp[0])||0,wmi=parseInt(wp[1])||0;
+        var days=item.days||[];
+        for(var d=0;d<90;d++){
+          var c=new Date(); c.setDate(c.getDate()+d); c.setHours(wh,wmi,0,0);
+          if(days.indexOf(c.getDay())!==-1&&c.getTime()>now+2000)
+            notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:new Date(c),allowWhileIdle:true},sound:'default'});
+        }
+      } else if(item.type==='event'){
+        var ms=_remCalcFireMs(item);
+        if(ms&&ms>now+2000)
+          notifs.push({id:nid++,title:item.title,body:item.desc||'',schedule:{at:new Date(ms),allowWhileIdle:true},sound:'default'});
+      }
     });
-    if(notifs.length) LN.schedule({notifications:notifs}).catch(function(e){console.warn('cap notif err',e);});
+    // מחיקת קודמות ותזמון חדשות
+    LN.getPending().then(function(pending){
+      var toCancel=(pending.notifications||[]).map(function(n){return{id:n.id};});
+      var doSched=function(){
+        if(notifs.length) LN.schedule({notifications:notifs}).catch(function(e){console.warn('cap sched',e);});
+      };
+      if(toCancel.length) LN.cancel({notifications:toCancel}).then(doSched).catch(doSched);
+      else doSched();
+    }).catch(function(){
+      if(notifs.length) LN.schedule({notifications:notifs}).catch(function(){});
+    });
   }).catch(function(){});
 }
 
