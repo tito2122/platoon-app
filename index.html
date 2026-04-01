@@ -1781,6 +1781,9 @@ function buildLeavesTab(s){
   var totLbl=document.createElement('span');totLbl.style.cssText='font-size:13px;font-weight:600;color:#92400E';totLbl.textContent='סה"כ ימי יציאה:';
   var totNum=document.createElement('span');totNum.style.cssText='font-size:24px;font-weight:900;color:#B45309';
   totBox.appendChild(totLbl);totBox.appendChild(totNum);
+  totBox.style.cursor='pointer';
+  totBox.title='לחץ לגלילה למעלה';
+  totBox.addEventListener('click',function(){document.getElementById('tab-leaves').scrollTop=0;});
 
   var lvList=document.createElement('div');
   var nextTotEl=null;
@@ -4177,6 +4180,55 @@ function _handleBack(){
     }
   });
 })();
+// ==============================
+// SWIPE NAVIGATION
+// ==============================
+(function(){
+  // Swipe right on detail screen → go back
+  var sx=0,sy=0;
+  var det=document.getElementById('scr-det');
+  det.addEventListener('touchstart',function(e){
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+  },{passive:true});
+  det.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-sx;
+    var dy=e.changedTouches[0].clientY-sy;
+    if(dx>70&&Math.abs(dy)<60)_handleBack();
+  },{passive:true});
+})();
+(function(){
+  // Swipe left/right on main screen → switch tabs
+  var sx=0,sy=0,startEl=null;
+  var mainTabOrder=['list','week','stats','reminders','lists'];
+  var main=document.getElementById('scr-main');
+  main.addEventListener('touchstart',function(e){
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;startEl=e.target;
+  },{passive:true});
+  main.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-sx;
+    var dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<70||Math.abs(dy)>60)return;
+    // Don't trigger inside drum pickers or scrollable content
+    if(startEl&&startEl.closest&&startEl.closest('#rem-drum-wrap'))return;
+    var cur=null;
+    document.querySelectorAll('.main-tab-btn').forEach(function(b){if(b.classList.contains('active'))cur=b.dataset.mtab;});
+    if(!cur)return;
+    var idx=mainTabOrder.indexOf(cur);if(idx<0)return;
+    var newIdx=dx<0?idx+1:idx-1;
+    if(newIdx<0||newIdx>=mainTabOrder.length)return;
+    var btn=document.querySelector('.main-tab-btn[data-mtab="'+mainTabOrder[newIdx]+'"]');
+    if(btn&&btn.style.display!=='none')btn.click();
+  },{passive:true});
+})();
+// Click on app-header → scroll active tab to top
+document.querySelectorAll('.app-header').forEach(function(hdr){
+  hdr.addEventListener('click',function(){
+    ['list','week','stats','reminders','lists','missions'].forEach(function(t){
+      var el=document.getElementById('main-tab-'+t);
+      if(el&&el.style.display!=='none')el.scrollTop=0;
+    });
+  });
+});
 // ==============================
 // REMINDERS SYSTEM
 // ==============================
