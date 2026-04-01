@@ -164,7 +164,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rt
 .btn-wa{background:#25D366;color:#fff;flex:1}
 .btn-xl{background:#1D6F42;color:#fff;flex:1}
 .btn-edit{background:var(--blue-bg);color:var(--blue);border:1.5px solid #BFDBFE;min-height:38px;padding:0 14px;font-size:13px;border-radius:20px}
-.detail-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 14px;height:var(--hh);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.detail-header{background:var(--card);border-bottom:1.5px solid var(--border);padding:env(safe-area-inset-top) 14px 0;height:calc(var(--hh) + env(safe-area-inset-top));display:flex;align-items:flex-end;gap:12px;flex-shrink:0}
 .back-btn{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--text2);flex-shrink:0;transition:background .15s}
 .back-btn:active{background:var(--bg)}
 .detail-title{flex:1;font-size:18px;font-weight:800;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4121,6 +4121,10 @@ function _handleBack(){
   history.pushState({app:true},'');
   window.addEventListener('popstate',function(e){
     history.pushState({app:true},'');
+    _handleBack();
+  });
+  // כפתור חזור של אנדרואיד (Capacitor מפעיל CustomEvent על document)
+  document.addEventListener('backButton',function(){
     _handleBack();
   });
 })();
