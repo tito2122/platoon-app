@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layoutDirection="rtl"
+    android:background="@color/background">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary"
+        android:title="פרטי חייל"
+        android:titleTextColor="@android:color/white" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Photo -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:id="@+id/ivPhoto"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_person"
+                    android:layout_marginEnd="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPickPhoto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="שנה תמונה"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            </LinearLayout>
+
+            <!-- Status radio -->
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="סטטוס" android:textStyle="bold" android:textSize="15sp"
+                android:layout_marginBottom="8dp" android:textColor="@color/text_primary" />
+            <RadioGroup android:id="@+id/rgStatus" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <RadioButton android:id="@+id/radioPresent" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="נוכח" android:checked="true" />
+                <RadioButton android:id="@+id/radioAbsent" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="נעדר"
+                    android:layout_marginStart="16dp" />
+            </RadioGroup>
+
+            <!-- Name fields -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="שם פרטי" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etFirstName" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textAlignment="textEnd" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="שם משפחה" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etLastName" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textAlignment="textEnd" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="מספר אישי" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPersonalId" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="טלפון" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPhone" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="phone" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="מקום מגורים" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etResidence" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textAlignment="textEnd" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Roles -->
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="תפקידים" android:textStyle="bold" android:textSize="15sp"
+                android:layout_marginBottom="8dp" android:textColor="@color/text_primary" />
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupRoles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Special flags -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="חופשת פיקוד (חו\"פ)" android:textSize="14sp" />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchHofpa" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="Extra 1" android:textSize="14sp" />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchExtra1" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <!-- Wife -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="נשוי" android:textSize="14sp" />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchHasWife" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="שם בת זוג" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etWifeName" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textAlignment="textEnd" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="טלפון בת זוג" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etWifePhone" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="phone" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Notes -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="הערות" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNotes" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:minLines="2"
+                    android:gravity="top|end" android:textAlignment="textEnd" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Leaves -->
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="חופשות" android:textStyle="bold" android:textSize="15sp"
+                android:layout_marginBottom="8dp" android:textColor="@color/text_primary" />
+
+            <LinearLayout
+                android:id="@+id/llLeaves"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddLeave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ הוסף חופשה"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginBottom="24dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="שמור"
+        android:textSize="16sp"
+        android:backgroundTint="@color/primary"
+        android:layout_margin="16dp" />
+
+</LinearLayout>

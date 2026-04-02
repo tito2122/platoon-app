@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/soldiersFragment"
+        android:icon="@drawable/ic_people"
+        android:title="חיילים" />
+
+    <item
+        android:id="@+id/weeklyBoardFragment"
+        android:icon="@drawable/ic_calendar"
+        android:title="לוח שנה" />
+
+    <item
+        android:id="@+id/statisticsFragment"
+        android:icon="@drawable/ic_stats"
+        android:title="סטטיסטיקה" />
+
+    <item
+        android:id="@+id/missionsFragment"
+        android:icon="@drawable/ic_mission"
+        android:title="משימות" />
+
+    <item
+        android:id="@+id/listsFragment"
+        android:icon="@drawable/ic_list"
+        android:title="רשימות" />
+
+</menu>

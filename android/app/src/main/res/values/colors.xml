@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary green (military) -->
+    <color name="primary">#1CB86A</color>
+    <color name="primary_dark">#15904F</color>
+    <color name="primary_light">#A8E6CF</color>
+    <color name="secondary">#2196F3</color>
+    <color name="secondary_dark">#1565C0</color>
+
+    <!-- Backgrounds -->
+    <color name="background">#F5F5F5</color>
+    <color name="surface">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <!-- Status colors -->
+    <color name="status_present">#1CB86A</color>
+    <color name="status_absent">#F44336</color>
+    <color name="status_leave">#FF9800</color>
+
+    <!-- Error -->
+    <color name="error">#F44336</color>
+
+    <!-- Legacy -->
+    <color name="colorPrimary">#1CB86A</color>
+    <color name="colorPrimaryDark">#15904F</color>
+    <color name="colorAccent">#2196F3</color>
+</resources>

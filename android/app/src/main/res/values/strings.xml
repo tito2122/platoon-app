@@ -1,7 +1,24 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">סד"כ מחלקה 1</string>
-    <string name="title_activity_main">סד"כ מחלקה 1</string>
-    <string name="package_name">com.platoon.app</string>
-    <string name="custom_url_scheme">com.platoon.app</string>
+    <string name="app_name">מערכת ניהול פלוגה</string>
+    <string name="title_activity_main">מערכת ניהול פלוגה</string>
+    <string name="navigation_drawer_open">פתח תפריט</string>
+    <string name="navigation_drawer_close">סגור תפריט</string>
+
+    <string-array name="soldier_roles">
+        <item>חובש</item>
+        <item>מ"כ</item>
+        <item>מאג</item>
+        <item>מטאדור</item>
+        <item>מטול</item>
+        <item>מפקד מחלקה</item>
+        <item>מתשאל</item>
+        <item>נגב</item>
+        <item>נהג נגמ"ש</item>
+        <item>סמ"ל</item>
+        <item>צלף</item>
+        <item>קלע</item>
+        <item>רוגר</item>
+        <item>רחפן</item>
+    </string-array>
 </resources>

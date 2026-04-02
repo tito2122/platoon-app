@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/soldiersFragment">
+
+    <fragment
+        android:id="@+id/soldiersFragment"
+        android:name="com.platoon.app.ui.soldiers.SoldiersFragment"
+        android:label="חיילים">
+        <action
+            android:id="@+id/action_soldiers_to_detail"
+            app:destination="@id/soldierDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/soldierDetailFragment"
+        android:name="com.platoon.app.ui.detail.SoldierDetailFragment"
+        android:label="פרטי חייל">
+        <argument
+            android:name="soldierId"
+            app:argType="long"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/weeklyBoardFragment"
+        android:name="com.platoon.app.ui.weekly.WeeklyBoardFragment"
+        android:label="לוח שבועי" />
+
+    <fragment
+        android:id="@+id/statisticsFragment"
+        android:name="com.platoon.app.ui.statistics.StatisticsFragment"
+        android:label="סטטיסטיקות" />
+
+    <fragment
+        android:id="@+id/missionsFragment"
+        android:name="com.platoon.app.ui.missions.MissionsFragment"
+        android:label="משימות" />
+
+    <fragment
+        android:id="@+id/listsFragment"
+        android:name="com.platoon.app.ui.lists.ListsFragment"
+        android:label="רשימות" />
+
+    <fragment
+        android:id="@+id/tasksFragment"
+        android:name="com.platoon.app.ui.tasks.TasksFragment"
+        android:label="ניתוח שמירה" />
+
+    <fragment
+        android:id="@+id/remindersFragment"
+        android:name="com.platoon.app.ui.reminders.RemindersFragment"
+        android:label="תזכורות" />
+
+</navigation>
