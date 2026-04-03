@@ -372,6 +372,7 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
     <button id="sb-nav-main" class="sb-nav-btn active">🏠 דשבורד ראשי</button>
     <button id="sb-nav-tasks" class="sb-nav-btn">📋 ניהול משימות יומיומיות</button>
     <button id="sb-nav-reminders" class="sb-nav-btn">🔔 תזכורות</button>
+    <button id="sb-nav-shelters" class="sb-nav-btn">🏠 מפות מקלטים</button>
   </nav>
 </div>
 <div id="ptr-indicator" style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .2s;z-index:10;background:var(--bg)">
@@ -554,6 +555,72 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
         </div>
       </div>
       <div style="text-align:center;padding:16px 0;font-size:11px;color:var(--text3);line-height:1.6">⚠️ התראות פועלות רק כשהאתר פתוח בדפדפן.<br>להתראות ברקע — התקן את האפליקציה כ-PWA.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== SHELTERS SCREEN ======== -->
+<div class="screen hidden" id="scr-shelters">
+  <div class="app-header">
+    <button id="menu-btn-shelters" style="width:40px;height:40px;border-radius:12px;border:1.5px solid var(--border);background:var(--card2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">☰</button>
+    <div class="title-wrap" style="margin:0 8px">
+      <h1>מפות מקלטים</h1>
+      <div class="sub" id="shelters-sub-lbl">מקלטים ציבוריים בישראל</div>
+    </div>
+  </div>
+  <div class="scroll-area" style="flex:1;overflow-y:auto">
+    <div class="list-pad" style="padding-bottom:80px">
+
+      <!-- Search bar -->
+      <div style="background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)">
+        <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">חיפוש מקלטים לפי עיר</div>
+        <div style="display:flex;gap:8px">
+          <input id="shelters-city-inp" class="finp" type="text" placeholder="הזן שם עיר (למשל: תל אביב, חיפה, ירושלים...)" style="flex:1;min-height:44px;font-size:14px" dir="rtl">
+          <button id="shelters-search-btn" style="min-height:44px;padding:0 16px;border-radius:var(--r-sm);border:none;background:var(--blue);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">חפש</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap" id="shelters-quick-btns">
+          <button class="chip" onclick="document.getElementById('shelters-city-inp').value='תל אביב';document.getElementById('shelters-search-btn').click()">תל אביב</button>
+          <button class="chip" onclick="document.getElementById('shelters-city-inp').value='ירושלים';document.getElementById('shelters-search-btn').click()">ירושלים</button>
+          <button class="chip" onclick="document.getElementById('shelters-city-inp').value='חיפה';document.getElementById('shelters-search-btn').click()">חיפה</button>
+          <button class="chip" onclick="document.getElementById('shelters-city-inp').value='באר שבע';document.getElementById('shelters-search-btn').click()">באר שבע</button>
+          <button class="chip" onclick="document.getElementById('shelters-city-inp').value='נתניה';document.getElementById('shelters-search-btn').click()">נתניה</button>
+          <button class="chip" onclick="document.getElementById('shelters-city-inp').value='אשדוד';document.getElementById('shelters-search-btn').click()">אשדוד</button>
+        </div>
+      </div>
+
+      <!-- Status / loading -->
+      <div id="shelters-loading" style="display:none;text-align:center;padding:24px;color:var(--text2);font-size:14px">
+        <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px"></div>
+        טוען מקלטים...
+      </div>
+      <div id="shelters-error" style="display:none;background:var(--red-bg);border:1.5px solid #FECDD3;border-radius:var(--r-sm);padding:14px;color:var(--red);font-size:14px;margin-bottom:12px"></div>
+
+      <!-- Stats bar -->
+      <div id="shelters-stats" style="display:none;background:var(--blue-bg);border:1.5px solid #BFDBFE;border-radius:var(--r-sm);padding:12px 14px;margin-bottom:12px;display:none">
+        <div style="font-size:13px;font-weight:700;color:var(--blue)" id="shelters-stats-text"></div>
+      </div>
+
+      <!-- Action buttons -->
+      <div id="shelters-actions" style="display:none;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button id="shelters-download-btn" style="flex:1;min-width:140px;min-height:44px;border-radius:var(--r-sm);border:none;background:var(--green);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">⬇ הורד CSV</button>
+        <button id="shelters-govmap-btn" style="flex:1;min-width:140px;min-height:44px;border-radius:var(--r-sm);border:none;background:#EA4335;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">🗺 פתח ב-GovMap</button>
+        <button id="shelters-gmap-btn" style="flex:1;min-width:140px;min-height:44px;border-radius:var(--r-sm);border:none;background:var(--blue);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">📍 Google Maps</button>
+      </div>
+
+      <!-- Map container -->
+      <div id="shelters-map-wrap" style="display:none;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border);margin-bottom:14px;box-shadow:var(--shadow)">
+        <div id="shelters-map" style="width:100%;height:320px"></div>
+      </div>
+
+      <!-- Shelters list -->
+      <div id="shelters-list"></div>
+
+      <!-- Empty state -->
+      <div id="shelters-empty" style="text-align:center;padding:40px 16px;color:var(--text3)">
+        <div style="font-size:40px;margin-bottom:10px">🏠</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text2);margin-bottom:6px">חיפוש מקלטים ציבוריים</div>
+        <div style="font-size:13px;line-height:1.6">הזן שם עיר וחפש מקלטים ציבוריים<br>בכל רחבי הארץ</div>
+      </div>
     </div>
   </div>
 </div>
@@ -3767,34 +3834,40 @@ function closeSidebar(){
 // ==============================
 // DASHBOARD SWITCHING
 // ==============================
-function showMainDash(){
-  document.getElementById('scr-main').classList.remove('hidden','slide-left');
+function _hideAllScreens(){
+  document.getElementById('scr-main').classList.add('hidden');
   document.getElementById('scr-tasks').classList.add('hidden');
   document.getElementById('scr-reminders').classList.add('hidden');
-  document.getElementById('sb-nav-main').classList.add('active');
+  document.getElementById('scr-shelters').classList.add('hidden');
+  document.getElementById('sb-nav-main').classList.remove('active');
   document.getElementById('sb-nav-tasks').classList.remove('active');
   document.getElementById('sb-nav-reminders').classList.remove('active');
+  document.getElementById('sb-nav-shelters').classList.remove('active');
+}
+function showMainDash(){
+  _hideAllScreens();
+  document.getElementById('scr-main').classList.remove('hidden','slide-left');
+  document.getElementById('sb-nav-main').classList.add('active');
   renderMain();
 }
 function showTasksDash(){
   var k=sessionStorage.getItem('anthropic_api_key')||'';
   var inp=document.getElementById('tasks-api-key-input');
   if(inp)inp.value=k;
-  document.getElementById('scr-main').classList.add('hidden');
+  _hideAllScreens();
   document.getElementById('scr-tasks').classList.remove('hidden','slide-left');
-  document.getElementById('scr-reminders').classList.add('hidden');
-  document.getElementById('sb-nav-main').classList.remove('active');
   document.getElementById('sb-nav-tasks').classList.add('active');
-  document.getElementById('sb-nav-reminders').classList.remove('active');
 }
 function showRemindersDash(){
-  document.getElementById('scr-main').classList.add('hidden');
-  document.getElementById('scr-tasks').classList.add('hidden');
+  _hideAllScreens();
   document.getElementById('scr-reminders').classList.remove('hidden','slide-left');
-  document.getElementById('sb-nav-main').classList.remove('active');
-  document.getElementById('sb-nav-tasks').classList.remove('active');
   document.getElementById('sb-nav-reminders').classList.add('active');
   renderReminders();
+}
+function showSheltersDash(){
+  _hideAllScreens();
+  document.getElementById('scr-shelters').classList.remove('hidden','slide-left');
+  document.getElementById('sb-nav-shelters').classList.add('active');
 }
 
 // ==============================
@@ -3977,7 +4050,9 @@ document.getElementById('sidebar-overlay').addEventListener('click',closeSidebar
 document.getElementById('sb-nav-main').addEventListener('click',function(){closeSidebar();showMainDash();});
 document.getElementById('sb-nav-tasks').addEventListener('click',function(){closeSidebar();showTasksDash();});
 document.getElementById('sb-nav-reminders').addEventListener('click',function(){closeSidebar();showRemindersDash();});
+document.getElementById('sb-nav-shelters').addEventListener('click',function(){closeSidebar();showSheltersDash();});
 document.getElementById('menu-btn-reminders').addEventListener('click',openSidebar);
+document.getElementById('menu-btn-shelters').addEventListener('click',openSidebar);
 
 document.getElementById('tasks-settings-toggle').addEventListener('click',function(){
   var sec=document.getElementById('tasks-settings-section');
@@ -4942,6 +5017,342 @@ if(document.readyState==='loading'){
 
 startSync();
 scheduleMidnightCheck();
+
+// ==============================
+// SHELTERS MODULE
+// ==============================
+(function(){
+  var _sheltersData=[];
+  var _sheltersMap=null;
+  var _sheltersCity='';
+  var _sheltersMarkers=[];
+
+  // Data.gov.il CKAN API — known shelter resource IDs (can add more as discovered)
+  // Format: { label, resource_id, cityField, nameField, addressField, latField, lngField }
+  var SHELTER_SOURCES=[
+    // Ma'aleh Adumim (example; other cities may have their own datasets)
+    {label:'מעלה אדומים',resource_id:'09c0f32d-4f7e-4d7a-80e3-7c77de7abf73',cityField:'CITY_NAME',nameField:'SHELTER_NAME',addressField:'STREET_NAME',latField:'Y',lngField:'X'},
+    // Nationwide public shelters (data.gov.il general dataset)
+    {label:'ארצי',resource_id:'b80c2ef7-5b14-40f4-a39e-6b2d6f7a88e7',cityField:'city',nameField:'name',addressField:'address',latField:'lat',lngField:'lng'},
+  ];
+
+  // Known govmap layer IDs for shelters by city
+  var GOVMAP_LAYERS={
+    'default':'417',
+    'חיפה':'217781',
+    'בת ים':'225824',
+    'ציבורי':'220929',
+  };
+
+  function $id(id){return document.getElementById(id);}
+
+  function showEl(id,displayType){
+    var el=$id(id);
+    if(el)el.style.display=displayType||'block';
+  }
+  function hideEl(id){
+    var el=$id(id);
+    if(el)el.style.display='none';
+  }
+
+  function setError(msg){
+    var el=$id('shelters-error');
+    if(!el)return;
+    el.textContent=msg;
+    el.style.display=msg?'block':'none';
+  }
+
+  function initShelterMap(lat,lng){
+    var container=$id('shelters-map');
+    if(!container)return;
+    showEl('shelters-map-wrap');
+    if(typeof google==='undefined'||!google.maps){hideEl('shelters-map-wrap');return;}
+    if(!_sheltersMap){
+      _sheltersMap=new google.maps.Map(container,{
+        center:{lat:lat||31.7683,lng:lng||35.2137},
+        zoom:13,
+        mapTypeId:'roadmap',
+        gestureHandling:'cooperative',
+        fullscreenControl:false,
+        streetViewControl:false,
+        mapTypeControl:false
+      });
+    } else {
+      _sheltersMap.setCenter({lat:lat,lng:lng});
+      _sheltersMap.setZoom(13);
+    }
+    // Clear old markers
+    _sheltersMarkers.forEach(function(m){m.setMap(null);});
+    _sheltersMarkers=[];
+  }
+
+  function addMarker(lat,lng,title,address){
+    if(!_sheltersMap||typeof google==='undefined')return;
+    var m=new google.maps.Marker({
+      position:{lat:lat,lng:lng},
+      map:_sheltersMap,
+      title:title,
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        fillColor:'#1CB86A',
+        fillOpacity:1,
+        strokeColor:'#0F9454',
+        strokeWeight:2,
+        scale:8
+      }
+    });
+    var iw=new google.maps.InfoWindow({content:'<div style="font-family:Rubik,sans-serif;direction:rtl;text-align:right;max-width:180px"><b>'+title+'</b><br><span style="font-size:12px;color:#666">'+address+'</span></div>'});
+    m.addListener('click',function(){iw.open(_sheltersMap,m);});
+    _sheltersMarkers.push(m);
+  }
+
+  function renderShelterList(shelters){
+    var list=$id('shelters-list');
+    if(!list)return;
+    list.innerHTML='';
+    if(!shelters||!shelters.length){
+      list.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">לא נמצאו מקלטים לעיר זו במאגר.</div>';
+      return;
+    }
+    var frag=document.createDocumentFragment();
+    shelters.forEach(function(s,i){
+      var card=document.createElement('div');
+      card.style.cssText='background:var(--card);border-radius:var(--r-sm);border:1.5px solid var(--border);padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;box-shadow:var(--shadow)';
+      var num=document.createElement('div');
+      num.style.cssText='min-width:28px;height:28px;border-radius:50%;background:var(--green-bg);color:var(--green-dark);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px';
+      num.textContent=i+1;
+      var info=document.createElement('div');
+      info.style.cssText='flex:1;min-width:0';
+      var name=document.createElement('div');
+      name.style.cssText='font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px';
+      name.textContent=s.name||'מקלט ציבורי';
+      var addr=document.createElement('div');
+      addr.style.cssText='font-size:12px;color:var(--text2)';
+      addr.textContent=[s.address,s.city].filter(Boolean).join(', ')||'כתובת לא זמינה';
+      info.appendChild(name);
+      info.appendChild(addr);
+      var nav=document.createElement('button');
+      nav.style.cssText='min-width:40px;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--card2);color:var(--blue);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0';
+      nav.title='נווט למקלט';
+      nav.textContent='📍';
+      (function(shelter){
+        nav.addEventListener('click',function(){
+          var url;
+          if(shelter.lat&&shelter.lng){
+            url='https://maps.google.com/?q='+shelter.lat+','+shelter.lng;
+          } else {
+            url='https://maps.google.com/?q='+encodeURIComponent((shelter.address||'')+(shelter.city?', '+shelter.city:''));
+          }
+          window.open(url,'_blank');
+        });
+      })(s);
+      card.appendChild(num);
+      card.appendChild(info);
+      card.appendChild(nav);
+      frag.appendChild(card);
+    });
+    list.appendChild(frag);
+  }
+
+  function buildCSV(shelters){
+    var rows=[['#','שם מקלט','כתובת','עיר','קו רוחב','קו אורך'].join(',')];
+    shelters.forEach(function(s,i){
+      rows.push([
+        i+1,
+        '"'+(s.name||'').replace(/"/g,'""')+'"',
+        '"'+(s.address||'').replace(/"/g,'""')+'"',
+        '"'+(s.city||'').replace(/"/g,'""')+'"',
+        s.lat||'',
+        s.lng||''
+      ].join(','));
+    });
+    return '\uFEFF'+rows.join('\n');
+  }
+
+  function downloadCSV(){
+    if(!_sheltersData.length){toast('אין נתונים להורדה');return;}
+    var csv=buildCSV(_sheltersData);
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+    a.download='מקלטים_'+(_sheltersCity||'ישראל')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click();
+    toast('קובץ CSV הורד ✓');
+  }
+
+  function openGovMap(){
+    var city=_sheltersCity||'';
+    var layerId=GOVMAP_LAYERS[city]||GOVMAP_LAYERS['default'];
+    var url='https://www.govmap.gov.il/?lay='+layerId;
+    if(city){url+='&q='+encodeURIComponent(city);}
+    window.open(url,'_blank');
+  }
+
+  function openGoogleMaps(){
+    var city=_sheltersCity||'ישראל';
+    window.open('https://maps.google.com/?q='+encodeURIComponent('מקלט ציבורי '+city),'_blank');
+  }
+
+  // Geocode city name to lat/lng using Google Maps Geocoder
+  function geocodeCity(city,cb){
+    if(typeof google==='undefined'||!google.maps){cb(null);return;}
+    var gc=new google.maps.Geocoder();
+    gc.geocode({address:city+', ישראל',region:'IL'},function(results,status){
+      if(status==='OK'&&results[0]){
+        var loc=results[0].geometry.location;
+        cb({lat:loc.lat(),lng:loc.lng()});
+      } else {
+        cb(null);
+      }
+    });
+  }
+
+  // Try each source for shelter data; parse and normalize records
+  async function fetchShelterData(city){
+    var normalized=[];
+    // Try all sources, collect results
+    for(var i=0;i<SHELTER_SOURCES.length;i++){
+      var src=SHELTER_SOURCES[i];
+      try{
+        var url='https://data.gov.il/api/3/action/datastore_search?resource_id='+src.resource_id+'&limit=5000';
+        if(city){url+='&q='+encodeURIComponent(city);}
+        var resp=await fetch(url,{headers:{'Accept':'application/json'}});
+        if(!resp.ok)continue;
+        var json=await resp.json();
+        if(!json.success||!json.result||!json.result.records)continue;
+        var records=json.result.records;
+        records.forEach(function(r){
+          var cityVal=(r[src.cityField]||r.city||r.CITY_NAME||r.cityName||'').toString().trim();
+          // Filter by city if specified
+          if(city&&cityVal&&cityVal.indexOf(city)===-1&&city.indexOf(cityVal)===-1)return;
+          var lat=parseFloat(r[src.latField]||r.lat||r.Y||r.latitude||0);
+          var lng=parseFloat(r[src.lngField]||r.lng||r.X||r.longitude||0);
+          // Convert from Israeli Transverse Mercator (ITM/ICS) to WGS84 if values look like ITM
+          if(lat>200000&&lng>200000){
+            var wgs=itmToWgs84(lng,lat);
+            lat=wgs.lat;lng=wgs.lng;
+          }
+          normalized.push({
+            name:(r[src.nameField]||r.name||r.SHELTER_NAME||r.shelterName||'מקלט ציבורי').toString().trim(),
+            address:(r[src.addressField]||r.address||r.STREET_NAME||r.streetName||'').toString().trim(),
+            city:cityVal,
+            lat:isNaN(lat)?null:lat,
+            lng:isNaN(lng)?null:lng
+          });
+        });
+      }catch(e){/* continue to next source */}
+    }
+    return normalized;
+  }
+
+  // Convert ITM (Israel Transverse Mercator) coordinates to WGS84
+  function itmToWgs84(x,y){
+    // ITM parameters
+    var a=6378137.0,f=1/298.257223563;
+    var b=a*(1-f),e2=1-(b*b)/(a*a);
+    var k0=1.0000067,lat0=31.7344394444444*Math.PI/180,lon0=35.2045169444444*Math.PI/180;
+    var n0=631313.0,e0=219529.584;
+    var e=Math.sqrt(e2);
+    var N0=n0,E0=e0;
+    var M0=meridArc(a,b,e2,lat0);
+    var xp=x-E0,yp=y-N0;
+    var M=M0+yp/k0;
+    var mu=M/(a*(1-e2/4-3*e2*e2/64-5*e2*e2*e2/256));
+    var e1=(1-Math.sqrt(1-e2))/(1+Math.sqrt(1-e2));
+    var phi1=mu+(3*e1/2-27*e1*e1*e1/32)*Math.sin(2*mu)+(21*e1*e1/16-55*e1*e1*e1*e1/32)*Math.sin(4*mu)+(151*e1*e1*e1/96)*Math.sin(6*mu);
+    var N1=a/Math.sqrt(1-e2*Math.sin(phi1)*Math.sin(phi1));
+    var T1=Math.tan(phi1)*Math.tan(phi1);
+    var C1=e2/(1-e2)*Math.cos(phi1)*Math.cos(phi1);
+    var R1=a*(1-e2)/Math.pow(1-e2*Math.sin(phi1)*Math.sin(phi1),1.5);
+    var D=xp/(N1*k0);
+    var lat=phi1-(N1*Math.tan(phi1)/R1)*(D*D/2-(5+3*T1+10*C1-4*C1*C1-9*e2/(1-e2))*D*D*D*D/24+(61+90*T1+298*C1+45*T1*T1-252*e2/(1-e2)-3*C1*C1)*D*D*D*D*D*D/720);
+    var lon=lon0+(D-(1+2*T1+C1)*D*D*D/6+(5-2*C1+28*T1-3*C1*C1+8*e2/(1-e2)+24*T1*T1)*D*D*D*D*D/120)/Math.cos(phi1);
+    return{lat:lat*180/Math.PI,lng:lon*180/Math.PI};
+  }
+  function meridArc(a,b,e2,lat){
+    var n=(a-b)/(a+b);
+    return a/(1+n)*(1+n*n/4+n*n*n*n/64)*(lat-(3*n/2-9*n*n*n/16)*Math.sin(2*lat)+(15*n*n/16-15*n*n*n*n/32)*Math.sin(4*lat)-(35*n*n*n/48)*Math.sin(6*lat)+(315*n*n*n*n/512)*Math.sin(8*lat));
+  }
+
+  async function doSearch(){
+    var city=($id('shelters-city-inp').value||'').trim();
+    if(!city){toast('⚠️ יש להזין שם עיר');return;}
+    _sheltersCity=city;
+    _sheltersData=[];
+    hideEl('shelters-empty');
+    hideEl('shelters-actions');
+    hideEl('shelters-stats');
+    hideEl('shelters-map-wrap');
+    showEl('shelters-loading');
+    setError('');
+    $id('shelters-list').innerHTML='';
+
+    try{
+      var shelters=await fetchShelterData(city);
+
+      hideEl('shelters-loading');
+
+      if(!shelters.length){
+        // Show fallback — city not found in data.gov.il, offer GovMap link
+        setError('לא נמצאו מקלטים במאגר data.gov.il עבור "'+city+'". ניתן לצפות במקלטים דרך GovMap.');
+        showEl('shelters-actions','flex');
+        hideEl('shelters-download-btn');
+        return;
+      }
+
+      _sheltersData=shelters;
+
+      // Stats
+      var statsEl=$id('shelters-stats');
+      if(statsEl){statsEl.style.display='block';}
+      var statsText=$id('shelters-stats-text');
+      if(statsText){statsText.textContent='נמצאו '+shelters.length+' מקלטים ב'+city;}
+
+      // Actions
+      showEl('shelters-actions','flex');
+      showEl('shelters-download-btn');
+
+      // Map
+      geocodeCity(city,function(loc){
+        if(loc){
+          initShelterMap(loc.lat,loc.lng);
+          shelters.forEach(function(s){
+            if(s.lat&&s.lng){addMarker(s.lat,s.lng,s.name,s.address);}
+          });
+        }
+      });
+
+      // List
+      renderShelterList(shelters);
+
+    }catch(e){
+      hideEl('shelters-loading');
+      setError('שגיאה בטעינת נתונים: '+e.message);
+      showEl('shelters-actions','flex');
+      hideEl('shelters-download-btn');
+    }
+  }
+
+  // Wire up buttons after DOM ready
+  function initSheltersUI(){
+    var searchBtn=$id('shelters-search-btn');
+    if(searchBtn)searchBtn.addEventListener('click',doSearch);
+    var inp=$id('shelters-city-inp');
+    if(inp)inp.addEventListener('keydown',function(e){if(e.key==='Enter')doSearch();});
+    var dlBtn=$id('shelters-download-btn');
+    if(dlBtn)dlBtn.addEventListener('click',downloadCSV);
+    var gmBtn=$id('shelters-govmap-btn');
+    if(gmBtn)gmBtn.addEventListener('click',openGovMap);
+    var ggBtn=$id('shelters-gmap-btn');
+    if(ggBtn)ggBtn.addEventListener('click',openGoogleMaps);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',initSheltersUI);
+  } else {
+    initSheltersUI();
+  }
+})();
+
 // תיקון: כשמקלדת נסגרת viewport לא חוזר — גורם לנעלם של bottom bar
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize',function(){
