@@ -820,7 +820,12 @@ function startSync(){
     if(document.getElementById('scr-main')&&!document.getElementById('scr-main').classList.contains('hidden')){
       renderMain();
     } else {
-      showMain();
+      var _detEl=document.getElementById('scr-det');
+      if(_detEl&&!_detEl.classList.contains('hidden')&&state.active!=null&&find(state.active)){
+        renderDetail(state.active);
+      } else {
+        showMain();
+      }
     }
   }
   // iOS/Safari: נסה .get() ראשון — חד פעמי ומהיר — ואחר כך onSnapshot לעדכונים
@@ -1218,7 +1223,6 @@ function updateStats(){
 }
 function renderList(){
   var wrap=document.getElementById('list-wrap');wrap.innerHTML='';
-  state.soldiers.forEach(function(s){checkNextExpiry(s);});
   var searchQ=(document.getElementById('soldier-search')?document.getElementById('soldier-search').value.trim().toLowerCase():'');
   var _td2=today();var _mid2=getMissingIds();var list=state.soldiers.filter(function(s){
     if(s.isMissing||_mid2[s.id]||(s.shams||[]).indexOf(_td2)!==-1)return false;
