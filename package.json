@@ -8,10 +8,6 @@
     "sync": "npm run build && npx cap sync android",
     "open": "npm run sync && npx cap open android"
   },
-  "repository": {
-    "type": "git",
-    "url": "http://local_proxy@127.0.0.1:41395/git/tito2122/platoon-app"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

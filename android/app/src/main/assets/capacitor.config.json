@@ -1,0 +1,12 @@
+{
+	"appId": "com.platoon.app",
+	"appName": "Platoon App",
+	"webDir": "www",
+	"plugins": {
+		"LocalNotifications": {
+			"smallIcon": "ic_stat_icon_config_sample",
+			"iconColor": "#4B5320",
+			"sound": "default"
+		}
+	}
+}
