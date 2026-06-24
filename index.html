@@ -676,6 +676,53 @@ body.dark-mode .btn-ghost:active{background:#3D4F70}
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
+<!-- Torah Discount Banner -->
+<div id="torah-discount-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:32px 28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.22);position:relative;animation:tdPop .35s cubic-bezier(.34,1.56,.64,1) both">
+    <div style="font-size:44px;margin-bottom:8px">📖</div>
+    <div style="font-size:22px;font-weight:800;color:#0F9454;margin-bottom:6px;line-height:1.3">15% הנחה ללומדי תורה!</div>
+    <div style="font-size:14px;color:#5A6070;font-weight:500;margin-bottom:20px;line-height:1.5">לכל מי שעוסק בתורה — הנחה מיוחדת של 15%.<br>צרו קשר לפרטים נוספים.</div>
+    <button id="torah-banner-close" style="background:#1CB86A;color:#fff;border:none;border-radius:12px;padding:12px 32px;font-size:15px;font-weight:700;font-family:var(--font);cursor:pointer;width:100%">מעולה, תודה!</button>
+    <button onclick="document.getElementById('torah-discount-overlay').style.display='none'" style="position:absolute;top:12px;left:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#9BA3B2;line-height:1">✕</button>
+  </div>
+</div>
+<style>
+@keyframes tdPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+#torah-discount-overlay{display:none}
+</style>
+<script>
+(function(){
+  var STORAGE_KEY='torah_banner_dismissed_v1';
+  function showTorahBanner(){
+    if(localStorage.getItem(STORAGE_KEY)) return;
+    var el=document.getElementById('torah-discount-overlay');
+    if(el) el.style.display='flex';
+  }
+  function closeBanner(){
+    var el=document.getElementById('torah-discount-overlay');
+    if(el) el.style.display='none';
+    localStorage.setItem(STORAGE_KEY,'1');
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    var btn=document.getElementById('torah-banner-close');
+    if(btn) btn.addEventListener('click',closeBanner);
+    // הצג לאחר שמסך הטעינה נעלם
+    setTimeout(function(){
+      var lo=document.getElementById('loading-overlay');
+      if(!lo||lo.style.display==='none'){showTorahBanner();}
+      else{
+        var obs=new MutationObserver(function(){
+          if(lo.style.display==='none'){obs.disconnect();showTorahBanner();}
+        });
+        obs.observe(lo,{attributes:true,attributeFilter:['style']});
+        // fallback
+        setTimeout(showTorahBanner,3000);
+      }
+    },500);
+  });
+})();
+</script>
+
 <script>
 (function(){
 var ROLES=['חובש','מ"כ','מאג','מטאדור','מטול','מפקד מחלקה','מתשאל','נגב','נהג נגמ"ש','סמ"ל','צלף','קלע','רוגר','רחפן'];
