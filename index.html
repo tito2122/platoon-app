@@ -4322,8 +4322,12 @@ var _remType='daily'; // current form type selection
 function _remLoad(){
   try{return JSON.parse(localStorage.getItem('reminders_v1')||'[]');}catch(e){return[];}
 }
+function _getCapLN(){
+  return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications)||null;
+}
 function _remSave(arr){
   try{localStorage.setItem('reminders_v1',JSON.stringify(arr));}catch(e){}
+  if(typeof _capScheduleAll==='function')setTimeout(_capScheduleAll,50);
 }
 
 function renderReminders(){
@@ -4334,7 +4338,25 @@ function renderReminders(){
   // Permission banner
   var permBanner=document.getElementById('rem-perm-banner');
   if(permBanner){
-    if(!('Notification' in window)){
+    var capLN=_getCapLN();
+    if(capLN){
+      capLN.checkPermissions().then(function(res){
+        var st=res&&res.display;
+        if(st==='granted'){
+          permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#166534">✅ מופעל</span>';
+        } else if(st==='denied'){
+          permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#C2410C" title="אפשר התראות בהגדרות האפליקציה בטלפון">🚫 חסום בהגדרות</span>';
+        } else {
+          permBanner.innerHTML='<button id="rem-perm-btn" style="padding:5px 11px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל התראות</button>';
+          var pb=document.getElementById('rem-perm-btn');
+          if(pb)pb.addEventListener('click',function(){
+            capLN.requestPermissions().then(function(){renderReminders();if(typeof _capScheduleAll==='function')_capScheduleAll();});
+          });
+        }
+      }).catch(function(){
+        permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#166534">✅ מופעל</span>';
+      });
+    } else if(!('Notification' in window)){
       permBanner.innerHTML='<span style="font-size:11px;font-weight:600;color:#C2410C">⚠️ לא נתמך</span>';
     } else if(Notification.permission==='default'){
       permBanner.innerHTML='<button id="rem-perm-btn" style="padding:5px 11px;border-radius:8px;border:none;background:#2563EB;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">הפעל התראות</button>';
@@ -4462,10 +4484,17 @@ function _remPlayAlarm(soundId){
 }
 
 function _remShowNotif(title,body,tag){
+  var capLN=_getCapLN();
+  if(capLN){
+    try{
+      capLN.schedule({notifications:[{id:Math.floor(Date.now()%2147483647)||1,title:title,body:body||'',schedule:{at:new Date(Date.now()+200)},sound:'default'}]});
+      return true;
+    }catch(e){return false;}
+  }
   if(!('Notification' in window)||Notification.permission!=='granted')return false;
   try{
     // Use direct Notification() — synchronous and immediate, no SW round-trip delay
-    new Notification(title,{body:body||'',icon:'/platoon-app/icons/icon-192.png',requireInteraction:true,vibrate:[300,100,300,100,600],silent:false,tag:tag||'platoon-rem',renotify:true,dir:'rtl',lang:'he'});
+    new Notification(title,{body:body||'',icon:'icon-192.png',requireInteraction:true,vibrate:[300,100,300,100,600],silent:false,tag:tag||'platoon-rem',renotify:true,dir:'rtl',lang:'he'});
     return true;
   }catch(e){return false;}
 }
@@ -4477,9 +4506,9 @@ function _remFire(item){
   var shown=_remShowNotif(title,body,'platoon-rem-'+item.id);
   // Always show toast too (so user sees it even when app is in foreground)
   toast('🔔 '+title+(body?' — '+body:''));
-  if(!shown && !('Notification' in window)){
+  if(!shown && !_getCapLN() && !('Notification' in window)){
     // Already showed toast above, nothing more to do
-  } else if(!shown && 'Notification' in window && Notification.permission!=='granted'){
+  } else if(!shown && !_getCapLN() && 'Notification' in window && Notification.permission!=='granted'){
     toast('⚠️ יש לאשר הרשאות התראות במסך התזכורות');
   }
 }
@@ -4762,6 +4791,28 @@ var _remSelDays=[];
   document.getElementById('rem-sort-btn').addEventListener('click',_remSort);
 
   document.getElementById('rem-test-btn').addEventListener('click',function(){
+    var capLN=_getCapLN();
+    if(capLN){
+      capLN.checkPermissions().then(function(res){
+        if(res&&res.display==='granted'){
+          _remPlayAlarm();
+          var shown=_remShowNotif('🔔 בדיקת התראה','המערכת עובדת כראוי!','platoon-test');
+          toast(shown?'✅ נשלחה התראת בדיקה':'⚠️ הנוטיפיקציה נכשלה');
+        } else {
+          capLN.requestPermissions().then(function(r2){
+            renderReminders();
+            if(r2&&r2.display==='granted'){
+              _remPlayAlarm();
+              _remShowNotif('🔔 בדיקת התראה','המערכת עובדת כראוי!','platoon-test');
+              toast('✅ הרשאה ניתנה ונשלחה התראת בדיקה');
+            } else {
+              toast('⚠️ יש לאשר התראות בהגדרות האפליקציה');
+            }
+          });
+        }
+      }).catch(function(){toast('⚠️ שגיאה בבדיקת הרשאות התראה');});
+      return;
+    }
     if(!('Notification' in window)){toast('⚠️ הדפדפן לא תומך בהתראות');return;}
     if(Notification.permission==='granted'){
       _remPlayAlarm();
