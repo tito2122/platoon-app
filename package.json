@@ -4,7 +4,7 @@
   "description": "",
   "main": "sw.js",
   "scripts": {
-    "build": "cp index.html www/ && cp manifest.json www/ && cp sw.js www/ && cp *.png www/ 2>/dev/null; echo 'Build done'",
+    "build": "mkdir -p www && cp index.html go.html register.html manifest.json sw.js www/ && cp *.png www/ 2>/dev/null || true; echo 'Build done'",
     "sync": "npm run build && npx cap sync android",
     "open": "npm run sync && npx cap open android"
   },
