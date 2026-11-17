@@ -3772,7 +3772,6 @@ function showMainDash(){
   document.getElementById('scr-tasks').classList.add('hidden');
   document.getElementById('scr-reminders').classList.add('hidden');
   document.getElementById('sb-nav-main').classList.add('active');
-  document.getElementById('sb-nav-tasks').classList.remove('active');
   document.getElementById('sb-nav-reminders').classList.remove('active');
   renderMain();
 }
@@ -3784,7 +3783,6 @@ function showTasksDash(){
   document.getElementById('scr-tasks').classList.remove('hidden','slide-left');
   document.getElementById('scr-reminders').classList.add('hidden');
   document.getElementById('sb-nav-main').classList.remove('active');
-  document.getElementById('sb-nav-tasks').classList.add('active');
   document.getElementById('sb-nav-reminders').classList.remove('active');
 }
 function showRemindersDash(){
@@ -3792,7 +3790,6 @@ function showRemindersDash(){
   document.getElementById('scr-tasks').classList.add('hidden');
   document.getElementById('scr-reminders').classList.remove('hidden','slide-left');
   document.getElementById('sb-nav-main').classList.remove('active');
-  document.getElementById('sb-nav-tasks').classList.remove('active');
   document.getElementById('sb-nav-reminders').classList.add('active');
   renderReminders();
 }
@@ -5039,8 +5036,8 @@ if(window.visualViewport){
 </div>
 <script>
 (function(){
-  var APP_VERSION='1.1.0';
-  var APP_VERSION_CODE=2;
+  var APP_VERSION='1.1.1';
+  var APP_VERSION_CODE=3;
   var VERSION_URL=window.Capacitor
     ?'https://tito2122.github.io/platoon-app/version.json'
     :'./version.json';
