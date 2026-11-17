@@ -5019,5 +5019,91 @@ if(window.visualViewport){
 })();
 
 </script>
+
+<!-- In-App Update Banner -->
+<div id="app-update-banner" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:flex-end;justify-content:center;padding:16px">
+  <div style="background:var(--card,#fff);color:var(--text,#1A1D23);border-radius:18px;padding:20px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,.25);border:1px solid var(--border,#E2E6ED);direction:rtl;text-align:right;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:26px">🚀</span>
+      <div>
+        <div id="app-update-title" style="font-size:17px;font-weight:800;color:#0F9454">עדכון חדש זמין!</div>
+        <div id="app-update-ver" style="font-size:12px;color:var(--text2,#5A6070);font-weight:600"></div>
+      </div>
+    </div>
+    <div id="app-update-notes" style="font-size:13px;color:var(--text2,#5A6070);margin-bottom:16px;line-height:1.5;display:none"></div>
+    <div style="display:flex;gap:10px">
+      <button id="app-update-now" style="flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#1CB86A,#0F9454);color:#fff;font-family:var(--font);font-size:15px;font-weight:800;cursor:pointer">עדכן עכשיו</button>
+      <button id="app-update-later" style="padding:12px 16px;border:1px solid var(--border,#E2E6ED);border-radius:12px;background:var(--card2,#F8F9FB);color:var(--text2,#5A6070);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">אחר כך</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var APP_VERSION='1.1.0';
+  var APP_VERSION_CODE=2;
+  var VERSION_URL=window.Capacitor
+    ?'https://tito2122.github.io/platoon-app/version.json'
+    :'./version.json';
+
+  function showUpdateBanner(data){
+    var banner=document.getElementById('app-update-banner');
+    if(!banner)return;
+    var verEl=document.getElementById('app-update-ver');
+    var notesEl=document.getElementById('app-update-notes');
+    var nowBtn=document.getElementById('app-update-now');
+    var laterBtn=document.getElementById('app-update-later');
+    if(verEl)verEl.textContent='גרסה '+data.version+' (נוכחית: '+APP_VERSION+')';
+    if(notesEl){
+      if(data.notes){notesEl.textContent=data.notes;notesEl.style.display='block';}
+      else{notesEl.style.display='none';}
+    }
+    banner.style.display='flex';
+    if(nowBtn){
+      nowBtn.onclick=function(){
+        if(window.Capacitor){
+          var url=data.apkUrl||'https://github.com/tito2122/platoon-app/releases/latest/download/platoon-app.apk';
+          var w=window.open(url,'_system');
+          if(!w)window.location.href=url;
+        } else {
+          banner.style.display='none';
+          if('caches' in window){
+            caches.keys().then(function(keys){
+              return Promise.all(keys.map(function(k){return caches.delete(k);}));
+            }).finally(function(){window.location.reload();});
+          } else {
+            window.location.reload();
+          }
+        }
+      };
+    }
+    if(laterBtn){
+      laterBtn.onclick=function(){
+        banner.style.display='none';
+        try{localStorage.setItem('dismissed_update_code',String(data.versionCode));}catch(e){}
+      };
+    }
+  }
+
+  function checkForAppUpdate(force){
+    fetch(VERSION_URL+'?t='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(data){
+        if(!data||!data.versionCode)return;
+        if(Number(data.versionCode)<=APP_VERSION_CODE){
+          if(force&&typeof toast==='function')toast('✅ האפליקציה מעודכנת לגרסה האחרונה ('+APP_VERSION+')');
+          return;
+        }
+        var dismissed=null;
+        try{dismissed=localStorage.getItem('dismissed_update_code');}catch(e){}
+        if(!force&&dismissed===String(data.versionCode))return;
+        showUpdateBanner(data);
+      })
+      .catch(function(){});
+  }
+
+  window.checkForAppUpdate=checkForAppUpdate;
+  setTimeout(function(){checkForAppUpdate(false);},2500);
+})();
+</script>
 </body>
 </html>

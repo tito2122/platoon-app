@@ -9,12 +9,16 @@ on:
       - 'go.html'
       - 'register.html'
       - 'manifest.json'
+      - 'version.json'
       - 'sw.js'
       - '*.png'
       - 'package.json'
       - 'capacitor.config.json'
       - 'android/**'
       - '.github/workflows/build-apk.yml'
+
+permissions:
+  contents: write
 
 jobs:
   build-apk:
@@ -36,6 +40,14 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Read version.json
+        id: ver
+        run: |
+          VERSION=$(node -p "require('./version.json').version")
+          CODE=$(node -p "require('./version.json').versionCode")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "code=$CODE" >> $GITHUB_OUTPUT
+
       - name: Install dependencies
         run: npm ci
 
@@ -46,7 +58,7 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon -PappVersionCode=${{ steps.ver.outputs.code }} -PappVersionName=${{ steps.ver.outputs.version }}
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -54,3 +66,15 @@ jobs:
           name: platoon-app-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish GitHub Release with APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.ver.outputs.version }}"
+          cp android/app/build/outputs/apk/debug/app-debug.apk platoon-app.apk
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" platoon-app.apk --clobber
+          else
+            gh release create "$TAG" platoon-app.apk --title "גרסה ${{ steps.ver.outputs.version }}" --notes "עדכון אוטומטי מ-GitHub Actions" --latest
+          fi
